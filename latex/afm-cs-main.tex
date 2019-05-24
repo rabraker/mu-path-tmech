@@ -443,7 +443,7 @@ can be almost completely automated.
 
 \begin{figure}[t!]
   \centering
-  \includesvg[width=1\columnwidth]{plots-afm-cs-final/figures/z_control_design.svg}
+  \includesvg[width=1\columnwidth]{figures/z_control_design.svg}
   \caption{}
   \label{fig:z_control}
 \end{figure}
@@ -477,7 +477,7 @@ function.
 \begin{figure}
   \begin{minipage}[t]{.46\textwidth}
     % L B R T
-    \includesvg[width=1\textwidth]{plots-afm-cs-final/figures/z_cant_evolution.svg}
+    \includesvg[width=1\textwidth]{figures/z_cant_evolution.svg}
     \caption{FRFs of three different cantilevers, showing substantial
       differences in the DC-gain and smaller, but still significant differences
       the frequency of the modes.}
@@ -486,7 +486,7 @@ function.
   \hfill
   \begin{minipage}[t]{.46\textwidth}
     % L B R T
-    \includegraphics[width=1\textwidth]{plots-afm-cs-final/figures/z_axis_gain_schematic-crop.pdf}
+    \includegraphics[width=1\textwidth]{figures/z_axis_gain_schematic-crop.pdf}
     \caption{Schematic drawing of how the length of the cantilever affects the
       $z$-axis gain.}
     \label{fig:z_axis_gain}
@@ -545,14 +545,14 @@ will get a lot of wiggles in the resulting signal. Rather, we need to take only
 the output of the integrator to represent the surface.
 % \begin{figure}
 %   \centering
-%   \includegraphics[width=1\columnwidth]{plots-afm-cs-final/figures/AFM_loop_Dinv-crop.pdf}
+%   \includegraphics[width=1\columnwidth]{figures/AFM_loop_Dinv-crop.pdf}
 %   \caption{Block diagram of the $Z$-axis control loop with the inverse
 %   compensator. }
 %   \label{fig:afm_bd_dinv}
 % \end{figure}
 \begin{figure*}[t]
   \centering
-  \includegraphics[width=0.75\textwidth]{plots-afm-cs-final/figures/AFM_loop_Dinv_antiwup-crop.pdf}
+  \includegraphics[width=0.75\textwidth]{figures/AFM_loop_Dinv_antiwup-crop.pdf}
   \caption{Block diagram of the $Z$-axis control loop. The anti-windup is active
     for decision index $i\in\{0,1,5\}$, which correspond to states such that
     $r_Z=r_{Z,\textrm{up}}$.}
@@ -709,14 +709,14 @@ more detail several features of the CS scanning process.
 % Fig.~\ref{fig:mupathsignaltrajectory}. Each of these differences is discussed
 % more fully in the following three subsections.
 \begin{figure*}[ht!]
-  \centering \includesvg[scale=0.85]{plots-afm-cs-final/figures/cs_cycle.svg}
+  \centering \includesvg[scale=0.85]{figures/cs_cycle.svg}
   \caption{Several CS cycles. Each state is indicated by color.}
   \label{fig:mupathsignaltrajectory}
 \end{figure*}
 
 % \begin{figure*}
 %   \centering
-%   \includesvg[width=.9\textwidth]{plots-afm-cs-final/figures/state-machine-final.svg}
+%   \includesvg[width=.9\textwidth]{figures/state-machine-final.svg}
 %   \caption{Diagram of the state-machine implemented in the final design.}
 %   \label{fig:sm_final}
 % \end{figure*}
@@ -790,12 +790,12 @@ $r_{Z,\textrm{up}}$ based the current state.
 
 \begin{figure}[ht!]
   \begin{subfigure}{.48\textwidth}
-    \includesvg[width=1\textwidth]{plots-afm-cs-final/figures/justify_small_lift.svg}
+    \includesvg[width=1\textwidth]{figures/justify_small_lift.svg}
     \caption{ }
     % \label{fig: }
   \end{subfigure}
   \begin{subfigure}{.48\textwidth}
-    \includesvg[width=01\textwidth]{plots-afm-cs-final/figures/justify_small_lift_zoom.svg}
+    \includesvg[width=01\textwidth]{figures/justify_small_lift_zoom.svg}
     \caption{ }
     % \label{fig: }
   \end{subfigure}
@@ -820,17 +820,17 @@ output of the accumulator is saturated before its own internal feedback.
 \subsection{The pre-scan}
 \begin{figure*}
   \begin{subfigure}{.33\textwidth}
-    \includesvg[width=1\textwidth]{plots-afm-cs-final/figures/zbounce_uz_example.svg}
+    \includesvg[width=1\textwidth]{figures/zbounce_uz_example.svg}
     \caption{ }
     \label{fig: }
   \end{subfigure}
   \begin{subfigure}{.33\textwidth}
-    \includesvg[width=1\textwidth]{plots-afm-cs-final/figures/prescan_uz_example.svg}
+    \includesvg[width=1\textwidth]{figures/prescan_uz_example.svg}
     \caption{ }
     \label{fig:uz_prescan}
   \end{subfigure}
   \begin{subfigure}{.33\textwidth}
-    \includesvg[width=1\textwidth]{plots-afm-cs-final/figures/prescan_zbounce_PSD.svg}
+    \includesvg[width=1\textwidth]{figures/prescan_zbounce_PSD.svg}
     \caption{ }
     \label{fig: }
   \end{subfigure}
@@ -955,7 +955,7 @@ implementation is publicly available \cite{L1c}.
 \section{A New Metric}\label{sec:rdi}
 \begin{figure}[t!]
   \centering
-  \includesvg[width=1\columnwidth]{plots-afm-cs-final/figures/damage_illustration.svg}
+  \includesvg[width=1\columnwidth]{figures/damage_illustration.svg}
   \caption{The RDI metric defined in \eqref{eqn:RDI} penalizes everything in the
     red shaded region and does not penalize anything in the un-shaded region.}
   \label{fig:damage_illustrate}
@@ -1037,13 +1037,13 @@ SSIM of 1.
 \begin{figure}[t!]
   % ------------ 1.0 Hz ---------------------
   \begin{subfigure}{.48\textwidth}
-    \includesvg[width=1\textwidth]{plots-afm-cs-final/figures/baseline_errors_noalign_1Hz.svg}
+    \includesvg[width=1\textwidth]{figures/baseline_errors_noalign_1Hz.svg}
     \caption{1.0~Hz, no alignment.}
     \label{fig:rast_unaligned_1}
   \end{subfigure}
   \hfill
   \begin{subfigure}{.48\textwidth}
-    \includesvg[width=1\textwidth]{plots-afm-cs-final/figures/baseline_errors_aligned_1Hz.svg}
+    \includesvg[width=1\textwidth]{figures/baseline_errors_aligned_1Hz.svg}
     \caption{1.0~Hz, with alignment.}
     \label{fig:rast_aligned_1}
   \end{subfigure}
@@ -1161,7 +1161,7 @@ default parameters) using the 1~Hz scan as the master and also computed the RDI
 metric. These are collected in table ~\ref{tab:rast_vs_cs_v1}.
 
 \begin{figure*}
-  \includesvg[scale=1]{plots-afm-cs-final/figures/cs_raster_images_4-26-2019}
+  \includesvg[scale=1]{figures/cs_raster_images_4-26-2019}
   \caption{Raster and compressed sensing images of a 5 micron square area of the
     CS-20NG grating. All images are 512$\times$512 pixels. The rows of pixels
     indicated by the red line are shown in \ref{fig:pixel_rows}.}
@@ -1169,7 +1169,7 @@ metric. These are collected in table ~\ref{tab:rast_vs_cs_v1}.
 \end{figure*}
 
 % \begin{figure*}
-%   \includesvg[scale=1]{plots-afm-cs-final/figures/cs_raster_images_err_4-26-2019}
+%   \includesvg[scale=1]{figures/cs_raster_images_err_4-26-2019}
 %   \caption{Errors between aligned sub-slices of the 1.0~Hz raster image and
 %   the remaining scans. The original scans are shown in
 %   Fig.~\ref{fig:resultsF1_images}.}
@@ -1182,7 +1182,7 @@ metric. These are collected in table ~\ref{tab:rast_vs_cs_v1}.
   \caption{Performance metrics for the scans taken on 4-26-2019. All CS images
     filtered with TV denoising, $\mu$=100.}
   \begin{tabular}{cccccc}
-    \input{plots-afm-cs-final/tables/cs_raster_table_4-26-2019_muInf_dct2.tex}
+    \input{tables/cs_raster_table_4-26-2019_muInf_dct2.tex}
   \end{tabular}
   \label{tab:rast_vs_cs_v1}
 \end{table}
@@ -1193,12 +1193,12 @@ metric. These are collected in table ~\ref{tab:rast_vs_cs_v1}.
     Table~\ref{tab:rast_vs_cs_v1}. All times are in seconds.}
   \label{tab:final_state_times}
   \begin{tabular}{ccccccc}
-    \input{plots-afm-cs-final/tables/cs_state_times_table_4-26-2019_muInf_dct2.tex}
+    \input{tables/cs_state_times_table_4-26-2019_muInf_dct2.tex}
   \end{tabular}
 \end{table}
 
 \begin{figure*}[t!]
-  \includesvg[width=1\textwidth]{plots-afm-cs-final/figures/cs_raster_pixel_rows_3-20-2019.svg}
+  \includesvg[width=1\textwidth]{figures/cs_raster_pixel_rows_3-20-2019.svg}
   \caption{Rows of pixels, as indicated by the red lines in
     Fig.~\ref{fig:resultsF1_images}. For clarity, not all images are included.}
   \label{fig:pixel_rows}
@@ -1221,14 +1221,14 @@ these numbers are not especially meaningful.
 
 \begin{figure*}[t!]
   \begin{subfigure}{1\textwidth}
-    \includesvg[scale=1]{plots-afm-cs-final/figures/cs_rast_time_vs_ssim_psnr.svg}
+    \includesvg[scale=1]{figures/cs_rast_time_vs_ssim_psnr.svg}
     \caption{(left) SSIM as a function of total acquisition time. (right) PSNR
       as a function of total acquisition time.}
     \label{fig:time_ssim_psnr}
   \end{subfigure}
   
   \begin{subfigure}{1\textwidth}
-    \includesvg[scale=1]{plots-afm-cs-final/figures/cs_rast_damage.svg}
+    \includesvg[scale=1]{figures/cs_rast_damage.svg}
     \caption{(left) RDI as a function of scan rate for raster scans and CS scans
       at 10\% and 15\% sampling. (right) RDI as a function of total imaging
       time.}
