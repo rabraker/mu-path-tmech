@@ -1,0 +1,8 @@
+*.aux
+*.bbl
+*.blg
+*.out
+*.log
+*.tar
+*.synctex.gz
+auto/
