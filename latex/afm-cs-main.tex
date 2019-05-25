@@ -227,21 +227,18 @@ true image signal $x\in\mathbb{R}^n$ from the following observation equation,
 \begin{equation}\label{op:observation}
   y = R x = RU\eta,
 \end{equation}
-\noindent where $y\in\mathbb{R}^m$ is the observation vector, $R$ is an
-$m\times n$ matrix defining the measurements, $U$ is an $n\times n$ sparsity
+\noindent where $y\in\mathbb{R}^n$ is the observation vector, $R$ is an
+$n\times m$ matrix defining the measurements, $U$ is an $m\times m$ sparsity
 basis and $\eta$ is the sparse representation of $x$ in the domain of $U$. In
-general, $m\ll n$. In an imaging application, where the underlying signal is a
+general, $n\ll m$. In an imaging application, where the underlying signal is a
 matrix $X\in\mathbb{R}^{h\times s}$, we take $x=\text{vec}(X)$, where the
 $\text{vec}(\cdot)$ operator stacks the columns of a matrix.
 
-The symbols $x$ and $y$ are also used to indicate coordinate directions in the AFM.
-They are reused here as they are standard notation in the CS literature; their
-specific meaning throughout the paper should be clear from context.
 	
 In the AFM application, the probe can only measure a single pixel at a time.
-This implies that $R$ is a sparse matrix with each row having only one
-nonzero entry and that $y$ is a subset of $x$. Ideally, the sparsity basis and
-the measurement matrix $U$ will have a low \textit{mutual coherence}, a
+Thus the rows of $R$ are a subset of the rows of an $m$ by $m$ identity matrix.
+Ideally, the sparsity basis and
+the measurement matrix $R$ will have a low \textit{mutual coherence}, a
 measure that describes how each of the rows of $R$ (the measurements)
 ``spreads out'' in the domain of $U$ \cite{candes2007sparsity}. In practice,
 the Discrete Cosine Transform (DCT) keeps a good balance between achieving a low
@@ -250,19 +247,15 @@ matrices and providing a high sparsity of typical AFM sample images. In the foll
 we assume that $U^TU=I$, though in the simulation and experimental results, we take
 $U$ as the DCT basis.
 	
-One common realization of the CS-based reconstruction problem, known as basis
-pursuit with denoising (BPDN), is given by the following optimization problem,
+Basis pursuit with denoising (BPDN) is one common realization of the CS-based
+reconstruction problem, and is given by the optimization
 \begin{equation}
   \min_{x} \left \| U^Tx \right \|_1 \quad
   \text{s.t.}\quad x\in Q_p = \{x:~\|Rx - y\|_2 < \sigma\} \label{op:bp}
 \end{equation}
-  where $\| \cdot \|_1$ and $\| \cdot \|_2$ denote $l_1$ and $l_2$ norms,
-respectively, and $\sigma$ represents some measure of the signal noise such as
-its variance. This problem essentially searches for the sparsest signal from all
-the candidates that match the measurements. While BPDN is a computationally
-demanding algorithm, particularly for large images, it in general provides
-accurate reconstructions.
-
+where $\sigma$ represents uncertainty in the measurements. BPDN
+essentially searches for the sparsest signal from all
+the candidates that match the measurements.
 
 Although BPDN is effective in the general setting, using it for reconstruction
 from horizontal $\mu$-path samples often yields artifacts in the vertical
@@ -296,6 +289,7 @@ discrete gradient in the vertical (resp., horizontal) direction and
     0, & \phantom{}1\leq i\leq,~\phantom{:::} j=s
   \end{cases}
 \end{align*}
+\todo{This is way too long}
 In \eqref{op:bp_tv}, $\left \| D_v x \right \|_1$ (resp., $\left \| D_h x \right \|_1$) is the total variation (TV) of the signal in the vertical (resp., horizontal) direction. The parameters $\alpha_v$ and $\alpha_h$ are weighting parameters.
 The description of BPVV in \eqref{op:bp_tv} can be viewed as the combination of CS
 and inpainting (described below), in which the first term seeks a sparse solution while the
@@ -374,12 +368,12 @@ for some vectors $g$ and $r$ and, as shown in~\cite{becker_nesta_2011}, have a c
   \centering
   \begin{tabular}{cccccc}
     \textit{\small original image} & \textit{\small BPDN} & \textit{\small BPVV} & \textit{\small detail of original} & \textit{\small detail of BPDN} & \textit{\small detail of BPVV} \\
-    \includegraphics[width=0.16\textwidth]{figures-SBA/circulargrating_gt_framed}
-                                   & \includegraphics[width=0.16\textwidth]{figures-SBA/circulargrating_40mu}		
-                                                          & \includegraphics[width=0.16\textwidth]{figures-SBA/circulargrating_bptv_40mu}
-                                                                                 & \includegraphics[width=0.16\textwidth]{figures-SBA/circulargrating_gt_zoomin}
-                                                                                                                      & \includegraphics[width=0.16\textwidth]{figures-SBA/circulargrating_mu40_zoomin}
-                                                                                                                                                       & \includegraphics[width=0.16\textwidth]{figures-SBA/circulargrating_bptv_40mu_zoomin}\\	
+    % \includegraphics[width=0.16\textwidth]{figures-SBA/circulargrating_gt_framed}
+    %                                & \includegraphics[width=0.16\textwidth]{figures-SBA/circulargrating_40mu}		
+    %                                                       & \includegraphics[width=0.16\textwidth]{figures-SBA/circulargrating_bptv_40mu}
+    %                                                                              & \includegraphics[width=0.16\textwidth]{figures-SBA/circulargrating_gt_zoomin}
+    %                                                                                                                   & \includegraphics[width=0.16\textwidth]{figures-SBA/circulargrating_mu40_zoomin}
+    %                                                                                                                                                    & \includegraphics[width=0.16\textwidth]{figures-SBA/circulargrating_bptv_40mu_zoomin}\\	
     \includegraphics[width=0.16\textwidth]{figures-SBA/anothergrating_gt_framed}
                                    & \includegraphics[width=0.16\textwidth]{figures-SBA/anothergrating_40mu}		
                                                           & \includegraphics[width=0.16\textwidth]{figures-SBA/anothergrating_bptv_40mu}	
@@ -402,6 +396,7 @@ for some vectors $g$ and $r$ and, as shown in~\cite{becker_nesta_2011}, have a c
     scans of the $\mu$-path pattern that appear in BPDN reconstructions.}
   \label{fig:BPTV_demonstration}
 \end{figure*}
+\todo{Re-do this figure???}
 \endgroup
 		
 A comparison between BPDN and BPVV is shown in
@@ -419,19 +414,19 @@ mitigated using BPVV.
 \section{Experimental setup} \label{sec:experimentalSetup}
 % =========================================================================
 Our experimental setup, illustrated in Fig.~\ref{fig:exp_setup_anderssonLab},
-consists of an Agilent 5500 AFM, a cRIO-9082 embedded controller (National
+consists of an Agilent 5400 AFM, a cRIO-9082 embedded controller (National
 Instruments), and a standard desktop computer. Through a breakout box, the
 Agilent 5500 provides access to the $x$, $y$, and $z$-axis measurements as well
 as the deflection signal (denoted in the following as $l$). When the Agilent
 default software (PicoView) is set to open-loop mode, a $\pm 10$ V input on the
 control box allows control of the $x$, $y$, and $z$-axis piezos. The N9524A
-piezoelectric scanner in the Agilent 5500 provides a maximum scan area of
+piezoelectric scanner in the Agilent 5400 provides a maximum scan area of
 $90~\mu$m $\times$ 90~$\mu$m in the $xy$ (horizontal) direction and a range of
 $20~\mu$m in the $z$ (vertical) direction. Initial engagement of the tip to the
 sample is performed using the PicoView software before control is handed over to
 the custom controllers.
 
-TKTKT add stuff about nPoint stage and C300.
+\todo{ add stuff about nPoint stage and C300.}
 	
 All control logic is programmed using LabVIEW 2017 and compiled to a Xilinx
 Spartan-6 LX150 Field Programmable Gate Array (FPGA) inside the cRIO-9082. The
@@ -666,6 +661,7 @@ parallel and independently. The state machine consists of the following states.
   locations of $\mu$-paths from a desktop file to a host-to-FPGA FIFO (first in,
   first out) buffer. Next, the closed-loop control of all the axes through the
   FPGA is enabled and the system performs the following operations.
+    \todo{Shorten this. Sean, what was your trick to not indent enumerate?}
   \begin{itemize}
   \item \textbf{Read} the starting location of the first $\mu$-path from the
     host-to-FPGA FIFO.
@@ -723,45 +719,21 @@ Two cycles of this sequential process are illustrated by the time series in
 Fig.~\ref{fig:mupathsignaltrajectory}. The following subsections describe in
 more detail several features of the CS scanning process.
 	
-% \begin{figure}[htbp!]
-%   \centering
-%     %   \includegraphics[width=3.0in]{figures-SBA/mupathsignaltrajectory}
-%   \includegraphics[width=3.0in]{figures-SBA/mupathsignaltrajectory-swapped}
-%   \caption{Two cycles of the $\mu$-path scanning process. The top two plots
-%   are the lateral motion of the stage, the third is the $z$-sensor signal, and
-%   the bottom is the deflection signal. Each stage of the state machine is
-%   indicated by color.}
-%   \label{fig:mupathsignaltrajectory}
-% \end{figure}
-
-% The first section discusses several modifications (i.e., differences to
-% Chapter~\ref{chap:cs_init}) to the CS-scanning cycle. Section
-% \ref{sec:post_process} discusses the post-processing techniques used. Section
-% \ref{sec:rdi} develops a new metric to compare the relative damage done by
-% different scans and Section~\ref{sec:psnr_ssim_limits} takes a closer look at
-% the SSIM and PSNR metrics in an effort to understand what ''reasonable''
-% numbers look like for AFM images taken with our AFM. Similarly,
-% Section~\ref{sec:cs_sim} looks at some CS simulations (based on real raster
-% scans) to help us understand what, ideally, we should see from the experiments
-% performed in Section~\ref{sec:results:final}.
 
 % Several cycles of the CS-scheme are shown in
 % Fig.~\ref{fig:mupathsignaltrajectory}. Each of these differences is discussed
 % more fully in the following three subsections.
+  
 \begin{figure*}[ht!]
   \centering \includesvg[scale=0.85]{figures/cs_cycle.svg}
   \caption{Several CS cycles. Each state is indicated by color.}
   \label{fig:mupathsignaltrajectory}
 \end{figure*}
+\todo{Make fig \ref{fig:mupathsignaltrajectory}  smaller}
 
-% \begin{figure*}
-%   \centering
-%   \includesvg[width=.9\textwidth]{figures/state-machine-final.svg}
-%   \caption{Diagram of the state-machine implemented in the final design.}
-%   \label{fig:sm_final}
-% \end{figure*}
 
 \subsection{Cantilever does not need to fully disengage.}
+\todo{Dramatically truncate this section}
 In the initial implementation, we insisted that the during tip-retraction
 (state-5), the cantilever tip should fully break contact with the surface. Here,
 we impose no such requirement. Rather, we change the $Z$-setpoint during
@@ -828,21 +800,21 @@ setpoints is achieved via the multiplexer in Fig.~\ref{fig:afm_bd_dinv_final}
 which selects either the scanning setpoint $r_{Z,s}$ or the retraction setpoint
 $r_{Z,\textrm{up}}$ based the current state.
 
-\begin{figure}[ht!]
-  \begin{subfigure}{.48\textwidth}
-    \includesvg[width=1\textwidth]{figures/justify_small_lift.svg}
-    \caption{ }
-    % \label{fig: }
-  \end{subfigure}
-  \begin{subfigure}{.48\textwidth}
-    \includesvg[width=01\textwidth]{figures/justify_small_lift_zoom.svg}
-    \caption{ }
-    % \label{fig: }
-  \end{subfigure}
-  \caption{One CS-cycle with different dis-engagement heights. (a) Full view.
-    (b) Zoomed-in view. Note the drift transient in the left panel of (b). }
-  \label{fig:z_drift}
-\end{figure}
+% \begin{figure}[ht!]
+%   \begin{subfigure}{.48\textwidth}
+%     \includesvg[width=1\textwidth]{figures/justify_small_lift.svg}
+%     \caption{ }
+%     % \label{fig: }
+%   \end{subfigure}
+%   \begin{subfigure}{.48\textwidth}
+%     \includesvg[width=01\textwidth]{figures/justify_small_lift_zoom.svg}
+%     \caption{ }
+%     % \label{fig: }
+%   \end{subfigure}
+%   \caption{One CS-cycle with different dis-engagement heights. (a) Full view.
+%     (b) Zoomed-in view. Note the drift transient in the left panel of (b). }
+%   \label{fig:z_drift}
+% \end{figure}
 
 This new scheme does not imply that the cantilever \emph{never} fully
 disengages. Occasionally, the new setpoint is far enough away that the probe
@@ -958,39 +930,6 @@ drifts over time. This can be seen, e.g., in Fig.~\ref{fig:rast_aligned_0p5}.
 Thus, while the technique described here mitigates the issue, it does not fully
 eliminate the problem.
 
-
-
-% \subsection{Dynamic de-trending}
-% Because our AFM is not equipped with a $Z$-axis sensor, it is important to
-% remove as much drift as possible from the $u_Z$ control signal, otherwise,
-% this slow dynamic will corrupt the final image. This can partly be achieved by
-% doing an image after the AFM has been on for a long time, e.g., 20 minutes,
-% and especially after taking several slow raster scans. We can also remove some
-% of the drift by fitting a curve
-% \begin{equation}
-%   d_k = \alpha + \beta t_k + \gamma \log\left(\frac{t_k}{0.1}\right)
-% \end{equation}
-% where $t_k$ is the time at the $k$-th sampling period and $\alpha$, $\beta$,
-% and $\gamma$ are the parameters to be fit. This is a combination of a
-% time-domain drift model \cite{Jung_open_loop_2000} and a linear fit which
-% accounts for sample tilt. This line is fit to the entire set of $u_Z$ control
-% data and subtracted.
-
-
-\subsection{CS-reconstruction}\label{sec:tv_denoise}
-Some of the noise in an image reconstructed via BPDN can be reduced by solving a
-Total Variation (TV) de-noising optimization problem
-\begin{equation}
-  \min_{U} ||\nabla_xU||_1 + ||\nabla_yU||_1 + \mu||F - U||_2 \label{eqn:breg1}
-\end{equation}
-where $F$ is the image produced by the BPDN optimization and $U$ is the
-de-noised image. This idea was heavily inspired by Yufan Luo's approach
-\cite{luo_mupath_2019}. The difference is that (i) I do this for both $\nabla_x$
-and $\nabla_y$, where he only does it for $\nabla_y$ and (ii) that he does it in
-a single optimization which combines \eqref{eqn:breg1} with BPDN while I do it
-in two separate optimizations. The optimization is solved using the Split
-Bregman technique described in \cite{goldstein_splitbregman_2009} and my
-implementation is publicly available \cite{L1c}.
 
 \section{A New Metric}\label{sec:rdi}
 \begin{figure}[t!]
@@ -1204,7 +1143,7 @@ metric. These are collected in table ~\ref{tab:rast_vs_cs_v1}.
   \includesvg[scale=1]{figures/cs_raster_images_4-26-2019}
   \caption{Raster and compressed sensing images of a 5 micron square area of the
     CS-20NG grating. All images are 512$\times$512 pixels. The rows of pixels
-    indicated by the red line are shown in \ref{fig:pixel_rows}.}
+    indicated by the red line are shown in Fig.~\ref{fig:pixel_rows}.}
   \label{fig:resultsF1_images}
 \end{figure*}
 
