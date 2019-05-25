@@ -29,7 +29,7 @@
 \usepackage{mdframed}
 \usepackage{amsmath, dsfont, bbold}
 % \usepackage{algpseudocode,algorithm,algorithmicx}
-\usepackage[linesnumberedhidden,ruled]{algorithm2e}
+\usepackage[ruled,linesnumbered]{algorithm2e}
 \usepackage{placeins}
 \usepackage{todonotes}
 
@@ -62,9 +62,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
-\title{High-speed atomic force microscopy through $\mu$-path sampling}
+\title{Improving the Image Acquisition Rate of an Atomic Force Microscope Through Compressive Sampling}
 
-\author{Roger A. Braker and Yufan Luo and Lucy Y. Pao and Sean B. Andersson
+\author{Roger A. Braker, Yufan Luo, Lucy Y. Pao and Sean B. Andersson
   \thanks{The authors are with the Dept. of Electrical, Computer, and Energy
     Engineering at the University of Colorado, 425 UCB, Boulder, CO 80309,
     United States. Phone: +1 (303) 492-2360. Fax: +1 (303) 492-2758. R. A.
@@ -225,115 +225,148 @@ real-world signals, that is, of the fact that many coefficients of such signals
 are close to zero when represented in an appropriate basis. CS methods seek the
 true image signal $x\in\mathbb{R}^n$ from the following observation equation,
 \begin{equation}\label{op:observation}
-  y = \Phi x = \Phi\Psi\eta,
+  y = R x = RU\eta,
 \end{equation}
-\noindent where $y\in\mathbb{R}^m$ is the observation vector, $\Phi$ is an
-$m\times n$ matrix defining the measurements, $\Psi$ is an $n\times n$ sparsity
-basis and $\eta$ is the sparse representation of $x$ in the domain of $\Psi$. In
+\noindent where $y\in\mathbb{R}^m$ is the observation vector, $R$ is an
+$m\times n$ matrix defining the measurements, $U$ is an $n\times n$ sparsity
+basis and $\eta$ is the sparse representation of $x$ in the domain of $U$. In
 general, $m\ll n$. In an imaging application, where the underlying signal is a
 matrix $X\in\mathbb{R}^{h\times s}$, we take $x=\text{vec}(X)$, where the
-$\text{vec}(\cdot)$ operator stacks the columns of a matrix. Note that the
-symbols $x$ and $y$ are also used to indicate coordinate directions in the AFM.
+$\text{vec}(\cdot)$ operator stacks the columns of a matrix.
+
+The symbols $x$ and $y$ are also used to indicate coordinate directions in the AFM.
 They are reused here as they are standard notation in the CS literature; their
 specific meaning throughout the paper should be clear from context.
 	
 In the AFM application, the probe can only measure a single pixel at a time.
-This implies that $\Phi$ is a sparse matrix with each row having only one
+This implies that $R$ is a sparse matrix with each row having only one
 nonzero entry and that $y$ is a subset of $x$. Ideally, the sparsity basis and
-the measurement matrix $\Phi$ will have a low \textit{mutual coherence}, a
-measure that describes how each of the rows of $\Phi$ (the measurements)
-``spreads out'' in the domain of $\Psi$ \cite{candes2007sparsity}. In practice,
+the measurement matrix $U$ will have a low \textit{mutual coherence}, a
+measure that describes how each of the rows of $R$ (the measurements)
+``spreads out'' in the domain of $U$ \cite{candes2007sparsity}. In practice,
 the Discrete Cosine Transform (DCT) keeps a good balance between achieving a low
 mutual coherence between the basis and the required structure of the AFM sensing
-matrices and providing a high sparsity of typical AFM sample images. Therefore,
-for concreteness, in this work we use the DCT as the sparsity basis $\Psi$.
+matrices and providing a high sparsity of typical AFM sample images. In the following,
+we assume that $U^TU=I$, though in the simulation and experimental results, we take
+$U$ as the DCT basis.
 	
 One common realization of the CS-based reconstruction problem, known as basis
 pursuit with denoising (BPDN), is given by the following optimization problem,
-\begin{equation}\label{op:bp}
-  \begin{aligned}
-	\min_{x} \left \| \Psi^{-1}x \right \|_1\quad \text{subject to}\quad \|\Phi
-    x - y\|_2 < \sigma,
-  \end{aligned}
+\begin{equation}
+  \min_{x} \left \| U^Tx \right \|_1 \quad
+  \text{s.t.}\quad x\in Q_p = \{x:~\|Rx - y\|_2 < \sigma\} \label{op:bp}
 \end{equation}
-where $\| \cdot \|_1$ and $\| \cdot \|_2$ denote $l_1$ and $l_2$ norms,
+  where $\| \cdot \|_1$ and $\| \cdot \|_2$ denote $l_1$ and $l_2$ norms,
 respectively, and $\sigma$ represents some measure of the signal noise such as
 its variance. This problem essentially searches for the sparsest signal from all
 the candidates that match the measurements. While BPDN is a computationally
 demanding algorithm, particularly for large images, it in general provides
-accurate reconstructions. In this work, we use the package
-$l_1$-magic~\cite{l1magic} to solve the BPDN problem. More efficient greedy
-algorithms have also been developed. One of these, Simplified Matching Pursuit
-(SMP), was created by two of the authors and was designed specifically for the
-sampling matrices in the AFM setting \cite{Luo:2015tu}.
-	
+accurate reconstructions.
+
+
 Although BPDN is effective in the general setting, using it for reconstruction
 from horizontal $\mu$-path samples often yields artifacts in the vertical
 direction (that is, the direction orthogonal to the $\mu$-path scans) leading to
 strong discontinuities in the image. These artifacts grow more prominent as the
 length of the $\mu$-paths is increased \cite{maxwell2014compressed} as these
 longer paths lead to increased mutual coherence between the measurement matrix
-$\Phi$ and the sparsity basis $\Psi$. However, longer $\mu$-paths means fewer
-tip re-engagements and thus shorter scan times. As a result, the second
+$R$ and the sparsity basis $U$. However, longer $\mu$-paths means fewer
+tip re-engagements and thus shorter scan times.
+As a result, the second
 algorithm we consider is a new variant of BPDN that we term basis pursuit with
 vertical variation (BPVV). In order to mitigate the vertical artifacts, BPVV
 adds a vertical total variation penalty in the spatial domain to the
 optimization objective. That is, \eqref{op:bp} is modified to
-\begin{equation}\label{op:bp_tv}
-  \begin{aligned}
-	\min_{x} \left \| \Psi^{-1}x \right \|_1 + \epsilon \left \| \nabla_v x
-    \right \|_1 \, \text{subject to} \, \| \Phi x - y \|_2 < \sigma,
-  \end{aligned}
-\end{equation}
-where ${\nabla_v x=\text{vec}(\nabla_v X)}$ is the discrete gradient in the
-vertical ($y$) direction and
-% \textcolor{red}{
-\begin{equation}
+
+\begin{align}
+  \min_{x\in Q_p}~f(x) &= \min_{x\in Q_p} |U^Tx|_1 + \alpha_v|D_vx|_1 + \alpha_h|D_hx|_1  \label{op:bp_tv}
+  % \text{subject to} &\, \| R x - y \|_2 < \sigma,
+\end{align}
+where ${D_v x=\text{vec}(\nabla_v X)}$ (resp., ${D_v x=\text{vec}(\nabla_v X)}$) is the
+discrete gradient in the vertical (resp., horizontal) direction and
+\begin{align*}
   (\nabla_v X)_{i,j} = 
   \begin{cases}
     X_{i+1,j} - X_{i,j}, & 1\leq i<h,~ 1\leq j\leq s,\\
     0, & \phantom{:}i=h,~\phantom{:::::} 1\leq j\leq s.
+  \end{cases}\\
+  (\nabla_h X)_{i,j} = 
+  \begin{cases}
+    X_{i,j+1} - X_{i,j}, & 1\leq i\leq h,~1\leq j<s \\
+    0, & \phantom{}1\leq i\leq,~\phantom{:::} j=s
   \end{cases}
+\end{align*}
+In \eqref{op:bp_tv}, $\left \| D_v x \right \|_1$ (resp., $\left \| D_h x \right \|_1$) is the total variation (TV) of the signal in the vertical (resp., horizontal) direction. The parameters $\alpha_v$ and $\alpha_h$ are weighting parameters.
+The description of BPVV in \eqref{op:bp_tv} can be viewed as the combination of CS
+and inpainting (described below), in which the first term seeks a sparse solution while the
+last two terms try to diffuse pixel information.
+To solve the optimization problem in \eqref{op:bp_tv} we use a (slight) extension to NESTA~\cite{becker_nesta_2011}. To that end, we re-write the cost $f(x)$ in \eqref{op:bp_tv} as
+\begin{equation*}
+  f(x) = \max_{u\in Q_d} \left\langle u, Wx \right\rangle,\quad Q_d = \{u:~||u||_{\infty} \leq 1\}
+\end{equation*}
+where 
+\begin{equation*}
+W = \begin{bmatrix}U&\alpha_hD^T_h&\alpha_vD^T_v \end{bmatrix}^T.
+%   W = \begin{bmatrix}U^T\\\alpha_hD_h\\\alpha_vD_v \end{bmatrix}.
+\end{equation*}
+One of the core features of the NESTA algorithm is to replace the non-smooth functional $f(x)$ with a smoothed approximation
+\begin{equation}
+  f_{\mu} = \max_{u\in Q_d} \left\langle u,
+    W x \right\rangle - \frac{\mu}{2}||u||_2^2. \label{eqn:fcn_prox}
 \end{equation}
-
+The gradient of \eqref{eqn:fcn_prox} is given by
+\begin{equation*}
+  \nabla f_{\mu}(x)[i] = W^Tu_{\mu}(x)
+\end{equation*}
+where
+\begin{equation*}
+  (u_{\mu}(x))[i] = 
+\begin{cases}
+    \mu^{-1}(Wx)[i], & |W x[i]| < \mu,\\
+    \text{sgn}(W x[i]), & \text{else}.
+  \end{cases}
+\end{equation*}
 
 \begin{algorithm}
   \SetKwInOut{Initialize}{Initialize} \SetKwInOut{Output}{Output}
 		
-  \Initialize{$x = d_y = w = b_y = b_w = k = 0$, $y_0=y$ sampled pixels}
-  \While{$\left \|\Phi x^k - y^k \right \|_2 \ge \sigma$} {
+  \Initialize{$x \in Q_p, \mu=0.9||W x_0||_{\infty}$, $L_{\mu} = \frac{1}{\mu}||W||^2_2$}
     % $x^{k+1} = x^{k}$\\
-    \For{$i= 1$ \KwTo $N$} {
-      $p\leftarrow\mu\Phi^Ty^k+\lambda\nabla_v^T\left(d_y-b_y\right)+\gamma\Psi\left(w-b_w\right)$\\
-      $x^{k+1}\leftarrow \left(\mu\Phi^{T}\Phi+\lambda\nabla_v^T\nabla_v+\gamma I\right)^{-1}p$\\
-      $d_y\leftarrow \text{shrink}(\nabla_vx^{k+1}+b_y,1/\lambda)$\\
-      $w\leftarrow \text{shrink}\left(\Psi^{-1}x^{k+1}+b_w,1/\gamma\right)$\\
-      $b_y\leftarrow b_y+\left(\nabla_vx^{k+1}-d_y\right)$\\
-      $b_w\leftarrow b_w+\left(\Psi^{-1}x^{k+1}-w\right)$\\
+  \While{$\mu < \mu_{\textrm{final}}$ } {
+    $k=0$\\
+      \While{$\Delta f_{\mu} > \delta$} {
+        $\alpha_k = \frac{1}{2}(k+1)$ \\
+        $\tau_k = \frac{2}{k+3}$ \\
+        $\displaystyle y_k = \text{arg } \min_{x\in Q_p}
+          \frac{L_{\mu}}{2}||x - x_k||_2^2 + \langle \nabla f(x_k),~ x\rangle$\\
+        $\displaystyle {z_k = \text{arg } \min_{x\in Q_p} \frac{L_{\mu}}{2}||x-x_0||_2^2 +
+        \langle \sum_{i=0}^k \alpha_i \nabla f(x_i), ~x \rangle}$\\
+        $x_{k+1} = \tau_kz_k + (1-\tau_k)y_k$\\
+        $k \leftarrow k + 1$\\
+      }
+      $x_0 = x_k$\\
+      $\mu = \gamma \mu$\\
+      $L_{\mu} = (1/\mu)||W||^2_2$
     }
-    $y^{k+1} = y^k + y - \Phi x^{k+1}$\\
-    $k \leftarrow k + 1$\\
-  } \Output{Reconstruction $x^k$}
-  \caption{Split Bregman BPVV}
+  \Output{Reconstruction $x_k$}
+  \caption{NESTA algorithm}
   \label{ag:BPTV}
 \end{algorithm}
-\todo{Modify this for NESTA}
-
-In \eqref{op:bp_tv}, $\left \| \nabla_v x \right \|_1$ is the total variation of
-the signal in the vertical direction and $\epsilon$ is a weighting parameter
-which in this work is taken to be unity. The description of BPVV in
-\eqref{op:bp_tv} can be viewed as the combination of CS and inpainting
-(described below), in which the first term seeks a sparse solution while the
-second term tries to diffuse pixel information. To solve the optimization
-problem in \eqref{op:bp_tv} we use the split Bregman method
-\cite{goldstein2009split}. The resulting algorithm is described in
-Algorithm~\ref{ag:BPTV} where $\mu, \lambda, \gamma$ are scalar penalty
-parameters that influence the convergence of the algorithm (though not the
-solution found) and
-\begin{equation}\label{df:shrink}
-  \text{shrink}(x,\gamma) = \frac{x}{|x|}\max\left(|x|-\gamma,0\right),
+In the termination condition for the inner loop, $\Delta f_{\mu} = |f_{\mu}(x_k) - \bar{f}_{\mu}(x_k)|/\bar{f}_{\mu}(x_k)$ where
+\begin{equation}
+\bar{f}_{\mu}(x_k) = \frac{1}{\min\{10, k\}} \sum_{\ell=1}^{\min\{10,k\}} f_{\mu}(x_{k-\ell})
 \end{equation}
-where all operations are element-wise.
+The sub-problems in lines 6 and 7 have the form
+\begin{equation}
+  p = \textrm{arg } \min_{x\in Q_p} \frac{L}{2}||x - r|| + \langle g,~x - r\rangle
+\end{equation}
+for some vectors $g$ and $r$ and, as shown in~\cite{becker_nesta_2011}, have a closed-form solution given by
+\begin{align}
+  \lambda & = \textrm{max}(0, \sigma^{-1}\left| b - Rq\right| - L\\
+  q &= r - L^{-1}g\\
+  p &= \left(I - \frac{\lambda}{\lambda + L} R^TR\right)\left( \frac{\lambda}{L}R^Tb + q\right).
+\end{align}
+
 
 \noindent 
 \begingroup \setlength{\tabcolsep}{1pt}
@@ -459,144 +492,151 @@ changes not only day-to-day but also (and especially) when changing cantilevers.
 This is illustrated in Fig.~\ref{fig:z_evolution}, which shows the FRF near the
 mode for two three different cantilevers. Two are of the same make and model.
 
-One cause for such different gains is variation in the length of the cantilever
-(and possibly how the laser was adjusted). This is illustrated in
-Fig.~\ref{fig:z_axis_gain}. Here, we consider a cantilever with length $h$ that
-rests on the surface of some specimen with a nominal angle of $\theta$. In this
-drawing, the laser is perpendicular to the sample surface. Given a vertical
-perturbation $\Delta z$, we have that
-\begin{equation}
-  \Delta \alpha \approx \frac{d}{h} \Delta z,
-\end{equation}
-where $d$ is the distance from the cantilever to the detector and
-$\Delta \alpha$ is the change in position of the incident laser spot on the
-detector. Thus, given the same change in the vertical position, we will see a
-larger change in the deflection signal for a shorter cantilever. In other words,
-a short cantilever will exhibit a larger DC-gain in the $G_{u_Z,Z_d}$ transfer
-function.
-\begin{figure}
-  \begin{minipage}[t]{.46\textwidth}
-    % L B R T
-    \includesvg[width=1\textwidth]{figures/z_cant_evolution.svg}
-    \caption{FRFs of three different cantilevers, showing substantial
-      differences in the DC-gain and smaller, but still significant differences
-      the frequency of the modes.}
-    \label{fig:z_evolution}
-  \end{minipage}
-  \hfill
-  \begin{minipage}[t]{.46\textwidth}
-    % L B R T
-    \includegraphics[width=1\textwidth]{figures/z_axis_gain_schematic-crop.pdf}
-    \caption{Schematic drawing of how the length of the cantilever affects the
-      $z$-axis gain.}
-    \label{fig:z_axis_gain}
-  \end{minipage}
-\end{figure}
-
-Fig.~\ref{fig:z_evolution} shows the frequency response of $G_{u_Z,Z_d}$ near
-the bending mode for three different cantilevers. Cantilevers (A) and (B) are
-both AppNano SICON cantilevers and have a nominal length of 450 microns.
-Cantilever (C) is an NCLR and has a nominal length of 225 microns.
-Interestingly, the SICON cantilevers show substantial variation. Unfortunately,
-the manufacture does not provide a tolerance on the nominal length, so it is
-difficult to tease out whether that variation is due to manufacturing
-variability or other factors not explained by this analysis.
-
-Notably, the frequency of the pole and zero do appear to shift and our inversion
-scheme is not robust to this. To deal with this, I have built a (mostly)
-automated system ID routine into the imaging software. This routine is a
-specialized version of the techniques described previously in
-Chapter~\ref{chap:modeling}. First, it obtains an FRF of the bending mode over a
-frequency range spanning 180~Hz to 240~Hz (the same set of points as in
-Fig.~\ref{fig:z_evolution}). The input and output sinusoids are demodulated in
-quasi-realtime as they come off the FPGA. Once this is complete, a 2-pole,
-2-zero transfer function model of the form
-\begin{equation*}
-  \hat{D}(z) = k \frac{z^2 + b_1z + b_o}{z^2 + a_1z + a_o}
-\end{equation*}
-is fit to the FRF, using the same optimization scheme as \eqref{eqn:logfit}.
-This is done inside the LabView VI by calling a custom DLL, which leverages
-CMPFIT~\cite{cmpfit,markwardt_mpfit_2009}, a
-Levenberg-Marquardt~\cite{more_levenberg_1978} routine written in C. To promote
-a stable fit, the optimization enforces the necessary conditions that
-\begin{align*}
-  |a_1| &< 2, \quad  |a_o| < 1\\
-  |b_1| &< 2, \quad  |b_o| < 1.
-\end{align*}
-The routine then checks that both the poles and zeros are indeed stabile, saves
-the data to a JSON file and passes the transfer function parameters into the
-imaging portion of the application which finally uploads the parameters into the
-FPGA imaging bitfile. Optionally, one can by-pass this step and simply load the
-previously saved JSON file.
-
-One of the benefits of this approach is that the DC-gain of the transfer
-function $G_{u_Z,Z_d}$ becomes (approximately) normalized to unity, which makes
-re-tuning the control system after changing tips far easier to non-existent. The
-benefit to automating the process is that it drastically reduces the friction
-required to obtain an up-to-date compensator, which means that an up-to-date
-compensator is more likely to be used~\cite{abramovitch_25years_2015}.
-
-
-Fig.~\ref{fig:afm_bd_dinv} shows a block diagram if the $Z$-axis control loop.
-We point out a small change from Chapter~\ref{chap:cs_init}: the addition of
-$D^{-1}(z)$ changes the correct signal to use to represent the sample surface.
-If we take the output of the entire compensator, $u_Z=D_ID^{-1}e_z$, then we
-will get a lot of wiggles in the resulting signal. Rather, we need to take only
-the output of the integrator to represent the surface.
-% \begin{figure}
-%   \centering
-%   \includegraphics[width=1\columnwidth]{figures/AFM_loop_Dinv-crop.pdf}
-%   \caption{Block diagram of the $Z$-axis control loop with the inverse
-%   compensator. }
-%   \label{fig:afm_bd_dinv}
-% \end{figure}
-\begin{figure*}[t]
+\begin{figure*}
   \centering
-  \includegraphics[width=0.75\textwidth]{figures/AFM_loop_Dinv_antiwup-crop.pdf}
-  \caption{Block diagram of the $Z$-axis control loop. The anti-windup is active
-    for decision index $i\in\{0,1,5\}$, which correspond to states such that
-    $r_Z=r_{Z,\textrm{up}}$.}
-  \label{fig:afm_bd_dinv_final}
+  \includesvg[width=1\textwidth]{figures/MIMO_CL_uxuy.svg}
+  \caption{MIMO closed and open loop FRFs, showing the dramatic affect on $G_{Z,u_X}$ and $G_{Z,u_Y}$ when the feedforward compensators are used for the $X$ and $Y$ axes.}
+  \label{fig:mimo_frf_uxuy}
 \end{figure*}
 
-
-It should be noted that this control is sufficient to eliminate the limit-cycle
-behavior described in Section~\ref{sec:aproachspeed}:
-
-% \begin{figure}[tbhp!]
-%   \centering\includegraphics[width=3.0in]{figures-SBA/uz_multiplexer_KI_anderssonLab2}
-%   \caption{The $z$-piezo movement is driven by switching between feedback from
-%   the $z$-axis position signal and from the deflection signal. The shaded area
-%   represents the digital control system, while the non-shaded region is the
-%   physical system.}
-%   \label{fig:zMultiplex_anderssonLab}
+% One cause for such different gains is variation in the length of the cantilever
+% (and possibly how the laser was adjusted). This is illustrated in
+% Fig.~\ref{fig:z_axis_gain}. Here, we consider a cantilever with length $h$ that
+% rests on the surface of some specimen with a nominal angle of $\theta$. In this
+% drawing, the laser is perpendicular to the sample surface. Given a vertical
+% perturbation $\Delta z$, we have that
+% \begin{equation}
+%   \Delta \alpha \approx \frac{d}{h} \Delta z,
+% \end{equation}
+% where $d$ is the distance from the cantilever to the detector and
+% $\Delta \alpha$ is the change in position of the incident laser spot on the
+% detector. Thus, given the same change in the vertical position, we will see a
+% larger change in the deflection signal for a shorter cantilever. In other words,
+% a short cantilever will exhibit a larger DC-gain in the $G_{u_Z,Z_d}$ transfer
+% function.
+% \begin{figure}
+%   \begin{minipage}[t]{.46\textwidth}
+%     % L B R T
+%     \includesvg[width=1\textwidth]{figures/z_cant_evolution.svg}
+%     \caption{FRFs of three different cantilevers, showing substantial
+%       differences in the DC-gain and smaller, but still significant differences
+%       the frequency of the modes.}
+%     \label{fig:z_evolution}
+%   \end{minipage}
+%   \hfill
+%   \begin{minipage}[t]{.46\textwidth}
+%     % L B R T
+%     \includegraphics[width=1\textwidth]{figures/z_axis_gain_schematic-crop.pdf}
+%     \caption{Schematic drawing of how the length of the cantilever affects the
+%       $z$-axis gain.}
+%     \label{fig:z_axis_gain}
+%   \end{minipage}
 % \end{figure}
-	
-As illustrated in Fig.~\ref{fig:zMultiplex_anderssonLab}, the voltage applied to
-the $z$-piezo is adjusted by switching the feedback signal between the $z$-axis
-position sensor (when the tip is off the surface) and the deflection signal
-(when the tip is engaged). The difference equation associated with
-\eqref{eqn:dzI} for the $z$-axis is
-\begin{equation}
-  u_z(k) = K_Ie(k) + u_z(k-1).
-  \label{eqn:intdiff}
-\end{equation}
 
-In the $z$-axis position control mode, the $z$-axis position is controlled to a
-fixed value $z_{ref}$ which, in general, is slightly above the sample surface.
-The difference between the measured $z$-axis position and $z_{ref}$,
-${e(k) = z_{ref} - z(k)}$, is used as the error signal. In the deflection
-control mode, when the tip is in contact with the sample, the deflection signal
-is controlled to a fixed value $l_{ref}$ to ensure a constant tip-sample force.
-The sample surface acts as a disturbance to the control loop. Therefore, the
-$z$-axis position measurements can be taken to represent the surface topography
-of the sample. In this case, the difference between the measured deflection and
-$l_{ref}$ is the error, $e(k) = l_{ref} - l(k)$.
+% Fig.~\ref{fig:z_evolution} shows the frequency response of $G_{u_Z,Z_d}$ near
+% the bending mode for three different cantilevers. Cantilevers (A) and (B) are
+% both AppNano SICON cantilevers and have a nominal length of 450 microns.
+% Cantilever (C) is an NCLR and has a nominal length of 225 microns.
+% Interestingly, the SICON cantilevers show substantial variation. Unfortunately,
+% the manufacture does not provide a tolerance on the nominal length, so it is
+% difficult to tease out whether that variation is due to manufacturing
+% variability or other factors not explained by this analysis.
+
+% Notably, the frequency of the pole and zero do appear to shift and our inversion
+% scheme is not robust to this. To deal with this, I have built a (mostly)
+% automated system ID routine into the imaging software. This routine is a
+% specialized version of the techniques described previously in
+% Chapter~\ref{chap:modeling}. First, it obtains an FRF of the bending mode over a
+% frequency range spanning 180~Hz to 240~Hz (the same set of points as in
+% Fig.~\ref{fig:z_evolution}). The input and output sinusoids are demodulated in
+% quasi-realtime as they come off the FPGA. Once this is complete, a 2-pole,
+% 2-zero transfer function model of the form
+% \begin{equation*}
+%   \hat{D}(z) = k \frac{z^2 + b_1z + b_o}{z^2 + a_1z + a_o}
+% \end{equation*}
+% is fit to the FRF, using the same optimization scheme as \eqref{eqn:logfit}.
+% This is done inside the LabView VI by calling a custom DLL, which leverages
+% CMPFIT~\cite{cmpfit,markwardt_mpfit_2009}, a
+% Levenberg-Marquardt~\cite{more_levenberg_1978} routine written in C. To promote
+% a stable fit, the optimization enforces the necessary conditions that
+% \begin{align*}
+%   |a_1| &< 2, \quad  |a_o| < 1\\
+%   |b_1| &< 2, \quad  |b_o| < 1.
+% \end{align*}
+% The routine then checks that both the poles and zeros are indeed stabile, saves
+% the data to a JSON file and passes the transfer function parameters into the
+% imaging portion of the application which finally uploads the parameters into the
+% FPGA imaging bitfile. Optionally, one can by-pass this step and simply load the
+% previously saved JSON file.
+
+% One of the benefits of this approach is that the DC-gain of the transfer
+% function $G_{u_Z,Z_d}$ becomes (approximately) normalized to unity, which makes
+% re-tuning the control system after changing tips far easier to non-existent. The
+% benefit to automating the process is that it drastically reduces the friction
+% required to obtain an up-to-date compensator, which means that an up-to-date
+% compensator is more likely to be used~\cite{abramovitch_25years_2015}.
+
+
+% Fig.~\ref{fig:afm_bd_dinv} shows a block diagram if the $Z$-axis control loop.
+% We point out a small change from Chapter~\ref{chap:cs_init}: the addition of
+% $D^{-1}(z)$ changes the correct signal to use to represent the sample surface.
+% If we take the output of the entire compensator, $u_Z=D_ID^{-1}e_z$, then we
+% will get a lot of wiggles in the resulting signal. Rather, we need to take only
+% the output of the integrator to represent the surface.
+% % \begin{figure}
+% %   \centering
+% %   \includegraphics[width=1\columnwidth]{figures/AFM_loop_Dinv-crop.pdf}
+% %   \caption{Block diagram of the $Z$-axis control loop with the inverse
+% %   compensator. }
+% %   \label{fig:afm_bd_dinv}
+% % \end{figure}
+% \begin{figure*}[t]
+%   \centering
+%   \includegraphics[width=0.75\textwidth]{figures/AFM_loop_Dinv_antiwup-crop.pdf}
+%   \caption{Block diagram of the $Z$-axis control loop. The anti-windup is active
+%     for decision index $i\in\{0,1,5\}$, which correspond to states such that
+%     $r_Z=r_{Z,\textrm{up}}$.}
+%   \label{fig:afm_bd_dinv_final}
+% \end{figure*}
+
+
+% It should be noted that this control is sufficient to eliminate the limit-cycle
+% behavior described in Section~\ref{sec:aproachspeed}:
+
+% % \begin{figure}[tbhp!]
+% %   \centering\includegraphics[width=3.0in]{figures-SBA/uz_multiplexer_KI_anderssonLab2}
+% %   \caption{The $z$-piezo movement is driven by switching between feedback from
+% %   the $z$-axis position signal and from the deflection signal. The shaded area
+% %   represents the digital control system, while the non-shaded region is the
+% %   physical system.}
+% %   \label{fig:zMultiplex_anderssonLab}
+% % \end{figure}
 	
-We note that the $z$-axis control described here operates the AFM in constant
-force mode during imaging. It is straightforward to perform scanning under
-different AFM modes, such as tapping mode, simply by adjusting the signals and
-control involved in the vertical loop.
+% As illustrated in Fig.~\ref{fig:zMultiplex_anderssonLab}, the voltage applied to
+% the $z$-piezo is adjusted by switching the feedback signal between the $z$-axis
+% position sensor (when the tip is off the surface) and the deflection signal
+% (when the tip is engaged). The difference equation associated with
+% \eqref{eqn:dzI} for the $z$-axis is
+% \begin{equation}
+%   u_z(k) = K_Ie(k) + u_z(k-1).
+%   \label{eqn:intdiff}
+% \end{equation}
+
+% In the $z$-axis position control mode, the $z$-axis position is controlled to a
+% fixed value $z_{ref}$ which, in general, is slightly above the sample surface.
+% The difference between the measured $z$-axis position and $z_{ref}$,
+% ${e(k) = z_{ref} - z(k)}$, is used as the error signal. In the deflection
+% control mode, when the tip is in contact with the sample, the deflection signal
+% is controlled to a fixed value $l_{ref}$ to ensure a constant tip-sample force.
+% The sample surface acts as a disturbance to the control loop. Therefore, the
+% $z$-axis position measurements can be taken to represent the surface topography
+% of the sample. In this case, the difference between the measured deflection and
+% $l_{ref}$ is the error, $e(k) = l_{ref} - l(k)$.
+	
+% We note that the $z$-axis control described here operates the AFM in constant
+% force mode during imaging. It is straightforward to perform scanning under
+% different AFM modes, such as tapping mode, simply by adjusting the signals and
+% control involved in the vertical loop.
 
 % =========================================================================
 \section{Implementation}\label{sec:implementation}
