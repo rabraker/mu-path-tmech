@@ -1,0 +1,60 @@
+
+
+
+
+
+\begin{enumerate}
+\item \textbf{Initialization:} In this state, the user uses the PicoView
+  software to bring the tip to the sample with the stepper motor. Once the tip
+  is engaged in the surface, the user switches the control from PicoView to the
+  custom software in LabView. The system writes parameters including the
+  locations of $\mu$-paths from a desktop file to a host-to-FPGA FIFO (first in,
+  first out) buffer. Next, the closed-loop control of all the axes through the
+  FPGA is enabled and the system performs the following operations.
+    \todo{Shorten this. Sean, what was your trick to not indent enumerate?}
+  \begin{itemize}
+  \item \textbf{Read} the starting location of the first $\mu$-path from the
+    host-to-FPGA FIFO.
+  \item \textbf{Set} the $z$-axis loop to position control mode.
+  \item \textbf{Wait until} $|e_z(k)|$ reaches a settling criterion, then go to
+    state 2.
+  \end{itemize}
+\item \textbf{$xy$-axis move:} The system moves the tip to the next target
+  location by holding $r_X$ and $r_Y$ to the beginning of the next $\mu$-path.
+\item \textbf{Tip engage:} We set the $Z$ setpoint to $r_{Z,s}$ so that the
+  tip is driven towards the sample surface. 
+  \begin{itemize}
+  \item \textbf{Set} the $z$-axis loop to deflection control mode.
+  \item \textbf{Wait until} $|e_z(k)|$ reaches a settling criterion, then
+    transition to state 4. \todo{Update this}
+  \end{itemize}
+\item \textbf{Scan:} In this state, the system moves the tip following the
+  trajectory of the current $\mu$-path.
+  \begin{itemize}
+  \item \textbf{Update} $x_{ref}$, and $y_{ref}$ iteratively to follow the
+    trajectory of the current $\mu$-path to the end. At the same time, write the
+    $x,y,z,$ and deflection measurements to an FPGA-to-host FIFO.
+  \item \textbf{Wait until} $|e_x(k)|$ and $|e_y(k)|$ reach the end of the
+    $\mu$-path,
+    % a settling criterion,
+    then go to state 5.
+  \end{itemize}
+  % \item \textbf{Transition decision:} The tip is at the end of the $\mu$-path
+  %   at this time. The location of the next $\mu$-path is read from the FIFO.
+  %   In
+  %   order to accelerate the scanning process, the decision to lift the tip or
+  %   not is made in this state. The time $t_{xy\_scan}$ it takes to scan to the
+  %   beginning of the next $\mu$-path is compared to
+  %   $t_{\textit{z}up}+t_{xy}+t_{\textit{z}down}$. If the former is larger,
+  %   then
+  %   go to state 6; otherwise, go to state 2.
+\item \textbf{Tip withdraw:} In this state, the system withdraws the tip in the
+  $z$-direction. A large $K_I$ is used for the $z$-piezo here in order to save
+  time.
+  \begin{itemize}
+  \item \textbf{Set} the $z$-axis loop to position control mode.
+  \item \textbf{Set} the $z$ setpoint at a specified distance off the surface.
+  \item \textbf{Wait until} $|e_z(k)|$ reaches a settling criterion, then go to
+    state 2.
+  \end{itemize}
+\end{enumerate}
