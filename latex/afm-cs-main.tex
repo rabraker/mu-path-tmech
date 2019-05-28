@@ -12,7 +12,7 @@
 \usepackage{amsthm}
 \usepackage{mathtools}
 \usepackage{graphicx}		% to insert figures
-\usepackage{hyperref}		% PDF hyperreferences??
+% \usepackage{hyperref}		% PDF hyperreferences??
 \usepackage{multirow}
 \usepackage{mathtools}
 \usepackage{cite}
@@ -457,7 +457,7 @@ mitigated using BPVV. Thus, in the remainder of the paper, we focus exclusively 
 % =========================================================================
 \section{Experimental setup} \label{sec:experimentalSetup}
 % =========================================================================
-Our experimental setup, illustrated in Fig.~\ref{fig:exp_setup_anderssonLab},
+Our experimental setup, illustrated in Fig.~\ref{fig:exp_setup},
 consists of an Agilent 5400 AFM  retrofitted with an nPoint NPXY100A
 piezoelectric stage, a cRIO-9082 embedded controller (National
 Instruments), and a standard desktop computer. 
@@ -472,7 +472,11 @@ Spartan-6 LX150 Field Programmable Gate Array (FPGA) inside the cRIO-9082. The
 cRIO includes a 16-Bit, 100 kHz NI-9215 analog-to-digital input module and a
 16-Bit, 100 kHz NI-9263 digital-to-analog output module. All control loops are
 implemented using a 25 kHz sampling rate.
-
+\begin{figure}
+  \includegraphics[width=1\columnwidth]{figures/exp_setup.pdf}
+  \caption{Schematic diagram of the expermental AFM setup.}
+  \label{fig:exp_setup}
+\end{figure}
 % =========================================================================
 \section{Control}\label{sec:control}
 The control structure for each axis is different. For the $X$-axis, we use a
@@ -532,7 +536,7 @@ changes not only day-to-day but also (and especially) when changing cantilevers 
 
 \begin{figure*}[t]
   \centering
-  \includegraphics[width=0.75\textwidth]{figures/AFM_loop_Dinv_antiwup-crop.pdf}
+  \includegraphics[width=0.75\textwidth]{figures/AFM_loop_z.pdf}
   \caption{Block diagram of the $Z$-axis control loop. The anti-windup is active
     for decision index $i\in\{0,1,5\}$, which correspond to states such that
     $r_Z=\rzup$.}
@@ -705,7 +709,7 @@ Transition between, and operation in, these different stages is implemented as a
 simple state machine, summarized in Table~\ref{tab:cs_tasks}. 
 In the following, $r_X$ and $r_Y$ refer to the references for the $X$ and $Y$ axes while $r_{Z,s}$ and $\rzup$ refer to the $Z$-axis setpoints during scanning and retraction, respectively.
 
-\begin{table}\label{tab:cs_tasks}
+\begin{table}
   \centering
   \caption{Summary of the tasks for $\mu$-path scanning.}
   \begin{tabular}{lccc}
@@ -717,6 +721,7 @@ In the following, $r_X$ and $r_Y$ refer to the references for the $X$ and $Y$ ax
     (4) $\mu$-path scan & ramp & $r_Z = \rzs$ & (5)\\
     (5) tip up & setpoint & $r_Z = \rzup$ & (1)\\
   \end{tabular}
+  \label{tab:cs_tasks}
 \end{table}
 Two cycles of this sequential process are illustrated by the time series in
 Fig.~\ref{fig:mupathsignaltrajectory}. The following subsections describe in
@@ -786,8 +791,7 @@ When dis-engagement does occur, the $Z$-axis control loop implements an anti-win
 After the tip-descent, we begin scanning in a ``pre-scan'' phase (state (3)).
 During this phase, 
 
-To
-motivate, this consider Fig.~\ref{fig:prescan_difference}. The left panel
+To motivate, this consider Fig.~\ref{fig:prescan_difference}. The left panel
 represents what we call a ``$Z$''-bounce experiment, where the $XY$-stage stays
 motionless, but we repeatedly retract and re-engage the tip with specimen,
 exactly as we would in a CS scan. The right panel represents a single cycle from
@@ -796,8 +800,7 @@ paths are separated by 0 pixels.
 In this case, the specimen is freshly cleaved
 mica.
 The goal here is to eliminate (i) any oscillations which arise from the
-$XY$-move (which, as we will show in Section ~\ref{sec:need_mimo}, can be
-significant) and (ii) to have a perfectly flat surface to scan over so that
+$XY$-move and (ii) to have a perfectly flat surface to scan over so that
 there are as few disturbances as possible entering the control loop. Finally,
 the left panel of Fig.~\ref{fig:prescan_difference} shows the PSDs of the left
 and right panels (but averaged over many similar cycles). Note that the PSD is
@@ -883,18 +886,23 @@ where the constants $C_1$ and $C_2$ are regularizing constants to prevent singul
 
 In general two images which are identical will yield an infinite PSNR and an SSIM of 1.
 
-
+\subsection{Limitations of SSIM and PSNR}\label{sec:limits}
 \todo{Should probably remove this entire section?}
 
-What kind of numbers are reasonable to expect from the SSIM and PSNR metrics? We
-mentioned in Chapter~\ref{chap:cs_init} that comparison of experimental images
-was difficult (particularly for our experimental setup) because, e.g., Agilent
-piezo tube drifts which gives a varying offset between images. However, we did
-not try to tease apart to what extent the poor SSIM and PSNR numbers we reported
-were due to simply the difference in scanning speeds vs things like image
-mis-alignment.
+What kind of numbers are reasonable to expect from the SSIM and PSNR metrics?
+To answer this question, we compare a sequence of 1~Hz raster scans.
+In this experiment, (Fig. \ref{fig:rast_unaligned_1}) we took 6 raster scans of the same 5 by 5 micron
+square of the CS-20NG sample grating. These scans were taken sequentially and
+the NPXY100A remained in closed-loop throughout the process.
+Fig.~\ref{fig:rast_unaligned_1} shows the error between the master
+image and the remaining 6 images.
+Temporally, the images are order left-to-right and top-to-bottom.
+Thus we can see, both visually and via the metrics, that in Fig.~\ref{fig:rast_unaligned_1} the mis-alignment
+grows over time. 
 
-
+Taking the first scan as the master, we compute the PSNR and SSIM
+metrics. The best PSNR here is 16.57 and the worst is 9.02.
+The best SSIM is 0.54 and the worst is 0.28.
 
 \begin{figure}[t!]
   % ------------ 1.0 Hz ---------------------
@@ -916,35 +924,20 @@ mis-alignment.
   \label{fig:baseline_errors}
 \end{figure}
 
-In the first experiment, (Figs \ref{fig:rast_unaligned_0p5} and
-\ref{fig:rast_aligned_0p5}) we took 6 raster scans of the same 5 by 5 micron
-square of the CS-20NG sample grating. These scans were taken sequentially and
-the NPXY100A remained in closed-loop throughout the process. Taking the first
-scan as the master, we compute (without any alignment) the PSNR and SSIM
-metrics. Fig.~\ref{fig:rast_unaligned_0p5} shows the error between the master
-image and the remaining 6 images. Note that the best PSNR here is 12.13 and the
-worst is 7.87. The best SSIM is 0.40 and the worst is 0.14.
-
-Next, using the cross-correlation alignment technique discussed in
-Section~\ref{sec:align}, we aligned the master image with a sub-slice of each of
+Next, using a cross-correlation alignment technique
+% discussed in Section~\ref{sec:align},
+we aligned the master image with a sub-slice of each of
 the remaining 6 (the sub-slice removes 25 pixels from each side). Again, we
 computed the PSNR and SSIM. These results are shown in
-Fig.~\ref{fig:rast_aligned_0p5}, which again shows the errors between the
+Fig.~\ref{fig:rast_aligned_1}, which again shows the errors between the
 aligned master and the remaining 6 images. Although the situation is improved
 compared to the un-aligned images, there is still noticable stretching,
-particularly in the $Y$-direction. Notably, the with the alignment technique,
-PSNR now ranges from SSIM 21.68 to 15.56 and the SSIM ranges from 0.67 to 0.50.
+particularly in the $Y$-direction. Notably, with the alignment technique,
+the SSIM lies between 0.7 and 0.73 and the PSNR ranges from 22.51 to 24.99 and appears more stable in time.
 
 
-We repeat this experiment but this time use a 1~Hz scan.
-Fig.~\ref{fig:rast_unaligned_1} shows the unaligned error images and
-Fig.\ref{fig:rast_aligned_1} shows the aligned error images. Temporally, the
-images are order left-to-right and top-to-bottom. Thus we can see, both visually
-and via the metrics, that in Fig.~\ref{fig:rast_unaligned_1} the mis-alignment
-grows over time (In the 0.5~Hz scans, it appears that after the third from, the
-misalignment is so bad, the situation can't get any worse). In the aligned 1~Hz
-images, our metrics are not only higher but also more consistent: and the SSIM
-lies between 0.7 and 0.73 and the PSNR ranges from 22.51 to 24.99.
+
+
 
 % Due to this unfortunate drift, in Section~\ref{sec:results:final}, we will use a
 % 1~Hz scan as the baseline image. Hopefully, this will give a decent trade-off
@@ -1021,8 +1014,8 @@ For the raster scans, we discard data from the re-trace and divided the
 remaining data into 512$\times$512 bins based on the \xc and \yc sensor
 measurements. We then average the data in each bin to obtain the value of one
 pixel. To remove the affects of piezo creep and sample tilt, we then de-trend
-each individual line. De-trending each line introduces the artifacts we noted in
-Section~\ref{sec:comp_raster}. To remove this effect, we select a column of
+each individual line. De-trending each line causes the flat portion between the holes in the horizontal direction to appear at a different height than the flat portion between holes in the vertical direction. 
+To remove this effect, we select a column of
 pixels on the left and right side of each image that does not cross any holes
 (i.e., a vertical line through the flat area), register each scan line to a
 common height along these columns. This step eases comparison with the CS scans
