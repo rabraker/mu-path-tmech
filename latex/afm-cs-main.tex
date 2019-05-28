@@ -1,4 +1,4 @@
-\documentclass[twocolumn,twoside]{IEEEtran/IEEEtran}
+\documentclass[twocolumn,oneside]{IEEEtran/IEEEtran}
 % \documentclass[defaultstyle,11pt]{IEEETran}
 % Lucy says to look at:
 % float_page_fraction
@@ -7,6 +7,7 @@
 % \renewcommand\floatpagefraction{0.5} %% default: 0.5
 % \renewcommand\topfraction{0.7} % default: 0.7
 % \renewcommand*\textfraction{.05}
+\usepackage{showframe}
 \usepackage{amssymb}		% to get all AMS symbols
 \usepackage{amsthm}
 \usepackage{mathtools}
@@ -44,16 +45,24 @@
 \newcommand{\yc}{\ensuremath{Y}\xspace}
 \newcommand{\zc}{\ensuremath{Z}\xspace}
 
+\newcommand{\rzup}{\ensuremath{r_{z,\textrm{up}}}\xspace}
+\newcommand{\rzs}{\ensuremath{r_{z,\textrm{s}}}\xspace}
 
+
+% *******************************************************************************
+% This artificially increases the papersize and margins, so todo notes are legible.
+% ***************** WARNING: comment this out for final version. ****************
+\usepackage[paperwidth=734.295pt, textwidth=516pt,
+            marginparsep=5pt, hoffset=10pt, marginparwidth=90pt,
+            textheight=696pt]{geometry}
+% Use layouts to display the original dimensions, so we can get as close to that as possible with
+% our fake page size.
 \usepackage{layouts}
 %textwidth: \printinunitsof{in}\prntlen{\textwidth}
 %linewidth: \printinunitsof{in}\prntlen{\linewidth}
 % textwidth: \printinunitsof{in}\prntlen{\textheight}
 
-% this reveals that textwidth and linewidth are 6.5 inches,
-% and textheight is 9.1 inches.
-
-
+% *******************************************************************************
 
 
 
@@ -81,19 +90,25 @@
   while still maintaining image quality. In this paper, we describe a hardware
   implementation and demonstration of one such approach based on the use of
   collections of short scans known as $\mu$--paths. Using a commercial AFM, we
-  acquire data on two different grating samples using two different sampling
-  approaches: randomly-placed $\mu-$paths and $\mu-$paths designed to minimize
-  the reconstruction error based on partial prior information about the spatial
-  frequency content in the sample image. Reconstructions are made from these
-  data using three approaches: (1) inpainting, an interpolation technique that
-  diffuses information from sampled locations into unsampled regions, (2)
-  basis-pursuit, a compressive sensing-based algorithm that seeks to minimize a
-  measure of sparsity in the underlying image, and (3) a new variant of basis
-  pursuit, Basis Pursuit Vertical Variation (BPVV), that is designed to reduce
+  acquire data on a grating sample.
+  %using two different sampling
+  %approaches: randomly-placed $\mu-$paths and $\mu-$paths designed to minimize
+  %the reconstruction error based on partial prior information about the spatial
+  %frequency content in the sample image.
+  Reconstructions are made from these data using
+  %three approaches: (1) inpainting, an interpolation technique that
+  %diffuses information from sampled locations into unsampled regions, (2)
+  %basis-pursuit, a compressive sensing-based algorithm that seeks to minimize a
+  %measure of sparsity in the underlying image, and (3)
+  a new variant of basis
+  pursuit, Basis Pursuit with Vertical Variation (BPVV), that is designed to reduce
   artifacts arising from the sampling pattern. The quality of the resulting
   images is compared to images from standard raster scans of the same regions at
   comparable imaging rates using both the peak signal-to-noise ratio and the
-  structured similarity index metric. These experiments demonstrate that at slow
+  structured similarity index metric
+  and a new metric we call the relative damage index.
+  \todo{Will this conclusion still hold?}
+  These experiments demonstrate that at slow
   scan rates, the $\mu-$path scheme produces similar image quality with
   significantly less sampling (and thus less tip-sample interaction) and that at
   high rates, the undersampling scheme produces higher quality images than
@@ -101,6 +116,18 @@
 \end{abstract}
 
 \section{Introduction}\label{sec:introduction}
+% textwidth: \printinunitsof{pt}\prntlen{\textwidth}
+
+% linewidth: \printinunitsof{pt}\prntlen{\linewidth}
+
+% paperwidth: \printinunitsof{pt}\prntlen{\paperwidth}
+
+% marginparwidth: \printinunitsof{pt}\prntlen{\marginparwidth}
+
+% marginsep: \printinunitsof{pt}\prntlen{\marginparsep}
+
+% textheight: \printinunitsof{pt}\prntlen{\textheight}
+
 The Atomic Force Microscope (AFM) is a powerful instrument capable of imaging
 sample surface topography, material characteristics, and other surface
 properties, at the nanometer scale. AFMs acquire information about the sample
@@ -188,42 +215,51 @@ horizontal scans (see Fig.~\ref{fig:mu_mask} for one such pattern) and is
 designed to balance the randomness needed to ensure good reconstruction with
 continuous scanning to reduce the number of tip
 engagements. %Though the pattern is motivated from CS, it also works well in practice for inpainting reconstruction \cite{luo2015comparison}.
-	
+\todo{Would be beneficial to shrink intro, if possible}
+
 Our previous work on the $\mu$-path pattern using theoretical calculations,
 simulations, and a preliminary implementation, demonstrates that the approach
 can achieve significant scanning time reduction while maintaining faithful image
-reconstruction \cite{maxwell2014compressed,Luo:2015tu,Braker:2018gi}. This paper
-builds upon that earlier work in several significant ways. First, we demonstrate
-performance using both randomly-placed $\mu-$paths and designed $\mu-$paths that
-are optimized to minimize the expected reconstruction error given some initial
-estimate of the frequency structure of the sample. These schemes are described
-in Sec. \ref{sec:samplingScheme}. We also introduce a new reconstruction
+reconstruction \cite{maxwell2014compressed,Luo:2015tu, braker_hardware_2018}. This paper
+builds upon that earlier work in several significant ways.
+% % ------------------ TKTKTKT ------------------
+% \todo{Strike this?}
+% First, we demonstrate
+% performance using both randomly-placed $\mu-$paths and designed $\mu-$paths that
+% are optimized to minimize the expected reconstruction error given some initial
+% estimate of the frequency structure of the sample. These schemes are described
+% in Sec. \ref{sec:samplingScheme}.
+% % --------------------------
+We also introduce a new reconstruction
 algorithm which is designed to minimize the artifacts arising from the structure
 of the $\mu$-path scanning pattern. This algorithm is described and compared to
 existing reconstruction methods through simulations in Sec.
-\ref{sec:reconstructionMethods}. We then demonstrate the entire scheme from
+\ref{sec:reconstructionMethods}.
+Section \ref{sec:control} describes improvements to the control algorithms compared to our preliminary implementation in ~\cite{braker_hardware_2018}.
+We then demonstrate the entire scheme from
 sampling through reconstruction using experiments on a commercial AFM (Agilent
 5500). The experimental setup and implementation details are described in Secs.
 \ref{sec:experimentalSetup} and \ref{sec:implementation}\footnote{The software
   portion of the implementation and image reconstruction described in this paper
-  can be found at \url{https://github.com/yufan88/}}. Experimental results with
-two different grating samples are provided in Sec.
-\ref{sec:experimentalResults}. Finally, we provide a few concluding remarks in
+  can be found at \url{https://github.com/rabraker/AFM_CS}}. Experimental results are provided in Sec.
+\ref{sec:results}. Finally, we provide a few concluding remarks in
 Sec. \ref{sec:conclusions}.
 
-
+\begin{figure}
+  \centering
+  \includegraphics[width=0.7\columnwidth]{figures-SBA/random_mask.pdf}
+  \caption{An example of the horizontal $\mu$-path sampling pattern for a 256$\times$256 pixel image with 35 pixels in each short scan and a total of 20\% pixels scanned.}
+  \label{fig:mu_mask}
+\end{figure}
 % =========================================================================
 \subsection{Reconstruction methods}
 \label{sec:reconstructionMethods}
-	
-In this work, we use three reconstruction algorithms to generate the final
-surface image. The first one comes from the field of compressive sensing (CS).
-CS is a signal processing technique which aims at signal reconstruction from a
+Compressive sensing (CS) is a signal processing technique which aims at signal reconstruction from a
 relatively small (sub-Nyquist limit) number of measurements
 \cite{carmi2014compressive}. It takes advantage of the approximate sparsity of
-real-world signals, that is, of the fact that many coefficients of such signals
+real-world signals, that is, that many coefficients of such signals
 are close to zero when represented in an appropriate basis. CS methods seek the
-true image signal $x\in\mathbb{R}^n$ from the following observation equation,
+true image signal $x\in\mathbb{R}^n$ from the observation equation,
 \begin{equation}\label{op:observation}
   y = R x = RU\eta,
 \end{equation}
@@ -240,12 +276,12 @@ Thus the rows of $R$ are a subset of the rows of an $m$ by $m$ identity matrix.
 Ideally, the sparsity basis and
 the measurement matrix $R$ will have a low \textit{mutual coherence}, a
 measure that describes how each of the rows of $R$ (the measurements)
-``spreads out'' in the domain of $U$ \cite{candes2007sparsity}. In practice,
-the Discrete Cosine Transform (DCT) keeps a good balance between achieving a low
-mutual coherence between the basis and the required structure of the AFM sensing
-matrices and providing a high sparsity of typical AFM sample images. In the following,
-we assume that $U^TU=I$, though in the simulation and experimental results, we take
-$U$ as the DCT basis.
+``spreads out'' in the domain of $U$ \cite{candes2007sparsity}.
+In the following, we assume that $U^TU=I$, though in the simulation and
+experimental results, we take $U$ as the Discrete Cosine Transform (DCT) basis.
+The DCT basis generally keeps a good balance between achieving a low
+mutual coherence between $U$ and the required structure of the AFM sensing
+matrices $R$ and providing a high sparsity of typical AFM sample images. 
 	
 Basis pursuit with denoising (BPDN) is one common realization of the CS-based
 reconstruction problem, and is given by the optimization
@@ -265,40 +301,43 @@ length of the $\mu$-paths is increased \cite{maxwell2014compressed} as these
 longer paths lead to increased mutual coherence between the measurement matrix
 $R$ and the sparsity basis $U$. However, longer $\mu$-paths means fewer
 tip re-engagements and thus shorter scan times.
-As a result, the second
-algorithm we consider is a new variant of BPDN that we term basis pursuit with
-vertical variation (BPVV). In order to mitigate the vertical artifacts, BPVV
-adds a vertical total variation penalty in the spatial domain to the
-optimization objective. That is, \eqref{op:bp} is modified to
 
+\todo{This development is way too long!}
+To mitigate these affects, we propose a new variant of BPDN that we term basis pursuit with
+vertical variation (BPVV). BPVV adds a vertical total variation penalty in the spatial domain to the
+optimization objective. That is, \eqref{op:bp} is modified to
+\todo{It has been my observation that some benefit is gained by including $D_h$, but weighting it less than $D_v$. Not sure if we should leave it in. If so, BPVV should be BPTV or something.}
 \begin{align}
-  \min_{x\in Q_p}~f(x) &= \min_{x\in Q_p} |U^Tx|_1 + \alpha_v|D_vx|_1 + \alpha_h|D_hx|_1  \label{op:bp_tv}
+  \min_{x\in Q_p}~f(x) &= \min_{x\in Q_p} \left\|U^Tx\right\|_1 + \alpha_v\left\|D_vx\right\|_1
+                         + \alpha_h\left\|D_hx\right\|_1  \label{op:bp_tv}
   % \text{subject to} &\, \| R x - y \|_2 < \sigma,
 \end{align}
 where ${D_v x=\text{vec}(\nabla_v X)}$ (resp., ${D_v x=\text{vec}(\nabla_v X)}$) is the
-discrete gradient in the vertical (resp., horizontal) direction and
-\begin{align*}
-  (\nabla_v X)_{i,j} = 
-  \begin{cases}
-    X_{i+1,j} - X_{i,j}, & 1\leq i<h,~ 1\leq j\leq s,\\
-    0, & \phantom{:}i=h,~\phantom{:::::} 1\leq j\leq s.
-  \end{cases}\\
-  (\nabla_h X)_{i,j} = 
-  \begin{cases}
-    X_{i,j+1} - X_{i,j}, & 1\leq i\leq h,~1\leq j<s \\
-    0, & \phantom{}1\leq i\leq,~\phantom{:::} j=s
-  \end{cases}
-\end{align*}
-\todo{This is way too long}
-In \eqref{op:bp_tv}, $\left \| D_v x \right \|_1$ (resp., $\left \| D_h x \right \|_1$) is the total variation (TV) of the signal in the vertical (resp., horizontal) direction. The parameters $\alpha_v$ and $\alpha_h$ are weighting parameters.
+discrete gradient in the vertical (resp., horizontal) direction (see, e.g., \cite[Section 6.1,]{becker_nesta_2011}). 
+% and
+% \begin{align*}
+%   (\nabla_v X)_{i,j} = 
+%   \begin{cases}
+%     X_{i+1,j} - X_{i,j}, & 1\leq i<h,~ 1\leq j\leq s,\\
+%     0, & \phantom{:}i=h,~\phantom{:::::} 1\leq j\leq s.
+%   \end{cases}\\
+%   (\nabla_h X)_{i,j} = 
+%   \begin{cases}
+%     X_{i,j+1} - X_{i,j}, & 1\leq i\leq h,~1\leq j<s \\
+%     0, & \phantom{}1\leq i\leq,~\phantom{:::} j=s
+%   \end{cases}
+% \end{align*}
+Thus, in \eqref{op:bp_tv}, $\left \| D_v x \right \|_1$ (resp., $\left \| D_h x \right \|_1$) is the total variation (TV) of the signal in the vertical (resp., horizontal) direction. The parameters $\alpha_v$ and $\alpha_h$ are weighting parameters.
+
 The description of BPVV in \eqref{op:bp_tv} can be viewed as the combination of CS
-and inpainting (described below), in which the first term seeks a sparse solution while the
+and inpainting, in which the first term seeks a sparse solution while the
 last two terms try to diffuse pixel information.
+\todo{When written this way, it seems that BP+VV/TV can could also be interpreted in the frameowrk of overcomplete dictionaries?\cite{candes_redundant_2011}. }
 To solve the optimization problem in \eqref{op:bp_tv} we use a (slight) extension to NESTA~\cite{becker_nesta_2011}. To that end, we re-write the cost $f(x)$ in \eqref{op:bp_tv} as
 \begin{equation*}
   f(x) = \max_{u\in Q_d} \left\langle u, Wx \right\rangle,\quad Q_d = \{u:~||u||_{\infty} \leq 1\}
 \end{equation*}
-where 
+where
 \begin{equation*}
 W = \begin{bmatrix}U&\alpha_hD^T_h&\alpha_vD^T_v \end{bmatrix}^T.
 %   W = \begin{bmatrix}U^T\\\alpha_hD_h\\\alpha_vD_v \end{bmatrix}.
@@ -320,7 +359,8 @@ where
     \text{sgn}(W x[i]), & \text{else}.
   \end{cases}
 \end{equation*}
-
+The optimization \eqref{op:bp_tv} may now be solved using Algorithm~\ref{ag:NESTA}.
+\todo{seems like a waste of space to reprint the algo, since its really no different than the reference}
 \begin{algorithm}
   \SetKwInOut{Initialize}{Initialize} \SetKwInOut{Output}{Output}
 		
@@ -344,22 +384,26 @@ where
     }
   \Output{Reconstruction $x_k$}
   \caption{NESTA algorithm}
-  \label{ag:BPTV}
+  \label{ag:NESTA}
 \end{algorithm}
+
+
 In the termination condition for the inner loop, $\Delta f_{\mu} = |f_{\mu}(x_k) - \bar{f}_{\mu}(x_k)|/\bar{f}_{\mu}(x_k)$ where
 \begin{equation}
 \bar{f}_{\mu}(x_k) = \frac{1}{\min\{10, k\}} \sum_{\ell=1}^{\min\{10,k\}} f_{\mu}(x_{k-\ell})
 \end{equation}
-The sub-problems in lines 6 and 7 have the form
-\begin{equation}
-  p = \textrm{arg } \min_{x\in Q_p} \frac{L}{2}||x - r|| + \langle g,~x - r\rangle
-\end{equation}
-for some vectors $g$ and $r$ and, as shown in~\cite{becker_nesta_2011}, have a closed-form solution given by
-\begin{align}
-  \lambda & = \textrm{max}(0, \sigma^{-1}\left| b - Rq\right| - L\\
-  q &= r - L^{-1}g\\
-  p &= \left(I - \frac{\lambda}{\lambda + L} R^TR\right)\left( \frac{\lambda}{L}R^Tb + q\right).
-\end{align}
+When $RR^T=I$, the sub-problems in lines 6 and 7 have a closed-form solution. Details can be found in~\cite{becker_nesta_2011}.
+
+% The sub-problems in lines 6 and 7 have the form
+% \begin{equation}
+%   p = \textrm{arg } \min_{x\in Q_p} \frac{L}{2}||x - r|| + \langle g,~x - r\rangle
+% \end{equation}
+% for some vectors $g$ and $r$ and, as shown in~\cite{becker_nesta_2011}, have a closed-form solution given by
+% \begin{align}
+%   \lambda & = \textrm{max}(0, \sigma^{-1}\left| b - Rq\right| - L\\
+%   q &= r - L^{-1}g\\
+%   p &= \left(I - \frac{\lambda}{\lambda + L} R^TR\right)\left( \frac{\lambda}{L}R^Tb + q\right).
+% \end{align}
 
 
 \noindent 
@@ -400,35 +444,30 @@ for some vectors $g$ and $r$ and, as shown in~\cite{becker_nesta_2011}, have a c
 \endgroup
 		
 A comparison between BPDN and BPVV is shown in
-Fig.~\ref{fig:BPTV_demonstration}. Images of three different samples (a circular
-grating, a square grating and a DNA image) were acquired using an Agilent 5500
+Fig.~\ref{fig:BPTV_demonstration}. Images of two different samples
+(a square grating and a DNA image) were acquired using an Agilent 5500
 AFM with a standard raster scan (first and fourth columns in the figure). These
 images were then resampled using a random $\mu$-path pattern of size 40 pixels
 with 25\% of the pixels sampled. Images were reconstructed using BPDN (second
 and fifth columns) and BPVV (third and sixth columns). The reconstruction
 results show the artifacts apparent in the BPDN reconstruction are largely
-mitigated using BPVV.
+mitigated using BPVV. Thus, in the remainder of the paper, we focus exclusively on BPVV.
 	
 
 % =========================================================================
 \section{Experimental setup} \label{sec:experimentalSetup}
 % =========================================================================
 Our experimental setup, illustrated in Fig.~\ref{fig:exp_setup_anderssonLab},
-consists of an Agilent 5400 AFM, a cRIO-9082 embedded controller (National
-Instruments), and a standard desktop computer. Through a breakout box, the
-Agilent 5500 provides access to the $x$, $y$, and $z$-axis measurements as well
-as the deflection signal (denoted in the following as $l$). When the Agilent
-default software (PicoView) is set to open-loop mode, a $\pm 10$ V input on the
-control box allows control of the $x$, $y$, and $z$-axis piezos. The N9524A
-piezoelectric scanner in the Agilent 5400 provides a maximum scan area of
-$90~\mu$m $\times$ 90~$\mu$m in the $xy$ (horizontal) direction and a range of
-$20~\mu$m in the $z$ (vertical) direction. Initial engagement of the tip to the
+consists of an Agilent 5400 AFM  retrofitted with an nPoint NPXY100A
+piezoelectric stage, a cRIO-9082 embedded controller (National
+Instruments), and a standard desktop computer. 
+
+Through a breakout box, the Agilent 5400 provides access to the $z$-axis deflection signal. When the Agilent software is set to open-loop mode, a $\pm10$~volt input on the standard control box allows control of the $z$-axis of the N9524a piezo scanner, which has a total range of 7 $\mu$m.
+Initial (course) engagement of the tip to the
 sample is performed using the PicoView software before control is handed over to
 the custom controllers.
-
-\todo{ add stuff about nPoint stage and C300.}
 	
-All control logic is programmed using LabVIEW 2017 and compiled to a Xilinx
+All control logic is programmed using LabVIEW 2019 and compiled to a Xilinx
 Spartan-6 LX150 Field Programmable Gate Array (FPGA) inside the cRIO-9082. The
 cRIO includes a 16-Bit, 100 kHz NI-9215 analog-to-digital input module and a
 16-Bit, 100 kHz NI-9263 digital-to-analog output module. All control loops are
@@ -438,10 +477,10 @@ implemented using a 25 kHz sampling rate.
 \section{Control}\label{sec:control}
 The control structure for each axis is different. For the $X$-axis, we use a
 state space controller. It is described fully in \cite{braker_afmmpc_2019} and
-achieves a bandwidth of about 110 Hz, which is approximately 1/3 of the $X$-axis
+achieves a bandwidth of about 150 Hz, which is over 1/3 of the first $X$-axis
 resonance at 350 Hz.
 
-The control law used for the $Y$-axis is a simple integral controllers of the
+The control law used for the $Y$-axis is a simple PI controller of the
 form
 \begin{equation}
   \frac{U(z)}{E_Y(z)}=D(z) = \frac{K_Iz}{z-1},
@@ -455,43 +494,49 @@ where, the error signal $E_Y(z) = Y(z)-R_Y$.
 The $Z$-axis control is slightly more complicated than the simple $Y$-axis
 integral controller and is described in the following subsection.
 \subsection{Z-axis Control Design}\label{sec:zaxis_cs_control}
-% In Section~\ref{sec:zaxis-dist}, we eliminated or reduced many of the
-% disturbances impinging on the $Z$-axis. This puts us in a position to
-% increase the bandwidth without introducing building dynamics into our
-% images.
 The main challenge to increasing the $Z$-axis bandwidth is the bending mode
 resonance at 215 Hz, which can be seen in the FRF from $u_Z$ to $Z_{d}$ in
 Fig.~\ref{fig:z_control} (blue curve). We address this by inverting the complex
-pole-zero pair at 215 Hz. There are multiple advantages to this method: first,
+pole-zero pair at 215 Hz. Thus, the entire $Z$-axis controller consists of a PI
+controller, $D_I(z)$ cascaded with the resonance inversion, $D^{-1}(z)$, as shown in Fig.~\ref{fig:afm_bd_dinv}. The DC-gain
+of $D$ is (approximately) the same as the DC-gain of the plant.
+The inclusion of $D^{-1}$ allows us to substantially increase the PI gain and
+achieve a closed-loop bandwidth of about 480 Hz. This is the black curve in Fig.~\ref{fig:z_control}.
+
+
+There are multiple advantages to this method: first,
 an inverse compensator still makes sense as a feedforward, open-loop compensator
-if the feedback path is broken. This, situation can and does occur during parts
-of the CS cycle. Second, as we discuss further below, the inverse compensator
-requires no tuning as it is defined only by a fit to the measured FRF and this
-can be almost completely automated.
+if the feedback path is broken. This situation can and does occur during parts
+of the CS cycle. Second, the inverse compensator
+requires no tuning as it is defined only by a fit to the measured FRF.
+
+One challenge to the inversion approach is both the system gain and resonance at 215~Hz
+changes not only day-to-day but also (and especially) when changing cantilevers and our inversion is not robust to this. However, because $D^{-1}$ is defined purely by a second order fit to a small band of the FRF, updating the compensator can be automated.
+\todo{What else to say here?}
+
 
 \begin{figure}[t!]
   \centering
   \includesvg[width=1\columnwidth]{figures/z_control_design.svg}
-  \caption{}
+  \caption{FRFs of the $Z$-axis. The blue curve is the open loop response from $u_Z$ to deflection. By inverting the bending mode at 215~Hz, we achieve the black curve in closed-loop.}
   \label{fig:z_control}
 \end{figure}
-The entire $Z$-axis controller consists of a PI controller, $D_I(z)$ cascaded
-with the resonance inversion, $D^{-1}(z)$. The inclusion of $D^{-1}$ allows us
-to substantially increase the PI gain and achieve a closed-loop bandwidth of
-about 480 Hz. This is the black curve in Fig.~\ref{fig:z_control}. For
-comparison, the red curve in Fig.~\ref{fig:z_control} shows the closed-loop FRF
-without the inverse compensator, which experiments indicate is unstable.
 
-One challenge to this approach is the system gain and resonance at 215~Hz
-changes not only day-to-day but also (and especially) when changing cantilevers.
-This is illustrated in Fig.~\ref{fig:z_evolution}, which shows the FRF near the
-mode for two three different cantilevers. Two are of the same make and model.
 
 \begin{figure*}
   \centering
   \includesvg[width=1\textwidth]{figures/MIMO_CL_uxuy.svg}
   \caption{MIMO closed and open loop FRFs, showing the dramatic affect on $G_{Z,u_X}$ and $G_{Z,u_Y}$ when the feedforward compensators are used for the $X$ and $Y$ axes.}
   \label{fig:mimo_frf_uxuy}
+\end{figure*}
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=0.75\textwidth]{figures/AFM_loop_Dinv_antiwup-crop.pdf}
+  \caption{Block diagram of the $Z$-axis control loop. The anti-windup is active
+    for decision index $i\in\{0,1,5\}$, which correspond to states such that
+    $r_Z=\rzup$.}
+  \label{fig:afm_bd_dinv}
 \end{figure*}
 
 % One cause for such different gains is variation in the length of the cantilever
@@ -633,6 +678,13 @@ mode for two three different cantilevers. Two are of the same make and model.
 % different AFM modes, such as tapping mode, simply by adjusting the signals and
 % control involved in the vertical loop.
 
+\subsection{Feedforward Control}\label{sec:ff_control}
+In our AFM, there is a strong coupling between the horizontal axes and vertical deflection. Fig.~\ref{fig:mimo_frf_uxuy} shows a MIMO FRF for $u_X$ and $u_Y$ to the outputs in each axis. The dotted black curves are the open loop responses and the dashed red curves are the nominal closed-loop responses. Though the $Z$-direction inputs are not shown, the closed loop responses include the $Z$-axis controller. Note that, especially for $H_{z,u_X}$, the closed-loop response is barely improved over the open loop response and in particular, there is a sharp resonance at 215~Hz and 505~Hz. To deal with this, we employ two different strategies for CS and raster scanning.
+
+For raster scanning, we use a truncated Fourier series, where each Fourier coefficient is scaled by the inverse of the closed-loop FRF at the corresponding frequency. We truncate this series such that the highest frequency is smaller than 200 Hz. See, e.g., \cite{clayton_review_2009} for more details on this strategy.
+
+For CS scanning, we insert a feed-forward filter with two notches, one at 215~Hz and the other at 505~Hz. We design a similar feed-forward filter for the $Y$-axis. Both filters are shown in Fig.~\ref{fig:mimo_frf_uxuy} as the solid pink curves and the resulting overall FRF is shown as the solid blue curves. Particularly for $H_{z,u_X}$, these filters result in a dramatic reduction in the cross coupling. A similar affect could be achieve by using a simple low-pass filter. However, to achieve the same 40~dB of attenuation of the mode at 215 Hz, would require, e.g., that a two-pole LPF have its cut-off frequency at about 20~Hz. 
+
 % =========================================================================
 \section{Implementation}\label{sec:implementation}
 % =========================================================================
@@ -643,191 +695,68 @@ Implementing the $\mu$-path scheme involves operating the AFM in several
 distinct stages. In the $xy$-direction, the system must transition from tracking
 a step command (in the transition to a new measurement location) to tracking a
 scan pattern. For our simple integral controller, this only involves changing
-the reference signals $x_{ref}$ and $y_{ref}$. In the $z$-direction, the system
+the reference signals $x_{ref}$ and $y_{ref}$.
+In the $z$-direction, the system
 must transition between tip descent, surface scanning, tip retraction, and
-maintaining a $z$-axis position. In addition, the $z$-piezo has to switch
-between position control and deflection control with two fixed reference values,
-$z_{ref}$ for position control and $l_{ref}$ for deflection control.
+maintaining a $z$-axis position.
+
 	
 Transition between, and operation in, these different stages is implemented as a
-simple state machine. The $x$, $y$, and $z$-axis control loops are operating in
-parallel and independently. The state machine consists of the following states.
+simple state machine, summarized in Table~\ref{tab:cs_tasks}. 
+In the following, $r_X$ and $r_Y$ refer to the references for the $X$ and $Y$ axes while $r_{Z,s}$ and $\rzup$ refer to the $Z$-axis setpoints during scanning and retraction, respectively.
 
-\begin{enumerate}
-\item \textbf{Initialization:} In this state, the user uses the PicoView
-  software to bring the tip to the sample with the stepper motor. Once the tip
-  is engaged in the surface, the user switches the control from PicoView to the
-  custom software in LabView. The system writes parameters including the
-  locations of $\mu$-paths from a desktop file to a host-to-FPGA FIFO (first in,
-  first out) buffer. Next, the closed-loop control of all the axes through the
-  FPGA is enabled and the system performs the following operations.
-    \todo{Shorten this. Sean, what was your trick to not indent enumerate?}
-  \begin{itemize}
-  \item \textbf{Read} the starting location of the first $\mu$-path from the
-    host-to-FPGA FIFO.
-  \item \textbf{Set} the $z$-axis loop to position control mode.
-  \item \textbf{Wait until} $|e_z(k)|$ reaches a settling criterion, then go to
-    state 2.
-  \end{itemize}
-\item \textbf{$xy$-axis move:} The system moves the tip to the next target
-  location.
-  \begin{itemize}
-  \item \textbf{Set} $x_{ref}$ and $y_{ref}$ to the beginning of the $\mu$-path.
-  \item \textbf{Wait until} $|e_x(k)|$ and $|e_y(k)|$ reach a settling
-    criterion, then go to state 3.
-  \end{itemize}
-\item \textbf{Tip engage:} The system drives the tip towards the sample surface.
-  Here, we use a smaller $K_I$ for the $z$-piezo, which results in a slow
-  descent and less windup while the tip is out of contact.
-  \begin{itemize}
-  \item \textbf{Set} the $z$-axis loop to deflection control mode.
-  \item \textbf{Wait until} $|e_z(k)|$ reaches a settling criterion, then
-    transition to state 4. \todo{Update this}
-  \end{itemize}
-\item \textbf{Scan:} In this state, the system moves the tip following the
-  trajectory of the current $\mu$-path.
-  \begin{itemize}
-  \item \textbf{Update} $x_{ref}$, and $y_{ref}$ iteratively to follow the
-    trajectory of the current $\mu$-path to the end. At the same time, write the
-    $x,y,z,$ and deflection measurements to an FPGA-to-host FIFO.
-  \item \textbf{Wait until} $|e_x(k)|$ and $|e_y(k)|$ reach the end of the
-    $\mu$-path,
-    % a settling criterion,
-    then go to state 5.
-  \end{itemize}
-  % \item \textbf{Transition decision:} The tip is at the end of the $\mu$-path
-  %   at this time. The location of the next $\mu$-path is read from the FIFO.
-  %   In
-  %   order to accelerate the scanning process, the decision to lift the tip or
-  %   not is made in this state. The time $t_{xy\_scan}$ it takes to scan to the
-  %   beginning of the next $\mu$-path is compared to
-  %   $t_{\textit{z}up}+t_{xy}+t_{\textit{z}down}$. If the former is larger,
-  %   then
-  %   go to state 6; otherwise, go to state 2.
-\item \textbf{Tip withdraw:} In this state, the system withdraws the tip in the
-  $z$-direction. A large $K_I$ is used for the $z$-piezo here in order to save
-  time.
-  \begin{itemize}
-  \item \textbf{Set} the $z$-axis loop to position control mode.
-  \item \textbf{Set} the $z$ setpoint at a specified distance off the surface.
-  \item \textbf{Wait until} $|e_z(k)|$ reaches a settling criterion, then go to
-    state 2.
-  \end{itemize}
-\end{enumerate}
-	
+\begin{table}\label{tab:cs_tasks}
+  \centering
+  \caption{Summary of the tasks for $\mu$-path scanning.}
+  \begin{tabular}{lccc}
+    state & $X$,$Y$ & $Z$ & next-state\\
+    \toprule
+    (1) $XY$-move & setpoint & $r_Z = \rzup$ & (2)\\
+    (2) tip-engage & setpoint & $r_Z = \rzs$ & (3)\\
+    (3) pre-scan & ramp & $r_Z = \rzs$ & (4)\\
+    (4) $\mu$-path scan & ramp & $r_Z = \rzs$ & (5)\\
+    (5) tip up & setpoint & $r_Z = \rzup$ & (1)\\
+  \end{tabular}
+\end{table}
 Two cycles of this sequential process are illustrated by the time series in
 Fig.~\ref{fig:mupathsignaltrajectory}. The following subsections describe in
 more detail several features of the CS scanning process.
-	
-
-% Several cycles of the CS-scheme are shown in
-% Fig.~\ref{fig:mupathsignaltrajectory}. Each of these differences is discussed
-% more fully in the following three subsections.
   
-\begin{figure*}[ht!]
-  \centering \includesvg[scale=0.85]{figures/cs_cycle.svg}
+\begin{figure}[t!]
+  \centering
+  \includesvg[width=1\columnwidth]{figures/cs_cycle.svg}
   \caption{Several CS cycles. Each state is indicated by color.}
   \label{fig:mupathsignaltrajectory}
-\end{figure*}
-\todo{Make fig \ref{fig:mupathsignaltrajectory}  smaller}
-
+\end{figure}
 
 \subsection{Cantilever does not need to fully disengage.}
 \todo{Dramatically truncate this section}
-In the initial implementation, we insisted that the during tip-retraction
+In our initial implementation \cite{braker_hardware_2018}, we insisted that the during tip-retraction
 (state-5), the cantilever tip should fully break contact with the surface. Here,
 we impose no such requirement. Rather, we change the $Z$-setpoint during
 tip-retraction to only pull away far enough that the deflection signal stays low
-(i.e., below the scanning setpoint), even while we run across the surface.
+(i.e., below the scanning setpoint), even while we run across the surface. We choose \rzup so that the interaction between the tip and sample becomes purely adhesive. In general, stable imaging in is not possible at \rzup and complete dis-engagement occasionally occurs.
 
-\textbf{Motivation} The motivation for this is two-fold. First, there is the
-obvious advantage that, by not pulling the tip so away, there is less distance
-to recover during the re-engagement. The original idea was to pull away from the
-surface far enough to disengage, then step back down towards the surface by some
-fraction of the step up. This proved impractical for several reasons. First, it
-requires the control system to be able to detect when disengagement has
-occurred. While preliminary experiments indicate it may be possible to achieve
-this by detecting a change in the derivative of the deflection signal, the
-actual value of the control signal which achieved dis-engagement proved to be
-highly variable (ranging from about 0.6 v to over 3 volts (210 nanometers to
-over a micron)) and sometimes saturating the control signal without
-disengagement. Experiments indicate that the dis-engagement point depends on (at
-least) the tip condition and the cantilever spring constant \footnote{The
-  numbers cited used a cantilever with $k\approx .1$~N/m. Experiments using a
-  cantilever with $k\approx 50$ N/m yielded much more consistent and much
-  smaller needed dis-engagement control signals. However, cantilevers with such
-  large spring constants are tapping-mode cantilevers, a mode which our AFM is
-  incapable of. Scanning in contact mode with such a cantilever implies that a
-  very large force is being applied to the sample.}.
+\todo{Not clear to me that friction is useful if I scan parallel to cantilever. Also not clear to me that the normal force and shear force are orthogonal concepts. Maybe the macroscopic analogy breaks down, but thinking of a knife pushed into a surface and then dragged...}
 
-Such large pull-away distances are problematic, especially for our AFM, which
-lacks a $Z$-position sensor. The difficulty is that when the tip is re-engaged
-with the sample from far away, this incites a large drift transient. This is
-shown in Fig.~\ref{fig:z_drift} under the panels labeled ``big lift''. By
-starting the re-engagement closer to the sample, this transient is much smaller.
-Without a $Z$-position sensor, we have to let this drift die out or it will
-corrupt the image. Thus, even if the step-up-down scheme could be made to work,
-the overall time would still be limited by this drift. I made some effort to fit
-an LTI model to the drift mode, so this affect could be removed in
-post-processing. Unfortunately, as we saw in
-Section~\ref{sec:modeling_remaining}, an LTI drift model does not adequately
-describe the drift transient, because the drift rate seems to depend on the
-control history.
-
-A third advantage is that, given the \emph{same} absolute starting height above
-the specimen, re-engagement is faster when the tip has not snapped free. The
-reason for this is that when the cantilever snaps away from the specimen
-surface, the deflection signal is essentially saturated. This gives the control
-loop an artificially small error signal, which leads to a very sluggish descent.
-
-
-\textbf{Justification} Ultimately the concern is damage to the sample and tip,
-which is caused by the force imparted by the cantilever probe
-\cite{clayton_review_2009}. The deflection signal, though un-calibrated (meaning
-it does not directly lead to a value in $kN$), is proportional to that force,
-because it is proportional to how much the cantilever is bent. I.e., a large
-(towards $+\infty$) deflection implies the spring force of the cantilever is
-pushing hard into the sample, thereby inducing damage. In a typical imaging
-scenario, we choose a deflection setpoint, (say $0.15$~[v], as in
-Fig.~\ref{fig:z_drift}), and have in some way decided that this is sufficient,
-all else being equal, to not damage things too much.
-
-Thus, rather than completely dis-engaging the tip from the surface, I propose to
-simply move the setpoint towards $-\infty$ during the $XY$-move. If this new
-setpoint is sufficiently far away, the deflection signal will stay below the
-scanning setpoint, which we had decided was a ''safe'' value. The change in
-setpoints is achieved via the multiplexer in Fig.~\ref{fig:afm_bd_dinv_final}
+The change in setpoints is achieved via the multiplexer in Fig.~\ref{fig:afm_bd_dinv}
 which selects either the scanning setpoint $r_{Z,s}$ or the retraction setpoint
 $r_{Z,\textrm{up}}$ based the current state.
+When dis-engagement does occur, the $Z$-axis control loop implements an anti-windup scheme.
 
-% \begin{figure}[ht!]
-%   \begin{subfigure}{.48\textwidth}
-%     \includesvg[width=1\textwidth]{figures/justify_small_lift.svg}
-%     \caption{ }
-%     % \label{fig: }
-%   \end{subfigure}
-%   \begin{subfigure}{.48\textwidth}
-%     \includesvg[width=01\textwidth]{figures/justify_small_lift_zoom.svg}
-%     \caption{ }
-%     % \label{fig: }
-%   \end{subfigure}
-%   \caption{One CS-cycle with different dis-engagement heights. (a) Full view.
-%     (b) Zoomed-in view. Note the drift transient in the left panel of (b). }
-%   \label{fig:z_drift}
-% \end{figure}
 
-This new scheme does not imply that the cantilever \emph{never} fully
-disengages. Occasionally, the new setpoint is far enough away that the probe
-does still snap away from the sample surface. When this happens, the integrator,
-$D_I(z)$, will windup. This happens because typically, the desired setpoint
-$r_{Z,\textrm{up}}$ is more negative than the free (disengaged) value of the
-deflection. Thus, the sensor signal is essentially saturated and no matter how
-far the $Z$-actuator tries to move, no change will result in the deflection,
-leading to windup and a control signal that exceeds the actuator bounds. To deal
-with this, we implement an anti-windup scheme for all states where
-$r_Z=r_{Z,\textrm{up}}$, i.e., states (0), (1) and (5). This is illustrated in
-the block diagram in Fig.~\ref{sec:modfied_cs_cycle}. During these states, the
-output of the accumulator is saturated before its own internal feedback.
+
+% Ultimately the concern is damage to the sample and tip,
+% which is caused by the force imparted by the cantilever probe
+% \cite{clayton_review_2009}. The deflection signal, though un-calibrated (meaning
+% it does not directly lead to a value in $kN$), is proportional to that force,
+% because it is proportional to how much the cantilever is bent. I.e., a large
+% (towards $+\infty$) deflection implies the spring force of the cantilever is
+% pushing hard into the sample, thereby inducing damage. In a typical imaging
+% scenario, we choose a deflection setpoint, (say $0.15$~[v], as in
+% Fig.~\ref{fig:z_drift}), and have in some way decided that this is sufficient,
+% all else being equal, to not damage things too much.
+
 
 \subsection{The pre-scan}
 \begin{figure*}
@@ -854,18 +783,23 @@ output of the accumulator is saturated before its own internal feedback.
     that the scan process itself reduces vibration in the $Z$-axis.}
   \label{fig:prescan_difference}
 \end{figure*}
-After the tip-descent, we begin scanning in a ``pre-scan'' phase (state (3)). To
+After the tip-descent, we begin scanning in a ``pre-scan'' phase (state (3)).
+During this phase, 
+
+To
 motivate, this consider Fig.~\ref{fig:prescan_difference}. The left panel
 represents what we call a ``$Z$''-bounce experiment, where the $XY$-stage stays
 motionless, but we repeatedly retract and re-engage the tip with specimen,
 exactly as we would in a CS scan. The right panel represents a single cycle from
 specialized CS pattern, where the $\mu$-paths are still 500 nm long, but the
-paths are separated by 0 pixels. In this case, the specimen is freshly cleaved
-mica. The goal here is to eliminate (i) any oscillations which arise from the
+paths are separated by 0 pixels.
+In this case, the specimen is freshly cleaved
+mica.
+The goal here is to eliminate (i) any oscillations which arise from the
 $XY$-move (which, as we will show in Section ~\ref{sec:need_mimo}, can be
 significant) and (ii) to have a perfectly flat surface to scan over so that
 there are as few disturbances as possible entering the control loop. Finally,
-the middle panel of Fig.~\ref{fig:prescan_difference} shows the PSDs of the left
+the left panel of Fig.~\ref{fig:prescan_difference} shows the PSDs of the left
 and right panels (but averaged over many similar cycles). Note that the PSD is
 only computed from the combination of the blue and turquoise signals.
 
@@ -880,121 +814,78 @@ can be computed from the steady-state error of the closed-loop system to a
 ramp), which means the pre-scan incurs an effective overhead of about 60 samples
 per $\mu$-path.
 
-The tip settling (pre-scan) period could likely be much shorter if we a had a
-$Z$-axis position sensor. Part of the reason it is so long is that, despite not
-pulling the cantilever completely away from the sample, there is still a small
-drift transient, as can be seen Fig.~\ref{fig:uz_prescan}. We would like to at
-least give the major part of that drift transient time to die out. With a
-position sensor, we would not care about the drift transient: the control signal
-drifts to keep the $Z$-position constant.
+% The tip settling (pre-scan) period could likely be much shorter if we a had a
+% $Z$-axis position sensor. Part of the reason it is so long is that, despite not
+% pulling the cantilever completely away from the sample, there is still a small
+% drift transient, as can be seen Fig.~\ref{fig:uz_prescan}. We would like to at
+% least give the major part of that drift transient time to die out. With a
+% position sensor, we would not care about the drift transient: the control signal
+% drifts to keep the $Z$-position constant.
 
-\section{Post-processing}\label{sec:post_process}
-Here, we discuss how we post-process the raster and CS images.
+% \section{Post-processing}\label{sec:post_process}
+% Here, we discuss how we post-process the raster and CS images.
 
-\subsection{Aligning images via cross-correlation}\label{sec:align}
-To get metrics that are meaningful in any sense, we need the master image and
-the comparee to be aligned. We take two steps to help ensure this. First, during
-each batch of images, the nPoint stage remains under closed loop control.
-Between images, the FPGA control loop idles in state-0, as discussed above in
-Section~\ref{sec:idle_0}. This was not necessary duing the initial
-implementation because then, the nPoint stage was controlled by the nPoint PI
-controller. While this helps things substantially, there is still an alignment
-issue between subsequent images, which I believe stems from the original Agilent
-piezo tube, which is a three axis tube. The $XY$-axes of the tube are
-uncontrolled during imaging, and in fact, after a firmware ``upgrade'', the
-option to close the $XY$-loop has been grayed out in the PicoView software.
+% \subsection{Aligning images via cross-correlation}\label{sec:align}
+% To get metrics that are meaningful in any sense, we need the master image and
+% the comparee to be aligned. We take two steps to help ensure this. First, during
+% each batch of images, the nPoint stage remains under closed loop control.
+% Between images, the FPGA control loop idles in state-0, as discussed above in
+% Section~\ref{sec:idle_0}. This was not necessary duing the initial
+% implementation because then, the nPoint stage was controlled by the nPoint PI
+% controller. While this helps things substantially, there is still an alignment
+% issue between subsequent images, which I believe stems from the original Agilent
+% piezo tube, which is a three axis tube. The $XY$-axes of the tube are
+% uncontrolled during imaging, and in fact, after a firmware ``upgrade'', the
+% option to close the $XY$-loop has been grayed out in the PicoView software.
 
-To help deal with this, we compare sub-slices of the master image and the
-comparee. The results in this chapter use a sub-image obtained by removing a
-border of 25 pixels from each edge. Thus, for the purposes of comparison, the
-original 512$\times$512 pixel image becomes a 462$\times$462 pixel image. Let
-$X$ represent the original, master image and ${\tilde X=X_{25:-25, 25:-25}}$,
-using Python notation. To find the correct subslice of the comparee, we use a
-two dimensional cross-correlation, which is defined as
-\begin{equation}
-  Z_{k,\ell} = \sum_{m=0}^{M-1}\sum_{n=0}^{N-1} \tilde{X}_{m-k, n-\ell}Y_{m-k, n-\ell}.
-\end{equation}
-where $Y$ is the comparee.
+% To help deal with this, we compare sub-slices of the master image and the
+% comparee. The results in this chapter use a sub-image obtained by removing a
+% border of 25 pixels from each edge. Thus, for the purposes of comparison, the
+% original 512$\times$512 pixel image becomes a 462$\times$462 pixel image. Let
+% $X$ represent the original, master image and ${\tilde X=X_{25:-25, 25:-25}}$,
+% using Python notation. To find the correct subslice of the comparee, we use a
+% two dimensional cross-correlation, which is defined as
+% \begin{equation}
+%   Z_{k,\ell} = \sum_{m=0}^{M-1}\sum_{n=0}^{N-1} \tilde{X}_{m-k, n-\ell}Y_{m-k, n-\ell}.
+% \end{equation}
+% where $Y$ is the comparee.
 
-The index of the maximum value of the matrix $Z$
-\begin{equation}
-  (i^*,j^*) = \textrm{arg~} \max_{i,j}Z_{i,j}
-\end{equation}
-corresponds to the lower left corner of the correct subslice. Thus, the
-comparisons will computed against $\tilde{Y} = Y_{i^*:i^*+487, j^*:j^*+487}$.
-For an example of this in action, see the Fig.~\ref{fig:baseline_errors} in the
-next section.
+% The index of the maximum value of the matrix $Z$
+% \begin{equation}
+%   (i^*,j^*) = \textrm{arg~} \max_{i,j}Z_{i,j}
+% \end{equation}
+% corresponds to the lower left corner of the correct subslice. Thus, the
+% comparisons will computed against $\tilde{Y} = Y_{i^*:i^*+487, j^*:j^*+487}$.
+% For an example of this in action, see the Fig.~\ref{fig:baseline_errors} in the
+% next section.
 
-Unfortunately, the mis-alignment is not simply constant offset, but rather
-drifts over time. This can be seen, e.g., in Fig.~\ref{fig:rast_aligned_0p5}.
-Thus, while the technique described here mitigates the issue, it does not fully
-eliminate the problem.
+% Unfortunately, the mis-alignment is not simply constant offset, but rather
+% drifts over time. This can be seen, e.g., in Fig.~\ref{fig:rast_aligned_0p5}.
+% Thus, while the technique described here mitigates the issue, it does not fully
+% eliminate the problem.
 
 
-\section{A New Metric}\label{sec:rdi}
-\begin{figure}[t!]
-  \centering
-  \includesvg[width=1\columnwidth]{figures/damage_illustration.svg}
-  \caption{The RDI metric defined in \eqref{eqn:RDI} penalizes everything in the
-    red shaded region and does not penalize anything in the un-shaded region.}
-  \label{fig:damage_illustrate}
-\end{figure}
-In Chapter~\ref{chap:cs_init} that we employed two metrics, the SSIM and PSNR,
-to compare different raster and CS scans to a master image. We took the master
-image as a raster scan taken at a slow rate. These metrics only assess the
-similarity of two images. However, in AFM imaging, pure image quality is not the
-only concern, particularly for delicate samples. What is needed is a figure of
-merit for how much damage was done to specimen during the imaging process. While
-this is not really a concern while imaging a hard calibration grating, it plays
-a prominent role biological samples~\cite{ando_highspeed_2008}. In general,
-damage occurs while scanning into an uphill region, which results in a positive
-deflection signal. The actual damage done by a given $Z_d$ will depend on the
-spring constant of the cantilever and the softness of the specimen. Nonetheless,
-we can use the positive deviations of $Z_d$ as a relative measure of damage
-between different scan speeds or scanning methods, for a given cantiliver and
-specimen. This motivates a metric we term the relative damage index (RDI), which
-we define as
-\begin{align}
-  \text{RDI} &= \frac{1}{T_s}\sum_{k\in I} \frac{1}{k} \left(Z_{d,k} - r_{Z,s}\right)^2 \label{eqn:RDI}\\
-  I &= \{k: k\in[0,~N-1],~ Z_{d,k}-r_{Z,s} > 0 \} \nonumber
-\end{align}
-where $N$ is the total number of samples in a given scan, $Z_{d,k}$ is the
-deflection signal at sample $k$ and $r_{Z,\textrm{s}}$ is the scanning setpoint.
-The RDI is basically the power in positive deflection. By excluding negative
-values of the deflection, we do not penalize the CS algorithm while it is
-re-engaging with the specimen \emph{unless} it overshoots the scanning setpoint,
-which we do want to penalize. This is illustrated in
-Fig.~\ref{fig:damage_illustrate}, which shows several CS cycles with a poorly
-tuned controller. Only deflection signals in the red-shaded region will be
-penalized by the RDI.
+\section{Metrics}\label{sec:rdi}
+In section~\ref{sec:results} we use three metrics to asses our results. The first two seek to quantify image quality of two images. 
+Define a master image as $X$ and a reconstruction or corrupted version as $Y$, with each having $s\times h=m$ pixels. Let $x=\textrm{vec}(X)$ and $y=\textrm{vec}(Y)$. Let $L$ be the dynamic range of the master image $x$. Then the peak signal to noise ratio (PSNR) is given by
+\begin{equation*}
+  \text{PSNR}(x,y) = 10\log_{10}\frac{L^2}
+  {\sqrt{\frac{1}{p^2} \sum_{i=1}^{m}( x_{i} - y_{i})^2 }}.
+\end{equation*}
 
-% Define the master image as $X$ and a reconstruction as $Y$, with each having
-% $p\times p=n$ pixels. Stack the columns of each into the vectors
-% $x, y\in\mathbb{R}^{n^2}$. Let $L$ be the dynamic range of the master image
-% $x$. Then the PSNR is given by
-% \begin{equation*}
-%   \text{PSNR}(x,y) = 10\log_{10}\frac{L^2}
-%   {\sqrt{\frac{1}{p^2} \sum_{i=1}^{n}( x_{i} - y_{i})^2}}.
-% \end{equation*}
-% The goal of the SSIM is to compare two image's structure, luminescence, and
-% contrast and is built up from the means ($\mu_x$ and $\mu_y$), standard
-% deviations ($\sigma_x$ and $\sigma_y$), and covariance ($\sigma_{xy}$) of the
-% image vectors $x$ and $y$. The variation of the SSIM used in this thesis is
-% defined as
-% \begin{equation*}
-%   \text{SSIM}(x,y) = \frac{(2\mu_x\mu_y + C_1)(2\sigma_{xy}+C_2)}
-%   {(\mu_x^2 + \mu_y^2 + C_1)(\sigma_x^2 + \sigma_y^2 + C_2)}
-% \end{equation*}
-% where the constants $C_1$ and $C_2$ are regularizing constants to prevent
-% singularity if, e.g., $\mu_x=\mu_y=0$. We use the default values suggested in
-% \cite{wang_image_2004} of $C_1=(0.01L)^2$ and ${C_2=(0.03L)^2}$, where again,
-% $L$ is the dynamic range. Both metrics have been used before to compare
-% \emph{simulations} of CS reconstruction in the context of AFM
-% \cite{oxvig_structure_2017, Luo_nano_2015}. We believe, however, that the
-% numbers presented here in Table~\ref{tab:metrics} should be interpreted with
-% some caution as it remains somewhat of an open question of how to best compare
-% \emph{experimental} images from AFM.
-\section{Limitations of SSIM and PSNR}\label{sec:psnr_ssim_limits}
+The goal of the SSIM is to compare two image's structure, luminescence, and contrast and is built up from the means ($\mu_x$ and $\mu_y$), standard deviations ($\sigma_x$ and $\sigma_y$), and covariance ($\sigma_{xy}$) of the image vectors $x$ and $y$.  
+The variation of the SSIM used in this paper is defined as
+\begin{equation*}
+  \text{SSIM}(x,y) = \frac{(2\mu_x\mu_y + C_1)(2\sigma_{xy}+C_2)}
+  {(\mu_x^2 + \mu_y^2 + C_1)(\sigma_x^2 + \sigma_y^2 + C_2)}
+\end{equation*}
+where the constants $C_1$ and $C_2$ are regularizing constants to prevent singularity if, e.g., $\mu_x=\mu_y=0$. We use the default values suggested in \cite{wang_image_2004} of $C_1=(0.01L)^2$ and ${C_2=(0.03L)^2}$, where again, $L$ is the dynamic range.
+
+In general two images which are identical will yield an infinite PSNR and an SSIM of 1.
+
+
+\todo{Should probably remove this entire section?}
+
 What kind of numbers are reasonable to expect from the SSIM and PSNR metrics? We
 mentioned in Chapter~\ref{chap:cs_init} that comparison of experimental images
 was difficult (particularly for our experimental setup) because, e.g., Agilent
@@ -1003,15 +894,7 @@ not try to tease apart to what extent the poor SSIM and PSNR numbers we reported
 were due to simply the difference in scanning speeds vs things like image
 mis-alignment.
 
-In this section, we explore this subject by comparing images obtained under the
-most ideal experimental conditions. Specifically, we look at the variation that
-exists when comparing multiple raster scans taken at the same rate. Second, we
-look at CS simulations where we sub-sample a raster image and reconstruct it.
-The goal is to provide context to the numbers in
-Section~\ref{sec:results:final}.
 
-Recall that two images which are identical will yield an infinite PSNR and an
-SSIM of 1.
 
 \begin{figure}[t!]
   % ------------ 1.0 Hz ---------------------
@@ -1063,51 +946,76 @@ misalignment is so bad, the situation can't get any worse). In the aligned 1~Hz
 images, our metrics are not only higher but also more consistent: and the SSIM
 lies between 0.7 and 0.73 and the PSNR ranges from 22.51 to 24.99.
 
-Due to this unfortunate drift, in Section~\ref{sec:results:final}, we will use a
-1~Hz scan as the baseline image. Hopefully, this will give a decent trade-off
-between having an image with minimal drift and scanning slowly enough that it
-accurately represents the sample grating. Due to the improved $Z$-axis
-bandwidth, a 1~Hz scan should still have better (or at least comparable) quality
-than the 0.25~Hz scan taken in Chapter~\ref{chap:cs_init}. Additionally,
-Fig.\ref{fig:rast_aligned_1} provides us with an (approximate) upper bound for
-our expectations when looking at the experimental results in
-Section~\ref{sec:results:final}.
+% Due to this unfortunate drift, in Section~\ref{sec:results:final}, we will use a
+% 1~Hz scan as the baseline image. Hopefully, this will give a decent trade-off
+% between having an image with minimal drift and scanning slowly enough that it
+% accurately represents the sample grating. Due to the improved $Z$-axis
+% bandwidth, a 1~Hz scan should still have better (or at least comparable) quality
+% than the 0.25~Hz scan taken in Chapter~\ref{chap:cs_init}. Additionally,
+% Fig.\ref{fig:rast_aligned_1} provides us with an (approximate) upper bound for
+% our expectations when looking at the experimental results in
+% Section~\ref{sec:results:final}.
 
+\subsection{A new metric}
+\begin{figure}[t!]
+  \centering
+  \includesvg[width=1\columnwidth]{figures/damage_illustration.svg}
+  \caption{The RDI metric defined in \eqref{eqn:RDI} penalizes everything in the
+    red shaded region and does not penalize anything in the un-shaded region.}
+  \label{fig:damage_illustrate}
+\end{figure}
 
+Th PSNR and SSIM metrics only assess the similarity of two images.
+However, in AFM imaging, pure image quality is not the
+only concern, particularly for delicate samples. What is needed is a figure of
+merit for how much damage was done to specimen during the imaging process. While
+this is not really a concern while imaging a hard calibration grating, it plays
+a prominent role biological samples~\cite{ando_highspeed_2008}. In general,
+damage occurs while scanning into an uphill region, which results in a positive
+deflection signal. The actual damage done by a given $Z_d$ will depend on the
+spring constant of the cantilever and the softness of the specimen. Nonetheless,
+we can use the positive deviations of $Z_d$ as a relative measure of damage
+between different scan speeds or scanning methods, for a given cantiliver and
+specimen. This motivates a metric we term the relative damage index (RDI), which
+we define as
+\begin{align}
+  \text{RDI} &= \frac{1}{T_s}\sum_{k\in I} \frac{1}{k} \left(Z_{d,k} - r_{Z,s}\right)^2 \label{eqn:RDI}\\
+  I &= \{k: k\in[0,~N-1],~ Z_{d,k}-r_{Z,s} > 0 \} \nonumber
+\end{align}
+where $N$ is the total number of samples in a given scan, $Z_{d,k}$ is the
+deflection signal at sample $k$ and $r_{Z,\textrm{s}}$ is the scanning setpoint.
+The RDI is basically the power in positive deflection. By excluding negative
+values of the deflection, we do not penalize the CS algorithm while it is
+re-engaging with the specimen \emph{unless} it overshoots the scanning setpoint,
+which we do want to penalize. This is illustrated in
+Fig.~\ref{fig:damage_illustrate}, which shows several CS cycles with a poorly
+tuned controller. Only deflection signals in the red-shaded region will be
+penalized by the RDI.
 
-\section{Experimental Results}\label{sec:results:final}
+\section{Experimental Results}\label{sec:results}
 We took scans of the CS-20NG sample grating over an area with holes on a 500 nm
-pitch. The holes are 20 nm deep. This is the same area imaged in
-Chapter~\ref{chap:cs_init}. We scanned 5 micron by 5 micron images with 512
+pitch. The holes are 20 nm deep.
+We scanned 5 micron by 5 micron images with 512
 lines each, yielding 512 by 512 pixel images. As before, the $\mu$-path scans
 are 500 nm long, as this allows us to work around the lack of a $Z$-axis sensor.
 This yields a $\mu$-path size of 52 pixels.
 
 The free value of the deflections signal was approximately -0.6 volts and we set
-the scanning reference to $r_{Z,s}=-0.3$~volts and the withdraw reference to
-$r_{Z,\textrm{up}}=-0.8$ volts. We set the $XY$-settle boundary to $\pm 0.05$
+the scanning reference to ${\rzs=-0.3}$~volts and the withdraw reference to
+${\rzup=-0.8}$ volts. We set the $XY$-settle boundary to $\pm 0.05$
 microns and required 20 samples within this boundary before moving to the
-$Z$-engage state. The pre-scan length was 150 time steps. The control for the
-$Z$-direction was as described in Chapter~\ref{chap:zaxis-improv}, and the
-$X$-direction control used the SLF state-space (CZ) design of
-Chapter~\ref{chap:mpc_slf} with one difference: the hysteresis model was
-re-tuned for a $\pm$ 7 micron area. The $Y$-axis used a simple integral
-controller, whose closed-loop FRF was shown in Fig.~\ref{fig:mimo_cl_frf}.
+$Z$-engage state. The pre-scan length was 150 time steps.
+
+\todo{Should I scan even faster??}
 
 For the raster scans, we took scans at 1.0~Hz, 4.0~Hz, 5.0~Hz, 8.0~Hz and
-10~Hz\footnote{For a 25~kHz sampling frequency, a 10~Hz raster scan at 512
-  pixels is close to the upper limit because each pixel will only have
-  approximately $ \frac{25000}{2\cdot 10 \cdot 512}\approx 2.4$ samples.}. The
-CS scans we taken with scan velocities equivalent to raster scans of 1.0~Hz,
-2.0~Hz, 4.0~Hz, 5.0~Hz and 8.0~Hz with sampling densities of 10~\% and 15~\%. As
-in Chapter~\ref{chap:cs_init}, the cantilever was an AppNano SICON, with a
+10~Hz.  The CS scans we taken with scan velocities equivalent to raster scans of 1.0~Hz,
+2.0~Hz, 4.0~Hz, 5.0~Hz and 8.0~Hz with sampling densities of 10~\% and 15~\%.
+The cantilever was an AppNano SICON, with a
 length of 450 microns and spring constant $k\in[0.02,~0.8]$~N/m.
 
-The CS scans were reconstructed with BPDN (see \eqref{eqn:bpdn}) using the
-log-barrier Newton method available in \texttt{L1c}\cite{L1c}. We set
-$\epsilon = 0.1$ and the data remained scaled in terms of volts. We then
-filtered the resulting image with the TV-denoising optimization described in
-Section~\ref{sec:tv_denoise} with $\mu=100$.
+The CS scans were reconstructed with BPVV. We set
+$\sigma = 0.1$, $\mu_f=$TKT, $\alpha_v=$TKT and $\alpha_h=$TKTKT. The data remained scaled in terms of volts.
 
 For the raster scans, we discard data from the re-trace and divided the
 remaining data into 512$\times$512 bins based on the \xc and \yc sensor
@@ -1126,34 +1034,25 @@ represent a range of $\pm$20 nm.
 
 
 The resulting images are shown in Fig.~\ref{fig:resultsF1_images}. The rows of
-pixels indicated by the red lines are shown Fig.~\ref{fig:pixel_rows}. Due to
-the improved $Z$-axis bandwidth and the image alignment issues described in
-Section~\ref{sec:psnr_ssim_limits}, we use the 1.0~Hz raster scan as the master
-image. Fig.~\ref{fig:resultsF1_errs} shows the error between aligned sub-slices
-of the 1.0~Hz image and the remaining scans. The sub-slice removed a 30 pixel
-boundary from each edge. Despite this alignment, the middle pixels tend to show
-a smaller error than those towards the top and bottom, which is similar to the
-affect observed before in Fig.~\ref{fig:baseline_errors}.
+pixels indicated by the red lines are shown Fig.~\ref{fig:pixel_rows}.
+
+% The sub-slice removed a 30 pixel
+% boundary from each edge. Despite this alignment, the middle pixels tend to show
+% a smaller error than those towards the top and bottom, which is similar to the
+% affect observed before in Fig.~\ref{fig:baseline_errors}.
 
 For each raster scan and each CS scan, we computed the SSIM, PSNR (both with
 default parameters) using the 1~Hz scan as the master and also computed the RDI
 metric. These are collected in table ~\ref{tab:rast_vs_cs_v1}.
 
-\begin{figure*}
-  \includesvg[scale=1]{figures/cs_raster_images_4-26-2019}
+\begin{figure}
+  \includesvg[width=1\columnwidth]{figures/cs_raster_images_4-26-2019}
   \caption{Raster and compressed sensing images of a 5 micron square area of the
     CS-20NG grating. All images are 512$\times$512 pixels. The rows of pixels
     indicated by the red line are shown in Fig.~\ref{fig:pixel_rows}.}
   \label{fig:resultsF1_images}
-\end{figure*}
+\end{figure}
 
-% \begin{figure*}
-%   \includesvg[scale=1]{figures/cs_raster_images_err_4-26-2019}
-%   \caption{Errors between aligned sub-slices of the 1.0~Hz raster image and
-%   the remaining scans. The original scans are shown in
-%   Fig.~\ref{fig:resultsF1_images}.}
-%   \label{fig:resultsF1_errs}
-% \end{figure*}
 
 
 \begin{table}[t!]
@@ -1198,23 +1097,25 @@ from Section \ref{sec:psnr_ssim_limits} plus or minus one standard deviation.
 This seems to be further evidence that, at least for our experimental setup,
 these numbers are not especially meaningful.
 
-\begin{figure*}[t!]
-  \begin{subfigure}{1\textwidth}
-    \includesvg[scale=1]{figures/cs_rast_time_vs_ssim_psnr.svg}
-    \caption{(left) SSIM as a function of total acquisition time. (right) PSNR
-      as a function of total acquisition time.}
-    \label{fig:time_ssim_psnr}
-  \end{subfigure}
+\begin{figure*}[h!]
+  % \begin{subfigure}{1\textwidth}
+  %   \includesvg[scale=1]{figures/cs_rast_time_vs_ssim_psnr.svg}
+  %   \caption{(left) SSIM as a function of total acquisition time. (right) PSNR
+  %     as a function of total acquisition time.}
+  %   \label{fig:time_ssim_psnr}
+  % \end{subfigure}
   
-  \begin{subfigure}{1\textwidth}
+  % \begin{subfigure}{1\textwidth}
     \includesvg[scale=1]{figures/cs_rast_damage.svg}
-    \caption{(left) RDI as a function of scan rate for raster scans and CS scans
+    % \caption{(left) RDI as a function of scan rate for raster scans and CS scans
+      % at 10\% and 15\% sampling. (right) RDI as a function of total imaging
+      % time.}
+  % \end{subfigure}
+\caption{(left) RDI as a function of scan rate for raster scans and CS scans
       at 10\% and 15\% sampling. (right) RDI as a function of total imaging
       time.}
     \label{fig:time_damage}
-  \end{subfigure}
-
-  \label{fig:time_vs_metrics}
+  % \label{fig:time_vs_metrics}
 \end{figure*}
 
 Where CS seems to really shine is if we look at the RDI for a given time or scan
@@ -1249,16 +1150,15 @@ advantage of CS over raster narrows. For example, the 4~Hz raster scan and 5~Hz,
 is a result of the constant overhead imposed by the engage/disengage and
 $XY$-move states in CS.
 
-\section{Conclusions}
+\section{Conclusions}\label{sec:conclusions}
 The main conclusion of this chapter is that with CS, it seems that we can
 acquire images faster yet (putatively) with less specimen damage than is
 possible with raster scanning, which we showed by introducing a new metric, the
 RDI. Of course, a natural criticism is that we did not validate the RDI against
 delicate specimens. We leave this as an area for future work.
 
-A more minor takeaway is that comparing experimental AFM images is difficult,
-especially for systems like ours which cannot control the $XY$-axes of the piezo
-tube.
+
+
 
 One final point that should be mentioned is that, by using an $X$-axis
 controller designed for tracking step inputs, we have unfairly disadvantaged
