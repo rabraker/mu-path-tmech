@@ -352,12 +352,18 @@ vertical variation (BPVV). BPVV adds a vertical total variation penalty in the s
 optimization objective. That is, \eqref{op:bp} is modified to
 \todo{It has been my observation that some benefit is gained by including $D_h$, but weighting it less than $D_v$. Not sure if we should leave it in. If so, BPVV should be BPTV or something.}
 \begin{align}
-  \min_{x\in Q_p}~f(x) &= \min_{x\in Q_p} \left\|U^Tx\right\|_1 + \alpha_v\left\|D_vx\right\|_1
-                         + \alpha_h\left\|D_hx\right\|_1  \label{op:bp_tv}
-  % \text{subject to} &\, \| R x - y \|_2 < \sigma,
+  \min_{x\in Q_p}~f(x) &= \min_{x\in Q_p} \left\|U^Tx\right\|_1
+                         + \alpha\left\|D_vx\right\|_1
+                         + \beta\left\|D_hx\right\|_1 \label{op:bp_tv}\\
+                       &=\min_{x\in Q_p} \left\|Wx\right\|_1 \label{op:bp_tvW}
+                         % \quad W = \begin{bmatrix}U&\alpha_hD^T_h&\alpha_vD^T_v \end{bmatrix}^T \nonumber
 \end{align}
-where ${D_v x=\text{vec}(\nabla_v X)}$ (resp., ${D_v x=\text{vec}(\nabla_v X)}$) is the
-discrete gradient in the vertical (resp., horizontal) direction (see, e.g., \cite[Section 6.1,]{becker_nesta_2011}). 
+where
+\begin{equation*}
+W = \begin{bmatrix}U&\alpha_hD^T_h&\alpha_vD^T_v \end{bmatrix}^T
+\end{equation*}
+with ${D_v x=\text{vec}(\nabla_v X)}$ (resp., ${D_v x=\text{vec}(\nabla_v X)}$) representing a 
+discrete gradient of a matrix in the vertical (resp., horizontal) direction (see, e.g., \cite[Section 6.1,]{becker_nesta_2011}). 
 % and
 % \begin{align*}
 %   (\nabla_v X)_{i,j} = 
@@ -371,20 +377,15 @@ discrete gradient in the vertical (resp., horizontal) direction (see, e.g., \cit
 %     0, & \phantom{}1\leq i\leq,~\phantom{:::} j=s
 %   \end{cases}
 % \end{align*}
-Thus, in \eqref{op:bp_tv}, $\left \| D_v x \right \|_1$ (resp., $\left \| D_h x \right \|_1$) is the total variation (TV) of the signal in the vertical (resp., horizontal) direction. The parameters $\alpha_v$ and $\alpha_h$ are weighting parameters.
+Thus, in \eqref{op:bp_tv}, $\left \| D_v x \right \|_1$ (resp., $\left \| D_h x \right \|_1$) is the total variation (TV) of the signal in the vertical (resp., horizontal) direction.
+The parameters $\alpha$ and $\beta$ are weighting parameters.
+The description of BPVV in \eqref{op:bp_tvW} can be interpreted as changing our assumption of sparsity in the DCT basis to assuming sparsity in an overcomplete dictionary \cite{candes_redundant_2011}.
+\todo{I believe this is correct: Sean/Yufan can you confirm or reject?}
 
-The description of BPVV in \eqref{op:bp_tv} can be viewed as the combination of CS
-and inpainting, in which the first term seeks a sparse solution while the
-last two terms try to diffuse pixel information.
-\todo{When written this way, it seems that BP+VV/TV can could also be interpreted in the frameowrk of overcomplete dictionaries?\cite{candes_redundant_2011}. }
-To solve the optimization problem in \eqref{op:bp_tv} we use a (slight) extension to NESTA~\cite{becker_nesta_2011}. To that end, we re-write the cost $f(x)$ in \eqref{op:bp_tv} as
+Moreover, when written as \eqref{op:bp_tvW}, the problem is in a form that may be solved with to NESTA~\cite{becker_nesta_2011}. For completeness, we give an overview here.
+To that end, we re-write the cost $f(x)$ in \eqref{op:bp_tvW} as
 \begin{equation*}
-  f(x) = \max_{u\in Q_d} \left\langle u, Wx \right\rangle,\quad Q_d = \{u:~||u||_{\infty} \leq 1\}
-\end{equation*}
-where
-\begin{equation*}
-W = \begin{bmatrix}U&\alpha_hD^T_h&\alpha_vD^T_v \end{bmatrix}^T.
-%   W = \begin{bmatrix}U^T\\\alpha_hD_h\\\alpha_vD_v \end{bmatrix}.
+  f(x) = \max_{u\in Q_d} \left\langle u, Wx \right\rangle,\quad Q_d = \{u:~||u||_{\infty} \leq 1\}.
 \end{equation*}
 
 One of the core features of the NESTA algorithm is to replace the non-smooth functional $f(x)$ with a smoothed approximation
