@@ -301,6 +301,50 @@ length of the $\mu$-paths is increased \cite{maxwell2014compressed} as these
 longer paths lead to increased mutual coherence between the measurement matrix
 $R$ and the sparsity basis $U$. However, longer $\mu$-paths means fewer
 tip re-engagements and thus shorter scan times.
+\noindent 
+\begingroup \setlength{\tabcolsep}{1pt}
+\begin{figure*}[h!]
+  \centering
+  \begin{tabular}{cccccc}
+    \textit{\small original image} & \textit{\small BPDN} & \textit{\small BPVV}
+    & \textit{\small detail of original} & \textit{\small detail of BPDN} & \textit{\small detail of BPVV} \\
+    % 
+    \includegraphics[width=0.16\textwidth]{figures-SBA/anothergrating_gt_framed}
+    %
+    & \includegraphics[width=0.16\textwidth]{figures-SBA/anothergrating_40mu}
+     % 
+    & \includegraphics[width=0.16\textwidth]{figures-SBA/anothergrating_bptv_40mu}
+     % 
+    & \includegraphics[width=0.16\textwidth]{figures-SBA/anothergrating_gt_zoomin}
+     % 
+    &\includegraphics[width=0.16\textwidth]{figures-SBA/anothergrating_40mu_zoomin}
+    %
+    &\includegraphics[width=0.16\textwidth]{figures-SBA/anothergrating_bptv_40mu_zoomin}\\
+    % 
+    % ------------------------------ Row  2 --------------------------------------------
+    \includegraphics[width=0.16\textwidth]{figures-SBA/dnaforbptv_gt_framed}
+    %
+    & \includegraphics[width=0.16\textwidth]{figures-SBA/dnaforbptv_40mu}
+    %
+    & \includegraphics[width=0.16\textwidth]{figures-SBA/dnaforbptv_bptv_40mu}
+    %
+    & \includegraphics[width=0.16\textwidth]{figures-SBA/dnaforbptv_gt_zoomin}
+    %
+    & \includegraphics[width=0.16\textwidth]{figures-SBA/dnaforbptv_40mu_zoomin}
+    %
+    & \includegraphics[width=0.16\textwidth]{figures-SBA/dnaforbptv_bptv_40mu_zoomin}
+  \end{tabular}
+  \caption{Reconstruction comparison between BPDN and BPVV. (first column)
+    Original raster-scanned image. (second column) BPDN reconstruction from
+    random, 40 pixel long $\mu$-paths with 25\% sampling. (third column) BPVV
+    reconstruction from the same sub-sampled data. (remaining columns)
+    Corresponding details from the red boxes indicated in the raster image. The
+    results show that BPVV reduces the artifacts arising from the horizontal
+    scans of the $\mu$-path pattern that appear in BPDN reconstructions.}
+  \label{fig:BPTV_demonstration}
+\end{figure*}
+\todo{Re-do this figure???}
+\endgroup
 
 \todo{This development is way too long!}
 To mitigate these affects, we propose a new variant of BPDN that we term basis pursuit with
@@ -342,6 +386,7 @@ where
 W = \begin{bmatrix}U&\alpha_hD^T_h&\alpha_vD^T_v \end{bmatrix}^T.
 %   W = \begin{bmatrix}U^T\\\alpha_hD_h\\\alpha_vD_v \end{bmatrix}.
 \end{equation*}
+
 One of the core features of the NESTA algorithm is to replace the non-smooth functional $f(x)$ with a smoothed approximation
 \begin{equation}
   f_{\mu} = \max_{u\in Q_d} \left\langle u,
@@ -360,6 +405,7 @@ where
   \end{cases}
 \end{equation*}
 The optimization \eqref{op:bp_tv} may now be solved using Algorithm~\ref{ag:NESTA}.
+
 \todo{seems like a waste of space to reprint the algo, since its really no different than the reference}
 \begin{algorithm}
   \SetKwInOut{Initialize}{Initialize} \SetKwInOut{Output}{Output}
@@ -387,7 +433,6 @@ The optimization \eqref{op:bp_tv} may now be solved using Algorithm~\ref{ag:NEST
   \label{ag:NESTA}
 \end{algorithm}
 
-
 In the termination condition for the inner loop, $\Delta f_{\mu} = |f_{\mu}(x_k) - \bar{f}_{\mu}(x_k)|/\bar{f}_{\mu}(x_k)$ where
 \begin{equation}
 \bar{f}_{\mu}(x_k) = \frac{1}{\min\{10, k\}} \sum_{\ell=1}^{\min\{10,k\}} f_{\mu}(x_{k-\ell})
@@ -406,43 +451,6 @@ When $RR^T=I$, the sub-problems in lines 6 and 7 have a closed-form solution. De
 % \end{align}
 
 
-\noindent 
-\begingroup \setlength{\tabcolsep}{1pt}
-\begin{figure*}[htbp]
-  \centering
-  \begin{tabular}{cccccc}
-    \textit{\small original image} & \textit{\small BPDN} & \textit{\small BPVV} & \textit{\small detail of original} & \textit{\small detail of BPDN} & \textit{\small detail of BPVV} \\
-    % \includegraphics[width=0.16\textwidth]{figures-SBA/circulargrating_gt_framed}
-    %                                & \includegraphics[width=0.16\textwidth]{figures-SBA/circulargrating_40mu}		
-    %                                                       & \includegraphics[width=0.16\textwidth]{figures-SBA/circulargrating_bptv_40mu}
-    %                                                                              & \includegraphics[width=0.16\textwidth]{figures-SBA/circulargrating_gt_zoomin}
-    %                                                                                                                   & \includegraphics[width=0.16\textwidth]{figures-SBA/circulargrating_mu40_zoomin}
-    %                                                                                                                                                    & \includegraphics[width=0.16\textwidth]{figures-SBA/circulargrating_bptv_40mu_zoomin}\\	
-    \includegraphics[width=0.16\textwidth]{figures-SBA/anothergrating_gt_framed}
-                                   & \includegraphics[width=0.16\textwidth]{figures-SBA/anothergrating_40mu}		
-                                                          & \includegraphics[width=0.16\textwidth]{figures-SBA/anothergrating_bptv_40mu}	
-                                                                                 & \includegraphics[width=0.16\textwidth]{figures-SBA/anothergrating_gt_zoomin}	
-                                                                                                                      & \includegraphics[width=0.16\textwidth]{figures-SBA/anothergrating_40mu_zoomin}
-                                                                                                                                                       & \includegraphics[width=0.16\textwidth]{figures-SBA/anothergrating_bptv_40mu_zoomin}	\\
-    \includegraphics[width=0.16\textwidth]{figures-SBA/dnaforbptv_gt_framed}
-                                   & \includegraphics[width=0.16\textwidth]{figures-SBA/dnaforbptv_40mu}		
-                                                          & \includegraphics[width=0.16\textwidth]{figures-SBA/dnaforbptv_bptv_40mu}	
-                                                                                 & \includegraphics[width=0.16\textwidth]{figures-SBA/dnaforbptv_gt_zoomin}	
-                                                                                                                      & \includegraphics[width=0.16\textwidth]{figures-SBA/dnaforbptv_40mu_zoomin}
-                                                                                                                                                       & \includegraphics[width=0.16\textwidth]{figures-SBA/dnaforbptv_bptv_40mu_zoomin}		
-  \end{tabular}
-  \caption{Reconstruction comparison between BPDN and BPVV. (first column)
-    Original raster-scanned image. (second column) BPDN reconstruction from
-    random, 40 pixel long $\mu$-paths with 25\% sampling. (third column) BPVV
-    reconstruction from the same sub-sampled data. (remaining columns)
-    Corresponding details from the red boxes indicated in the raster image. The
-    results show that BPVV reduces the artifacts arising from the horizontal
-    scans of the $\mu$-path pattern that appear in BPDN reconstructions.}
-  \label{fig:BPTV_demonstration}
-\end{figure*}
-\todo{Re-do this figure???}
-\endgroup
-		
 A comparison between BPDN and BPVV is shown in
 Fig.~\ref{fig:BPTV_demonstration}. Images of two different samples
 (a square grating and a DNA image) were acquired using an Agilent 5500
@@ -453,6 +461,11 @@ and fifth columns) and BPVV (third and sixth columns). The reconstruction
 results show the artifacts apparent in the BPDN reconstruction are largely
 mitigated using BPVV. Thus, in the remainder of the paper, we focus exclusively on BPVV.
 	
+\begin{figure}[ht!]
+  \includegraphics[width=1\columnwidth]{figures/exp_setup.pdf}
+  \caption{Schematic diagram of the expermental AFM setup.}
+  \label{fig:exp_setup}
+\end{figure}
 
 % =========================================================================
 \section{Experimental setup} \label{sec:experimentalSetup}
@@ -461,6 +474,7 @@ Our experimental setup, illustrated in Fig.~\ref{fig:exp_setup},
 consists of an Agilent 5400 AFM  retrofitted with an nPoint NPXY100A
 piezoelectric stage, a cRIO-9082 embedded controller (National
 Instruments), and a standard desktop computer. 
+
 
 Through a breakout box, the Agilent 5400 provides access to the $z$-axis deflection signal. When the Agilent software is set to open-loop mode, a $\pm10$~volt input on the standard control box allows control of the $z$-axis of the N9524a piezo scanner, which has a total range of 7 $\mu$m.
 Initial (course) engagement of the tip to the
@@ -472,11 +486,7 @@ Spartan-6 LX150 Field Programmable Gate Array (FPGA) inside the cRIO-9082. The
 cRIO includes a 16-Bit, 100 kHz NI-9215 analog-to-digital input module and a
 16-Bit, 100 kHz NI-9263 digital-to-analog output module. All control loops are
 implemented using a 25 kHz sampling rate.
-\begin{figure}
-  \includegraphics[width=1\columnwidth]{figures/exp_setup.pdf}
-  \caption{Schematic diagram of the expermental AFM setup.}
-  \label{fig:exp_setup}
-\end{figure}
+
 % =========================================================================
 \section{Control}\label{sec:control}
 The control structure for each axis is different. For the $X$-axis, we use a
@@ -685,9 +695,9 @@ changes not only day-to-day but also (and especially) when changing cantilevers 
 \subsection{Feedforward Control}\label{sec:ff_control}
 In our AFM, there is a strong coupling between the horizontal axes and vertical deflection. Fig.~\ref{fig:mimo_frf_uxuy} shows a MIMO FRF for $u_X$ and $u_Y$ to the outputs in each axis. The dotted black curves are the open loop responses and the dashed red curves are the nominal closed-loop responses. Though the $Z$-direction inputs are not shown, the closed loop responses include the $Z$-axis controller. Note that, especially for $H_{z,u_X}$, the closed-loop response is barely improved over the open loop response and in particular, there is a sharp resonance at 215~Hz and 505~Hz. To deal with this, we employ two different strategies for CS and raster scanning.
 
-For raster scanning, we use a truncated Fourier series, where each Fourier coefficient is scaled by the inverse of the closed-loop FRF at the corresponding frequency. We truncate this series such that the highest frequency is smaller than 200 Hz. See, e.g., \cite{clayton_review_2009} for more details on this strategy.
-
 For CS scanning, we insert a feed-forward filter with two notches, one at 215~Hz and the other at 505~Hz. We design a similar feed-forward filter for the $Y$-axis. Both filters are shown in Fig.~\ref{fig:mimo_frf_uxuy} as the solid pink curves and the resulting overall FRF is shown as the solid blue curves. Particularly for $H_{z,u_X}$, these filters result in a dramatic reduction in the cross coupling. A similar affect could be achieve by using a simple low-pass filter. However, to achieve the same 40~dB of attenuation of the mode at 215 Hz, would require, e.g., that a two-pole LPF have its cut-off frequency at about 20~Hz. 
+
+For raster scanning, we use a truncated Fourier series, where each Fourier coefficient is scaled by the inverse of the closed-loop FRF at the corresponding frequency. We truncate this series such that the highest frequency is smaller than 200 Hz. See, e.g., \cite{clayton_review_2009} for more details on this strategy. Note that these scheme implies that the effective bandwidth of the $X$-axis controller is higher while raster scanning than while CS-scanning. On the other hand, it also implies that the for faster scan rates, fewer Fourier coefficients are used, and so the approximation to a triangle wave is worse.
 
 % =========================================================================
 \section{Implementation}\label{sec:implementation}
@@ -1077,37 +1087,40 @@ metric. These are collected in table ~\ref{tab:rast_vs_cs_v1}.
 
 Unfortunately, the SSIM and PSNR metrics are not particularly illuminating. It
 is easiest to see this by plotting PSNR and SSIM against total acquisition time,
-which is shown in Fig.~\ref{fig:time_ssim_psnr}. There are several
+which is shown in Fig.~\ref{fig:time_ssim} and ~\ref{fig:time_psnr}. There are several
 inconsistencies. First, the 4~Hz raster scan has the lowest PSNR of all the
 raster scans, while the 8~Hz scan has the highest. Second, all of the 15\% CS
 scans except the 8~Hz version have as good or better SSIM numbers than the
 raster scans. It makes no sense for a CS scan at a 5~Hz rate to have better
-quality than a raster scan at a 5~Hz rate. It is interesting to also compare
-these numbers to the batch of 1~Hz raster scans we compared in
-Section~\ref{sec:psnr_ssim_limits}. The blue shaded bands of
-Figs~\ref{fig:time_ssim_psnr} indicate the mean of the SSIM and PSNR metrics
-from Section \ref{sec:psnr_ssim_limits} plus or minus one standard deviation.
-This seems to be further evidence that, at least for our experimental setup,
-these numbers are not especially meaningful.
+quality than a raster scan at a 5~Hz rate.
+
+% It is interesting to also compare
+% these numbers to the batch of 1~Hz raster scans we compared in
+% Section~\ref{sec:limits}.
+% The blue shaded bands of
+% Figs~\ref{fig:time_ssim_psnr} indicate the mean of the SSIM and PSNR metrics
+% from Section \ref{sec:psnr_ssim_limits} plus or minus one standard deviation.
+% This seems to be further evidence that, at least for our experimental setup,
+% these numbers are not especially meaningful.
 
 \begin{figure*}[h!]
-  % \begin{subfigure}{1\textwidth}
-  %   \includesvg[scale=1]{figures/cs_rast_time_vs_ssim_psnr.svg}
-  %   \caption{(left) SSIM as a function of total acquisition time. (right) PSNR
-  %     as a function of total acquisition time.}
-  %   \label{fig:time_ssim_psnr}
-  % \end{subfigure}
-  
-  % \begin{subfigure}{1\textwidth}
-    \includesvg[scale=1]{figures/cs_rast_damage.svg}
-    % \caption{(left) RDI as a function of scan rate for raster scans and CS scans
-      % at 10\% and 15\% sampling. (right) RDI as a function of total imaging
-      % time.}
-  % \end{subfigure}
-\caption{(left) RDI as a function of scan rate for raster scans and CS scans
-      at 10\% and 15\% sampling. (right) RDI as a function of total imaging
-      time.}
+  \begin{subfigure}{0.33\textwidth}
+    \includesvg[width=\textwidth]{figures/cs_rast_time_vs_ssim.svg}
+    \caption{}
+    \label{fig:time_ssim}
+  \end{subfigure}
+  \begin{subfigure}{0.33\textwidth}
+    \includesvg[width=1\textwidth]{figures/cs_rast_time_vs_psnr.svg}
+    \caption{}
+    \label{fig:time_psnr}
+  \end{subfigure}
+  \begin{subfigure}{0.33\textwidth}
+    \includesvg[width=\textwidth]{figures/cs_rast_damage.svg}
+    \caption{}
     \label{fig:time_damage}
+  \end{subfigure}
+\caption{Metrics for raster scan and $\mu$-path scans at 10\% and 15\% sampling. (a) SSIM as a function of total acquisition time. (b) PSNR  as a function of total acquisition time. (c) RDI as a function of total acquisition time.}
+    
   % \label{fig:time_vs_metrics}
 \end{figure*}
 
@@ -1153,19 +1166,7 @@ delicate specimens. We leave this as an area for future work.
 
 
 
-One final point that should be mentioned is that, by using an $X$-axis
-controller designed for tracking step inputs, we have unfairly disadvantaged
-raster scanning. Due the faster harmonic decay of a triangle wave compared to a
-series of step inputs, in principle a higher bandwidth $X$-axis controller could
-be used for raster scanning because the cross-coupling concerns discussed in
-Section~\ref{sec:cz_cr_cs} would play a smaller role. While this will be
-discussed a bit further in the next chapter, for now we note that the most
-prominent way the lower bandwidth $X$-axis controller has limited raster
-scanning is by chopping off the left and right edges of the images, which can be
-seen in Fig.~\ref{fig:resultsF1_images} and \ref{fig:pixel_rows}. However, the
-metrics are computed on a subslice that is large enough to eliminate this
-region. Additionally, the RDI is mostly affected by the $Z$-direction bandwidth.
-    
+
 
 %%%%%%%%% then the Bibliography, if any %%%%%%%%%
 % \bibliographystyle{plain} % or "siam", or "alpha", etc.
