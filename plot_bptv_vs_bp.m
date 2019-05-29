@@ -2,6 +2,7 @@ clear
 addpath('functions/')
 clc
 
+
 im_og = double(rgb2gray(imread('dnn_dna_gt.png')));
 im_og = im_og / max(im_og(:));
 n = 256;
@@ -18,7 +19,7 @@ Ut_fun = @(x) dct(x);
 E_fun = @(x) CsTools.E_fun1(x, pix_idx);
 Et_fun = @(x) CsTools.Et_fun1(x, pix_idx, n, n);
 
-%%
+
 opts = NESTA_opts('U', U_fun, 'Ut', Ut_fun, 'alpha_v', 0.25, 'alpha_h', 1,...
     'verbose', 5, 'TolVar', 1e-5);
 
@@ -39,7 +40,7 @@ opts = NESTA_opts('U', U_fun, 'Ut', Ut_fun, 'alpha_v', 0, 'alpha_h', 0,...
 x_bp = NESTA_mine(E_fun, Et_fun, b, mu, delta, opts);
 X_bp = CsTools.pixvec2mat(x_bp, n);
 
-%%
+
 [Fig_dna_og, ax_dna_og] = imshow_local(im_og, 1);
 [Fig_dna_bp, ax_dna_bp] = imshow_local(X_bp, 2);
 [Fig_dna_bptv, ax_dna_bptv] = imshow_local(X_bptv, 3);

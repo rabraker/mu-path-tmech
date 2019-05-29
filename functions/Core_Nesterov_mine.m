@@ -60,17 +60,17 @@ function [xk,niter] = Core_Nesterov_mine(...
 
 
     %---- Init Variables
-    
+
+    % Evidently, ||D||_2 ~= sqrt(8), and ||Dv||_2 ~= 2, ||Dh||_2 ~=2
+    % In general, we take L=||W||_2^2, so when we multiply alp*D,
+    % we need alp^2.
     % Lmu = (opts.normU + alp_v^2*4 + alp_h^2*4)/mu; %Lmu;
     Lmu = opts.normU/mu;
     n = floor(sqrt(N));
     
     if opts.alpha_v > 0
         alp_v = opts.alpha_v;
-        
-        % Evidently, ||D||_2 ~= sqrt(8), and ||Dv||_2 ~= 2, ||Dh||_2 ~=2
-        % In general, we take L=||W||_2^2, so when we multiply alp*D,
-        % we need alp^2.
+        Lmu = Lmu + alp_v^2 * 4;
 
         Dv = alp_v*spdiags([reshape([-ones(n-1,n); zeros(1,n)],N,1) ...
             reshape([zeros(1,n); ones(n-1,n)],N,1)], [0 1], N, N);
@@ -80,6 +80,7 @@ function [xk,niter] = Core_Nesterov_mine(...
     
     if opts.alpha_h > 0
         alp_h = opts.alpha_h;%.125;
+        Lmu = Lmu + alp_h^2 * 4;
         Dh = alp_h*spdiags([reshape([-ones(n,n-1) zeros(n,1)],N,1) ...
             reshape([zeros(n,1) ones(n,n-1)],N,1)], [0 n], N, N);
     else
