@@ -8,14 +8,36 @@ classdef PATHS
   methods (Static)
     function [ PATH ] = exp()
       % PATH constant to where all experimental data is stored for the
-      % MPC journal paper.
       if ispc
         PATH = 'Z:\afm-cs';
       else
         PATH = '/media/labserver/afm-cs';
       end
     end
+    function path = tmech_fig()
+       path = '/home/arnold/gradschool/publications/afm-cs-tmech/latex/figures/'; 
+    end
+    function path = tmech_table()
+      path = '/home/arnold/gradschool/publications/afm-cs-tmech/latex/tables';
+    end
     
+    function path = cs_final_fig()
+      path = '/home/arnold/gradschool/thesis/plots-afm-cs-final/figures';
+    end
+    function path = cs_final_table()
+      path = '/home/arnold/gradschool/thesis/plots-afm-cs-final/tables';
+    end
+    function path = thesis_root()
+      path = '/home/arnold/gradschool/thesis';
+    end
+    function path = defense_fig()
+      path = '/home/arnold/gradschool/thesis/defense/presentation/figures';
+    end
+    function [ PATH ] = step_exp()
+      % PATH constant to where all experimental data for step experiments 
+      % (for the x-y plane) is stored for the.
+        PATH = fullfile(PATHS.exp(), 'step-exps');
+    end
     
     function PATH = cs_image_data(size, date_dir)
       PATH = fullfile(PATHS.exp(), 'imaging', 'cs-imaging', size, date_dir);
@@ -66,6 +88,10 @@ classdef PATHS
         mkdir(folder_path);
       end
       PATH = fullfile(folder_path, fname);
+    end
+    
+    function PATH = thesis_fig_final
+      PATH = fullfile(PATHS.thesis_root, 'plots-afm-cs-final', 'figures');
     end
     
     function PATH = note_fig(fname)
