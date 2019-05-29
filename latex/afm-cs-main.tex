@@ -406,7 +406,6 @@ where
 \end{equation*}
 The optimization \eqref{op:bp_tv} may now be solved using Algorithm~\ref{ag:NESTA}.
 
-\todo{seems like a waste of space to reprint the algo, since its really no different than the reference}
 \begin{algorithm}
   \SetKwInOut{Initialize}{Initialize} \SetKwInOut{Output}{Output}
 		
@@ -432,6 +431,8 @@ The optimization \eqref{op:bp_tv} may now be solved using Algorithm~\ref{ag:NEST
   \caption{NESTA algorithm}
   \label{ag:NESTA}
 \end{algorithm}
+  \todo{seems like a waste of space to reprint the algo, since its really no different than the reference}
+
 
 In the termination condition for the inner loop, $\Delta f_{\mu} = |f_{\mu}(x_k) - \bar{f}_{\mu}(x_k)|/\bar{f}_{\mu}(x_k)$ where
 \begin{equation}
@@ -493,6 +494,8 @@ The control structure for each axis is different. For the $X$-axis, we use a
 state space controller. It is described fully in \cite{braker_afmmpc_2019} and
 achieves a bandwidth of about 150 Hz, which is over 1/3 of the first $X$-axis
 resonance at 350 Hz.
+\todo{Not sure how to give a deeper summary without getting to much into the weeds.}
+
 
 The control law used for the $Y$-axis is a simple PI controller of the
 form
@@ -745,14 +748,17 @@ more detail several features of the CS scanning process.
 \end{figure}
 
 \subsection{Cantilever does not need to fully disengage.}
-\todo{Dramatically truncate this section}
+\todo{Not clear to me yet that friction is useful if I scan parallel to cantilever.
+  Also not clear to me that the normal force and shear force are orthogonal concepts.
+  Maybe the macroscopic analogy breaks down, but thinking of a knife pushed into a surface and then dragged...}
 In our initial implementation \cite{braker_hardware_2018}, we insisted that the during tip-retraction
 (state-5), the cantilever tip should fully break contact with the surface. Here,
 we impose no such requirement. Rather, we change the $Z$-setpoint during
 tip-retraction to only pull away far enough that the deflection signal stays low
-(i.e., below the scanning setpoint), even while we run across the surface. We choose \rzup so that the interaction between the tip and sample becomes purely adhesive. In general, stable imaging in is not possible at \rzup and complete dis-engagement occasionally occurs.
+(i.e., below the scanning setpoint), even while we run across the surface.
+We choose \rzup so that the interaction between the tip and sample becomes purely adhesive.
+In general, stable imaging in is not possible at \rzup and complete dis-engagement occasionally occurs.
 
-\todo{Not clear to me that friction is useful if I scan parallel to cantilever. Also not clear to me that the normal force and shear force are orthogonal concepts. Maybe the macroscopic analogy breaks down, but thinking of a knife pushed into a surface and then dragged...}
 
 The change in setpoints is achieved via the multiplexer in Fig.~\ref{fig:afm_bd_dinv}
 which selects either the scanning setpoint $r_{Z,s}$ or the retraction setpoint
@@ -879,8 +885,11 @@ per $\mu$-path.
 
 
 \section{Metrics}\label{sec:rdi}
-In section~\ref{sec:results} we use three metrics to asses our results. The first two seek to quantify image quality of two images. 
-Define a master image as $X$ and a reconstruction or corrupted version as $Y$, with each having $s\times h=m$ pixels. Let $x=\textrm{vec}(X)$ and $y=\textrm{vec}(Y)$. Let $L$ be the dynamic range of the master image $x$. Then the peak signal to noise ratio (PSNR) is given by
+In section~\ref{sec:results} we use three metrics to asses our results.
+The first two seek to quantify image quality of two images. 
+Define a master image as $X$ and a reconstruction or corrupted version as $Y$, with each having $s\times h=m$ pixels.
+Let $x=\textrm{vec}(X)$ and $y=\textrm{vec}(Y)$. Let $L$ be the dynamic range of the master image $x$.
+Then the peak signal to noise ratio (PSNR) is given by
 \begin{equation*}
   \text{PSNR}(x,y) = 10\log_{10}\frac{L^2}
   {\sqrt{\frac{1}{p^2} \sum_{i=1}^{m}( x_{i} - y_{i})^2 }}.
@@ -892,13 +901,11 @@ The variation of the SSIM used in this paper is defined as
   \text{SSIM}(x,y) = \frac{(2\mu_x\mu_y + C_1)(2\sigma_{xy}+C_2)}
   {(\mu_x^2 + \mu_y^2 + C_1)(\sigma_x^2 + \sigma_y^2 + C_2)}
 \end{equation*}
-where the constants $C_1$ and $C_2$ are regularizing constants to prevent singularity if, e.g., $\mu_x=\mu_y=0$. We use the default values suggested in \cite{wang_image_2004} of $C_1=(0.01L)^2$ and ${C_2=(0.03L)^2}$, where again, $L$ is the dynamic range.
-
+where the constants $C_1$ and $C_2$ are regularizing constants to prevent singularity if, e.g., $\mu_x=\mu_y=0$.
+We use the default values suggested in \cite{wang_image_2004} of $C_1=(0.01L)^2$ and ${C_2=(0.03L)^2}$, where again, $L$ is the dynamic range.
 In general two images which are identical will yield an infinite PSNR and an SSIM of 1.
 
 \subsection{Limitations of SSIM and PSNR}\label{sec:limits}
-\todo{Should probably remove this entire section?}
-
 What kind of numbers are reasonable to expect from the SSIM and PSNR metrics?
 To answer this question, we compare a sequence of 1~Hz raster scans.
 In this experiment, (Fig. \ref{fig:rast_unaligned_1}) we took 6 raster scans of the same 5 by 5 micron
@@ -909,6 +916,7 @@ image and the remaining 6 images.
 Temporally, the images are order left-to-right and top-to-bottom.
 Thus we can see, both visually and via the metrics, that in Fig.~\ref{fig:rast_unaligned_1} the mis-alignment
 grows over time. 
+\todo{Should probably remove this entire section?}
 
 Taking the first scan as the master, we compute the PSNR and SSIM
 metrics. The best PSNR here is 16.57 and the worst is 9.02.
