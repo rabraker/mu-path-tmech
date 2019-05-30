@@ -1056,20 +1056,19 @@ For each raster scan and each CS scan, we computed the SSIM, PSNR (both with
 default parameters) using the 1~Hz scan as the master and also computed the RDI
 metric. These are collected in table ~\ref{tab:rast_vs_cs_v1}.
 
-\begin{figure}
-  \includesvg[width=1\columnwidth]{figures/cs_raster_images_4-26-2019}
+\begin{figure*}
+  \includesvg[width=1\textwidth]{figures/cs_raster_images_4-26-2019}
   \caption{Raster and compressed sensing images of a 5 micron square area of the
     CS-20NG grating. All images are 512$\times$512 pixels. The rows of pixels
     indicated by the red line are shown in Fig.~\ref{fig:pixel_rows}.}
   \label{fig:resultsF1_images}
-\end{figure}
+\end{figure*}
 
 
 
 \begin{table}[t!]
   \centering
-  \caption{Performance metrics for the scans taken on 4-26-2019. All CS images
-    filtered with TV denoising, $\mu$=100.}
+  \caption{Performance metrics for raster and CS scans.}
   \begin{tabular}{cccccc}
     \input{tables/cs_raster_table_4-26-2019_muInf_dct2.tex}
   \end{tabular}
@@ -1087,7 +1086,7 @@ metric. These are collected in table ~\ref{tab:rast_vs_cs_v1}.
 \end{table}
 
 \begin{figure*}[t!]
-  \includesvg[width=1\textwidth]{figures/cs_raster_pixel_rows_3-20-2019.svg}
+  \includesvg[width=1\textwidth]{figures/cs_raster_pixel_rows_4-26-2019.svg}
   \caption{Rows of pixels, as indicated by the red lines in
     Fig.~\ref{fig:resultsF1_images}. For clarity, not all images are included.}
   \label{fig:pixel_rows}
@@ -1163,6 +1162,14 @@ advantage of CS over raster narrows. For example, the 4~Hz raster scan and 5~Hz,
 15\% CS scan have comparable RDI, but now CS is only about 6 times faster. This
 is a result of the constant overhead imposed by the engage/disengage and
 $XY$-move states in CS.
+
+\subsection{Comparison to sub-line sampling}
+Compressed sensing so far does not look good if we compare to subline sampling. The left panel of Fig.~\ref{fig:subline} shows a 5~Hz raster scan taken with 128 lines which takes approximately 25 seconds. We use that data to produce a 128 by 512 pixel image, and then use basic linear interpolation to fill produce a 512 by 512 pixel image. The CS image with the nearest acquisition time (15\% at 4~Hz) is shown in the right panel. The raster scan looks better and has basically the same RDI, and better SSIM and PSNR numbers. We conclude there is no reason to use CS.
+\begin{figure}
+  \includesvg[width=1\columnwidth]{figures/subline_vs_cs.svg}
+  \caption{(left) A 128 line raster scan interpolated onto 512 lines. (left) the CS scan with the nearest time.}
+  \label{fig:subline}
+\end{figure}
 
 \section{Conclusions}\label{sec:conclusions}
 The main conclusion of this chapter is that with CS, it seems that we can
