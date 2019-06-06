@@ -10,3 +10,7 @@ svg-inkscape/
 *.m~
 latex/afm-cs-main.pdf
 *.m#
+*.fls
+*.fdb_latexmk
+latex/IEEEtran/
+*.zip

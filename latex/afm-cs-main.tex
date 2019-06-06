@@ -474,7 +474,6 @@ consists of an Agilent 5400 AFM  retrofitted with an nPoint NPXY100A
 piezoelectric stage, a cRIO-9082 embedded controller (National
 Instruments), and a standard desktop computer. 
 
-
 Through a breakout box, the Agilent 5400 provides access to the $z$-axis deflection signal. When the Agilent software is set to open-loop mode, a $\pm10$~volt input on the standard control box allows control of the $z$-axis of the N9524a piezo scanner, which has a total range of 7 $\mu$m.
 Initial (course) engagement of the tip to the
 sample is performed using the PicoView software before control is handed over to
@@ -485,6 +484,7 @@ Spartan-6 LX150 Field Programmable Gate Array (FPGA) inside the cRIO-9082. The
 cRIO includes a 16-Bit, 100 kHz NI-9215 analog-to-digital input module and a
 16-Bit, 100 kHz NI-9263 digital-to-analog output module. All control loops are
 implemented using a 25 kHz sampling rate.
+
 
 % =========================================================================
 \section{Control}\label{sec:control}
@@ -1120,22 +1120,26 @@ quality than a raster scan at a 5~Hz rate.
 % these numbers are not especially meaningful.
 
 \begin{figure*}[h!]
-  \begin{subfigure}{0.33\textwidth}
-    \includesvg[width=\textwidth]{figures/cs_rast_time_vs_ssim.svg}
+  \centering
+  \begin{subfigure}{1\textwidth}
+    \centering
+    \includesvg[width=0.8\textwidth]{figures/cs_rast_time_vs_ssim.svg}
     \caption{}
     \label{fig:time_ssim}
   \end{subfigure}
-  \begin{subfigure}{0.33\textwidth}
-    \includesvg[width=1\textwidth]{figures/cs_rast_time_vs_psnr.svg}
+  \begin{subfigure}{1\textwidth}
+    \centering
+    \includesvg[width=0.8\textwidth]{figures/cs_rast_time_vs_psnr.svg}
     \caption{}
     \label{fig:time_psnr}
   \end{subfigure}
-  \begin{subfigure}{0.33\textwidth}
-    \includesvg[width=\textwidth]{figures/cs_rast_damage.svg}
+  \begin{subfigure}{1\textwidth}
+    \centering
+    \includesvg[width=0.8\textwidth]{figures/cs_rast_damage.svg}
     \caption{}
     \label{fig:time_damage}
   \end{subfigure}
-\caption{Metrics for raster scan and $\mu$-path scans at 10\% and 15\% sampling. (a) SSIM as a function of total acquisition time. (b) PSNR  as a function of total acquisition time. (c) RDI as a function of total acquisition time.}
+\caption{Metrics for raster scan and $\mu$-path scans at 10\% and 15\% sampling. (a) SSIM as a function of total acquisition time. (b) PSNR  as a function of total acquisition time. (c) RDI as a function of total acquisition time. The scan rate is indicated by color while the scan style is indicated by marker style.}
     
   % \label{fig:time_vs_metrics}
 \end{figure*}
