@@ -488,7 +488,7 @@ implemented using a 25 kHz sampling rate.
 
 % =========================================================================
 \section{Control}\label{sec:control}
-The control structure for each axis is similar and essentially consists of a set of filters in series with a PI controller. The open-loop frequency response for the $Z$-axis is shown in Fig.~\ref{fig:z_control} (red curve) and in Fig.~\ref{fig:mimo_frf_uxuy} for the $X$ and $Y$ axes (black curves). The first resonance of each axis is the bending mode. For the $Z$ axis, this resonance is at 215~Hz and at approximately 350~Hz for the $X$ and $Y$ axes.
+The control structure for each axis is similar and essentially consists of a set of filters in series with a PI controller. The open-loop frequency response for the $Z$-axis is shown in Fig.~\ref{fig:z_control} (black curve) and in Fig.~\ref{fig:mimo_frf_uxuy} for the $X$ and $Y$ axes (red curves). The first resonance of each axis is the bending mode. For the $Z$ axis, this resonance is at 215~Hz and at approximately 350~Hz for the $X$ and $Y$ axes.
 
 The filter for the $Z$-axis controller inverts the complex-conjugate pole-zero pair at 215~Hz. This allows the gain of the PI controller to be increased substantially. The closed-loop achieves a bandwidth of about 450~Hz, as shown by the black curve in Fig.~\ref{fig:z_control}.
 

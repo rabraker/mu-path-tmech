@@ -40,8 +40,8 @@ F2 = mkfig(2, 3.48, 2); clf
 
 
 h1 = frf_bode_mag(Loop, ss_data.freq_s, ha, 'Hz', 'Color', [0.35, 0.75, 0.93], 'LineWidth', 1.2);
-h2 = frf_bode_mag(G_frf, ss_data.freq_s, ha, 'Hz', 'r', 'LineWidth', 1.2);
-h4 = frf_bode_mag(Hyr, ss_data.freq_s, ha, 'Hz', '-k', 'LineWidth', 1.2);
+h2 = frf_bode_mag(G_frf, ss_data.freq_s, ha, 'Hz', '-k', 'LineWidth', 1.2);
+h4 = frf_bode_mag(Hyr, ss_data.freq_s, ha, 'Hz', '-r', 'LineWidth', 1.2);
 
 ylim(ha(1), [-40, 20]);
 
