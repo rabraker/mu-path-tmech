@@ -88,9 +88,10 @@ function [xk,niter] = Core_Nesterov_mine(...
     end
     
     residuals = zeros(maxiter, 2);
-    st = sprintf('Iter |     fmu     |  Rel. Vartn fmu |  Residual  |');
-    fprintf('%s\n%s\n', st, repmat('-', 1, length(st)));
-
+    if opts.Verbose > 0
+        st = sprintf('Iter |     fmu     |  Rel. Vartn fmu |  Residual  |');
+        fprintf('%s\n%s\n', st, repmat('-', 1, length(st)));
+    end
     % ---------------------------- MAIN ITERATION -------------------------- %
     max_means = 10;
     fmu_s = zeros(max_means+1, 1);
