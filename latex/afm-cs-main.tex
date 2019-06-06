@@ -1,12 +1,6 @@
 \documentclass[twocolumn,oneside]{IEEEtran/IEEEtran}
 % \documentclass[defaultstyle,11pt]{IEEETran}
-% Lucy says to look at:
-% float_page_fraction
-% tex_page_fraction
-% https://tex.stackexchange.com/questions/35125/how-to-use-the-placement-options-t-h-with-figures#35130
-% \renewcommand\floatpagefraction{0.5} %% default: 0.5
-% \renewcommand\topfraction{0.7} % default: 0.7
-% \renewcommand*\textfraction{.05}
+
 \usepackage{showframe}
 \usepackage{amssymb}		% to get all AMS symbols
 \usepackage{amsthm}
@@ -20,7 +14,7 @@
 \usepackage{booktabs}
 % \usepackage{amsthm}
 \usepackage[percent]{overpic}
-\usepackage{caption}
+%\usepackage{caption}
 \usepackage{subcaption}
 \usepackage{xspace}
 \usepackage{enumitem}
@@ -305,7 +299,7 @@ $R$ and the sparsity basis $U$. However, longer $\mu$-paths means fewer
 tip re-engagements and thus shorter scan times.
 \noindent 
 \begingroup \setlength{\tabcolsep}{1pt}
-\begin{figure*}[h!]
+\begin{figure*}[ht!]
   \centering
   \begin{tabular}{cccccc}
     \textit{\small original image} & \textit{\small BPDN} & \textit{\small BPVV}
@@ -1066,7 +1060,7 @@ metric. These are collected in table ~\ref{tab:rast_vs_cs_v1}.
 % \end{figure*}
 
 \begin{figure*}
-  \includesvg[width=1\linewidth]{figures/cs_raster_images_6-5-2019.svg}
+  \includesvg[width=0.95\linewidth]{figures/cs_raster_images_6-5-2019.svg}
   \caption{Raster and compressed sensing images of a 5 micron square area of the
      CS-20NG grating. All images are 512$\times$512 pixels: the raster images marked as 64 and 128 lines have been interpolated. The rows of pixels
      indicated by the red line are shown in Fig.~\ref{fig:pixel_rows}.}
@@ -1119,7 +1113,7 @@ quality than a raster scan at a 5~Hz rate.
 % This seems to be further evidence that, at least for our experimental setup,
 % these numbers are not especially meaningful.
 
-\begin{figure*}[h!]
+\begin{figure*}[ht!]
   \centering
   \begin{subfigure}{1\textwidth}
     \centering
