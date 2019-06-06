@@ -3,9 +3,7 @@ clear
 %%
 close all
 addpath functions
-% addpath ~/matlab/dependencies/l1c/
-% addpath ~/matlab/dependencies/l1c/lib
-% addpath cs_simulations/splitBregmanROF_mex/
+
 % initialize paths.
 % init_paths();
 figbase = 20;
@@ -54,7 +52,7 @@ cs_files = {...
 rast_exps = {};
 for k=1:length(raster_files)
   raster_paths = get_raster_paths(dat_root, raster_files{k});
-  rast_exps{k} = RasterExp(raster_paths, 'load_full', true, 'reload_raw', true);
+  rast_exps{k} = RasterExp(raster_paths, 'load_full', true, 'reload_raw', false);
   if rast_exps{k}.time_total == 0
       rast_exps{k}.time_total = rast_exps{k}.samps_per_period*rast_exps{k}.npix*AFM.Ts;
   end
@@ -69,7 +67,7 @@ use_ze = false;
 x1s = [25,   27,  27,  27,  27, 27, 6*4];
 x2s = [493, 493, 493, 495, 494, 494, 122*4]; 
 figbase = 10;
-for k=7:length(rast_exps)
+for k=1:length(rast_exps)
     if k==7
         rast_exps{k}.bin_raster_really_slow(@detrend, use_ze, 512);
         rast_exps{k}.pix_mat = rast_exps{k}.interp_y(512);
@@ -92,6 +90,16 @@ for k=7:length(rast_exps)
   plot_raster_data(rast_exps{k}.pix_mat_pinned, figbase*k, stit)
 
 end
+
+% save the first image so we can simulate reconstruction in plot_bptv_vs_bp.m
+%%
+img = rast_exps{1}.pix_mat_pinned;
+img = img - min(img(:));
+img = (img/max(img(:)) ) * 255/1.7;
+img = uint8(img);
+
+imwrite(img, 'cs20ng.png')
+
 %%
 for k=1:length(rast_exps)
   rast_exps{k}.save()
