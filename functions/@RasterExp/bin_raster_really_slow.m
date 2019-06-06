@@ -48,7 +48,8 @@ function [ self] = bin_raster_really_slow(self, line_detrender, use_error, npix_
   end
   
   xpix = self.npix_x; 
-  ypix = self.npix_y; 
+  ypix = self.npix_y_og; 
+  
     
   if use_error
       udat = self.ze; 
@@ -62,8 +63,8 @@ function [ self] = bin_raster_really_slow(self, line_detrender, use_error, npix_
 
   x_dat_pix = self.x * self.volts2pix_x;
   
-  self.pix_mask = zeros(ypix, xpix);
-  self.pix_mat = zeros(ypix, xpix);
+  pix_mask = zeros(ypix, xpix);
+  pix_mat = zeros(ypix, xpix);
   
   samps_per_line = self.samps_per_line;
   samps_per_period = self.samps_per_period;
@@ -95,14 +96,22 @@ function [ self] = bin_raster_really_slow(self, line_detrender, use_error, npix_
       ind_x = find(x_dat_j >= i_col & x_dat_j < i_col+1);
       u_mean_ij = mean(U_dat_j(ind_x));
       if ~isnan(u_mean_ij)
-        self.pix_mat(j_row+1, i_col+1) = u_mean_ij;
-        self.pix_mask(j_row+1, i_col+1) = 1;
+        pix_mat(j_row+1, i_col+1) = u_mean_ij;
+        pix_mask(j_row+1, i_col+1) = 1;
       else
         %             keyboard
       end
       
     end
     
+  end
+  
+  if use_error
+      self.pix_mat_ze = pix_mat;
+      self.pix_mask_ze = pix_mask;
+  else
+      self.pix_mat = pix_mat;
+      self.pix_mask = pix_mask;
   end
 
 end

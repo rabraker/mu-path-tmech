@@ -14,10 +14,7 @@ classdef CsExp < handle
     npix;
     width;
     channel_map;
-    Img_raw;
-    Img_smp1d;
-    Img_bp;
-    pix_mask;
+   
     Gz;
     meta_exp;
     meta_in;
@@ -27,6 +24,14 @@ classdef CsExp < handle
     gg;
     cs_paths;
 
+    pix_mat_raw_uz;
+    pix_mat_uz;
+    pix_mask_uz;
+
+    pix_mat_raw_ze;
+    pix_mask_ze;
+    pix_mat_ze;
+    
     UserData = [];
   end
 
@@ -51,20 +56,37 @@ classdef CsExp < handle
       if ~opts.reload_raw && mat_exists == 2
         fprintf('loading from mat file...\n')
         self = self.load_mat(cs_paths.data_path_mat, opts.load_full);
-        fprintf('done\n')
+        fprintf('\bdone\n')
       else
         fprintf('loading from raw data...\n')
         self = self.load_raw_data(cs_paths, opts);
-        fprintf('done\n')
+        fprintf('\bdone\n')
       end
 
       self.time_total = length(self.x)*self.Ts;
     end
+    function rate = equiv_raster_rate(self)
+       rate = self.meta_in.tip_velocity * 0.5 / self.meta_in.width; 
+    end
+    function N = N_scans(self)
+        N = length(self.idx_state_s.scan);
+    end
+    
+    function [tmu_overhead_avg, tscan_avg] = get_mean_mu_overhead(self)
+    % [tscan_avg, tmu_overhead_avg] = get_mean_state_times(self)
+       N = self.N_scans();
+       times = self.get_state_times();
+       % compute the average move time:
+       tscan_avg = times.scan/N;
+       tmu_overhead_avg = (times.move + times.tdown + times.tsettle + times.tup)/N;
+    end
+    
     function frac = sub_sample_frac(self)
       N = self.npix^2;
-      n_samps = sum(self.pix_mask(:));
+      n_samps = sum(self.pix_mask_uz(:));
       frac = n_samps/N;
     end
+    
     function [t_cycle_est, t_connect] = estimate_mpt_connect_savings(self)
       N_up = length(self.idx_state_s.tup);
       N_scan = length(self.idx_state_s.scan);
@@ -226,7 +248,7 @@ classdef CsExp < handle
     [sig_psd, freqs, k] = psd_from_intervals(self, signal, state, ...
                                              starts, ends)
     % Defined in process_cs_data.m
-    [pix_mask] = process_cs_data(self, verbose, figs, use_ze, register_uzk)
+    [pix_mask] = process_cs_data(self, use_ze, register_uzk)
       
     function [CS_idx, start_idx, end_idx] = find_cycle_idx(self, time)
     % find the CS-cycle index corresponding to time. A single cycle is defined
@@ -439,29 +461,8 @@ classdef CsExp < handle
 
     end % bin_data_into_pix
 
-    function solve_smp1d(self, recalc)
-      if nargin <2
-        recalc = false;
-      end
-      if sum(self.Img_smp1d(:)) ~= 0 && ~recalc
-        fprintf('SMP1D already solved. Skipping\n')
-        return
-      end
 
-      [n,m] = size(self.Img_raw);
-
-      tic
-      samp_frac = sum(sum(self.pix_mask))/(n*m);
-      reduce_frac = 0.1;  %It's my understanding Yufan says 1/10 of sub-sample fraction.
-      maxiter = round(samp_frac*reduce_frac*n*m);
-      fprintf('sample fraction: %.2f     max-iter: %d\n', samp_frac, maxiter);
-      self.Img_smp1d = SMP_1D(self.Img_raw, self.pix_mask, maxiter);
-      time_smp = toc;
-      fprintf('Total smp-1d solution time: %.1f\n', time_smp);
-    end
-
-
-    function solve_bp(self, recalc, use_2d, opts)
+    function solve_bp(self, recalc, use_2d, use_ze, opts)
     % Solve the Basis Pursuit problem in either 1d or 2d. If in 1D, use the mex
     % function. 
     % Options
@@ -475,20 +476,28 @@ classdef CsExp < handle
       if nargin <3
         use_2d = false;
       end
+      if nargin < 4
+          use_ze = false;
+      end
+      assert(islogical(use_ze));
+      
+      if use_ze
+          error('solve_bp cannot yet solve with self.pix_mat_ze')
+      end
       if ~recalc && ~isempty(self.Img_bp) && sum(self.Img_bp(:)) ~= 0
         warning(['BP solution already calculated, so skipping optimization.',...
           'Pass recalc flag to recompute']);
         return;
       end
       
-      [n m] = size(self.Img_raw);
+      [n m] = size(self.pix_mat_raw_uz);
       
       if ~exist('opts', 'var')
         opts = l1qc_dct_opts('verbose', 2, 'l1_tol', 0); %'epsilon', 0.01);
       end
-      pix_idx = find(CsTools.pixmat2vec(self.pix_mask) > 0.5);
+      pix_idx = find(CsTools.pixmat2vec(self.pix_mask_uz) > 0.5);
       % b, set of measurements. have to remove all the spots we didn't sample.
-      b = CsTools.pixmat2vec(self.Img_raw);
+      b = CsTools.pixmat2vec(self.pix_mat_raw_uz);
       b = b(pix_idx);
       min_b = min(b);
       max_b = max(b);
@@ -502,10 +511,10 @@ classdef CsExp < handle
         % eta_vec = CsTools.l1qc_logbarrier(x0, A, At, b, opts);
         % self.Img_bp = idct2(CsTools.pixvec2mat(eta_vec, n))*max_diff_b;
         [x_est, LBRes] = l1qc_dct(n, m, b, pix_idx, opts);
-        self.Img_bp = CsTools.pixvec2mat(x_est*max_diff_b, n);
+        self.pix_mat_uz = CsTools.pixvec2mat(x_est*max_diff_b, n);
       else
         [x_est, LBRes] = l1qc_dct(n*m, 1, b, pix_idx, opts);
-        self.Img_bp = CsTools.pixvec2mat(x_est*max_diff_b, n);
+        self.pix_mat_uz = CsTools.pixvec2mat(x_est*max_diff_b, n);
       end
       
       time_bp = toc;
@@ -513,7 +522,7 @@ classdef CsExp < handle
       fprintf('BP Time: %f\n', time_bp);
       
     end
-function solve_nesta(self, recalc, use_2d, opts)
+function solve_nesta(self, recalc, use_2d, use_ze, opts)
     % Solve the Basis Pursuit problem in either 1d or 2d, using NESTA (my version) 
     % To set opts, use NESTA_opts.m
     % Options
@@ -527,15 +536,31 @@ function solve_nesta(self, recalc, use_2d, opts)
       if nargin <3
         use_2d = false;
       end
+      if nargin < 4
+          use_ze = false;
+      end
+      assert(islogical(use_ze));
+      
+      if use_ze
+          img_raw = self.pix_mat_raw_ze;
+          img = self.pix_mat_ze;
+          pix_mask = self.pix_mask_ze;
+      else
+          img_raw = self.pix_mat_raw_uz;
+          img = self.pix_mat_uz;
+          pix_mask = self.pix_mask_uz;
+      end
+      
+      
       if ~recalc && ~isempty(self.Img_bp) && sum(self.Img_bp(:)) ~= 0
         warning(['BP solution already calculated, so skipping optimization.',...
           ' Pass recalc flag to recompute.']);
         return;
       end
       
-      [n, m] = size(self.Img_raw);
+      [n, m] = size(img_raw);
       
-      pix_idx = find(CsTools.pixmat2vec(self.pix_mask) > 0.5);
+      pix_idx = find(CsTools.pixmat2vec(pix_mask) > 0.5);
       
       if use_2d
           M_fun = @(x) CsTools.pixmat2vec(dct2(CsTools.pixvec2mat(x, n)));
@@ -548,7 +573,7 @@ function solve_nesta(self, recalc, use_2d, opts)
       Et_fun = @(x) CsTools.Et_fun1(x, pix_idx, n, m);
       
       % b, set of measurements. have to remove all the spots we didn't sample.
-      b = CsTools.pixmat2vec(self.Img_raw);
+      b = CsTools.pixmat2vec(img_raw);
       b = b(pix_idx);
       min_b = min(b);
       max_b = max(b);
@@ -565,8 +590,13 @@ function solve_nesta(self, recalc, use_2d, opts)
       tic
       [x_est] = NESTA_mine(E_fun, Et_fun, b, mu, delta, opts);
 
-      self.Img_bp = CsTools.pixvec2mat(x_est*max_diff_b, n);
+      img = CsTools.pixvec2mat(x_est*max_diff_b, n);
 
+      if use_ze
+          self.pix_mat_ze = img;
+      else
+          self.pix_mat_uz = img;
+      end
       time_nesta = toc;
       
       fprintf('NESTA Time: %f\n', time_nesta);

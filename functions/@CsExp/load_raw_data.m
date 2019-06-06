@@ -107,10 +107,14 @@ function self = load_raw_data(self, cs_paths, opts)
     self.uz = dat_meas(:, channel_map.uz);
   end
   
-  self.Img_raw = zeros(self.npix, self.npix);
-  self.Img_smp1d = zeros(self.npix, self.npix);
-  self.Img_bp = zeros(self.npix, self.npix);
-  self.pix_mask = zeros(self.npix, self.npix);
+  self.pix_mat_raw_uz = zeros(self.npix, self.npix);
+  self.pix_mat_uz = zeros(self.npix, self.npix);
+  self.pix_mask_uz = zeros(self.npix, self.npix);
+
+  self.pix_mat_raw_ze = zeros(self.npix, self.npix);
+  self.pix_mat_ze = zeros(self.npix, self.npix);
+  self.pix_mask_ze = zeros(self.npix, self.npix);
+
   self.Gz = zpk([], [], 1, self.Ts);
   
   state_ticks = self.meta_exp.state_counts;

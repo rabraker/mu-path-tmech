@@ -13,6 +13,7 @@ classdef RasterExp <matlab.mixin.Copyable
     met_ind;
     npix_x;
     npix_y;
+    npix_y_og;
     width;
     volts2pix_y;
     volts2pix_x;
@@ -34,6 +35,9 @@ classdef RasterExp <matlab.mixin.Copyable
     pix_mat_pinned;
     pin_idx_s;
     pix_mask;
+    
+    pix_mask_ze;
+    pix_mat_ze;
 %     UserData;
   end
   
@@ -58,13 +62,15 @@ classdef RasterExp <matlab.mixin.Copyable
       if ~opts.reload_raw && mat_exists
         fprintf('loading from mat file...\n')
         self = self.load_mat(raster_paths.data_path_mat, opts.load_full);
-        fprintf('done\n')
+        fprintf('\bdone\n')
       else
         fprintf('loading from raw data...\n')
         self = self.load_raw_data(raster_paths, opts);
-        fprintf('done\n')
+        self.npix_y_og = self.npix_y;
+        fprintf('\bdone\n')
       end      
       self.time_total = length(self.x)*self.Ts;
+      
     end
     
     % Methods defined in other files
@@ -72,23 +78,48 @@ classdef RasterExp <matlab.mixin.Copyable
     [ self] = bin_raster_really_slow(self, line_detrender, use_error, npix_x)
     trace_inds = get_trace_indeces(self)
     
+    im = interp_missing(self, im, mask);
+    
     function meta_data(self)
       error(['For consistency with CsExp, the meta_data property has been',...
         ' removed. That data is now located in self.meta_in.'])
     end
     
-    function img =  interp_y(self, ypix)
-        ypix_old = self.npix_y;
+    function interp_y(self, ypix, fill_missing)
+        
+        if size(self.pix_mat, 1) == ypix
+            return
+        end
+        
+        if nargin < 3
+            fill_missing = false;
+        end
+        
+        if fill_missing
+            self.pix_mat = self.interp_missing(self.pix_mat);
+        end
+        ypix_old = self.npix_y_og;
         xpix = size(self.pix_mat, 2);
-        img = zeros(ypix, xpix);
+        img_uz = zeros(ypix, xpix);
+        img_ze = zeros(ypix, xpix);
+        
         % Now interpolate the missing rows
         vq = 1:ypix;
         skip = floor(ypix/ypix_old);
         h = skip:skip:ypix;
+        
         for k=1:xpix
-           img(:, k) = interp1(h, self.pix_mat(:, k), vq, 'linear', 'extrap');
+           img_uz(:, k) = interp1(h, self.pix_mat(:, k), vq, 'linear', 'extrap');
+           img_ze(:, k) = interp1(h, self.pix_mat_ze(:, k), vq, 'linear', 'extrap');
         end
+        self.npix_y = ypix;
+        self.pix_mat = img_uz;
+        self.pix_mat_ze = img_ze;
+        % Create a new pix_mask
+        %  pix_mask_old = self.pix_mask;
     end
+    
+    
     function damage = damage_metric(self)
     % Compute a damage metric based on the deflection signals positivity.
     % This is computed as the power of the positive values of the negative
