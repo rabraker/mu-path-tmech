@@ -16,7 +16,7 @@ $(figpath)/dna_og.svg:plot_bptv_vs_bp.m functions/Core_Nesterov_mine.m functions
 	./matlab_wrapper.py $<
 
 
-$(figpath)/MIMO_CL_uxuy.svg:plot_MIMO_closedloop.m
+$(figpath)/MIMO_CL_uxuy.svg:build_controllers_with_xyFF_DxDy.m
 	./matlab_wrapper.py $<
 
 

@@ -29,15 +29,14 @@ alph = .91;
 opts = NESTA_opts('U', U_fun, 'Ut', Ut_fun, 'verbose', 0, 'TolVar', 1e-5);
 
 % [ssm, X] = fun(im_og, b, E_fun, Et_fun, opts, alpv, alph);
-% ssm
-alps_0 = [alpv; alph];
-%%
-
-
-f = @(alps) fun(im_og, b, E_fun, Et_fun, opts, alps(1), alps(2));
-
-fmopts = optimoptions('fmincon', 'MaxIterations', 10, 'Disp', 'iter');
-alps = fmincon(f, alps_0, [], [], [], [], [0;0], [], [], fmopts)
+% alps_0 = [alpv; alph];
+% %%
+% 
+% 
+% f = @(alps) fun(im_og, b, E_fun, Et_fun, opts, alps(1), alps(2));
+% 
+% fmopts = optimoptions('fmincon', 'MaxIterations', 10, 'Disp', 'iter');
+% alps = fmincon(f, alps_0, [], [], [], [], [0;0], [], [], fmopts)
 
 %%
 
@@ -147,7 +146,7 @@ function t_recon = cp_bptv_bp(im_og, pix_idx, prefix, figbase)
     [Fig_og_zoom] = imshow_local(im_og(slice_y, slice_x), 4 + figbase);
     [Fig_bp_zoom] = imshow_local(X_bp(slice_y, slice_x), 5 + figbase);
     [Fig_bptv_zoom] = imshow_local(X_bptv(slice_y, slice_x), 6 + figbase);
-    return
+    
     save_fig(Fig_dna_og, fullfile(PATHS.tmech_fig(), [prefix, '_og']), false)
     save_fig(Fig_dna_bp, fullfile(PATHS.tmech_fig(), [prefix, '_bp']), false)
     save_fig(Fig_dna_bptv, fullfile(PATHS.tmech_fig(), [prefix, '_bptv']), false)
