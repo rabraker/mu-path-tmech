@@ -488,46 +488,50 @@ implemented using a 25 kHz sampling rate.
 
 % =========================================================================
 \section{Control}\label{sec:control}
-The control structure for each axis is different. For the $X$-axis, we use a
-state space controller. It is described fully in \cite{braker_afmmpc_2019} and
-achieves a bandwidth of about 150 Hz, which is over 1/3 of the first $X$-axis
-resonance at 350 Hz.
-\todo{Not sure how to give a deeper summary without getting to much into the weeds.}
+The control structure for each axis is similar and essentially consists of a set of filters in series with a PI controller. The open-loop frequency response for the $Z$-axis is shown in Fig.~\ref{fig:z_control} (red curve) and in Fig.~\ref{fig:mimo_frf_uxuy} for the $X$ and $Y$ axes (black curves). The first resonance of each axis is the bending mode. For the $Z$ axis, this resonance is at 215~Hz and at approximately 350~Hz for the $X$ and $Y$ axes.
+
+The filter for the $Z$-axis controller inverts the complex-conjugate pole-zero pair at 215~Hz. This allows the gain of the PI controller to be increased substantially. The closed-loop achieves a bandwidth of about 450~Hz, as shown by the black curve in Fig.~\ref{fig:z_control}.
+
+We take a similar approach to the $X$ and $Y$ axes. The filter inverts the bending modes at 350~Hz and adds a notch filter for the main resonant peak at 650~Hz. The resulting closed-loops are shown in the (1,1) and (2,2) positions of Fig.~\ref{fig:mimo_frf_uxuy}. In general, the $X$-axis positioning requirements are more stringent for both CS and raster scanning
+
+Unfortunately, as Fig.~\ref{fig:mimo_frf_uxuy} makes clear, there is a strong cross-coupling between the axes. The coupling from the horizontal plane to the $Z$ axis is particularly problematic and our SISO control scheme does little to attenuate the resonances of $G_{Z,u_X}$ and $G_{Z,u_Y}$. In particular, there are modes in both these transfer functions at 215 and 505 Hz that do not appear in a SISO model of $G_{X,u_x}$ or $G_{y,u_Y}$.
+
+For raster scans, the frequency content of the $X$-axis reference (which is a triangle wave) decays like $1/n^2$ with a gain proportional to the raster frequency. In contrast, the $X$-axis reference for a $\mu$-path scan is composed of a sequence of steps and ramps. The inclusion of the (discontinuous) steps means we should expect the $\mu$-path $X$ reference to decay like $1/n$. 
+Thus,  while the cross-coupling can induce $Z$-axis vibrations for faster raster scans, it is especially problematic for $\mu$-path scanning. In principle, one could mitigate these issues with a full MIMO control design. In this work, we opt for a much simpler feedforward scheme described in the next subsection.
+
+% The control law used for the $Y$-axis is a simple PI controller of the
+% form
+% \begin{equation}
+%   \frac{U(z)}{E_Y(z)}=D(z) = \frac{K_Iz}{z-1},
+%   \label{eqn:dzI}
+% \end{equation}
+% where, the error signal $E_Y(z) = Y(z)-R_Y$.
+% 
+% \todo{Should I implement something better for $Y$-axis, e.g., cancel complex
+%   pole-zeros at 350 hz and add notch filter???}
+
+% The $Z$-axis control is slightly more complicated than the simple $Y$-axis
+% integral controller and is described in the following subsection.
+% \subsection{Z-axis Control Design}\label{sec:zaxis_cs_control}
+% The main challenge to increasing the $Z$-axis bandwidth is the bending mode
+% resonance at 215 Hz, which can be seen in the FRF from $u_Z$ to $Z_{d}$ in
+% Fig.~\ref{fig:z_control} (blue curve). We address this by inverting the complex
+% pole-zero pair at 215 Hz. Thus, the entire $Z$-axis controller consists of a PI
+% controller, $D_I(z)$ cascaded with the resonance inversion, $D^{-1}(z)$, as shown in Fig.~\ref{fig:afm_bd_dinv}. The DC-gain
+% of $D$ is (approximately) the same as the DC-gain of the plant.
+% The inclusion of $D^{-1}$ allows us to substantially increase the PI gain and
+% achieve a closed-loop bandwidth of about 480 Hz. This is the black curve in Fig.~\ref{fig:z_control}.
 
 
-The control law used for the $Y$-axis is a simple PI controller of the
-form
-\begin{equation}
-  \frac{U(z)}{E_Y(z)}=D(z) = \frac{K_Iz}{z-1},
-  \label{eqn:dzI}
-\end{equation}
-where, the error signal $E_Y(z) = Y(z)-R_Y$.
+% There are multiple advantages to this method: first,
+% an inverse compensator still makes sense as a feedforward, open-loop compensator
+% if the feedback path is broken. This situation can and does occur during parts
+% of the CS cycle. Second, the inverse compensator
+% requires no tuning as it is defined only by a fit to the measured FRF.
 
-\todo{Should I implement something better for $Y$-axis, e.g., cancel complex
-  pole-zeros at 350 hz and add notch filter???}
-
-The $Z$-axis control is slightly more complicated than the simple $Y$-axis
-integral controller and is described in the following subsection.
-\subsection{Z-axis Control Design}\label{sec:zaxis_cs_control}
-The main challenge to increasing the $Z$-axis bandwidth is the bending mode
-resonance at 215 Hz, which can be seen in the FRF from $u_Z$ to $Z_{d}$ in
-Fig.~\ref{fig:z_control} (blue curve). We address this by inverting the complex
-pole-zero pair at 215 Hz. Thus, the entire $Z$-axis controller consists of a PI
-controller, $D_I(z)$ cascaded with the resonance inversion, $D^{-1}(z)$, as shown in Fig.~\ref{fig:afm_bd_dinv}. The DC-gain
-of $D$ is (approximately) the same as the DC-gain of the plant.
-The inclusion of $D^{-1}$ allows us to substantially increase the PI gain and
-achieve a closed-loop bandwidth of about 480 Hz. This is the black curve in Fig.~\ref{fig:z_control}.
-
-
-There are multiple advantages to this method: first,
-an inverse compensator still makes sense as a feedforward, open-loop compensator
-if the feedback path is broken. This situation can and does occur during parts
-of the CS cycle. Second, the inverse compensator
-requires no tuning as it is defined only by a fit to the measured FRF.
-
-One challenge to the inversion approach is both the system gain and resonance at 215~Hz
-changes not only day-to-day but also (and especially) when changing cantilevers and our inversion is not robust to this. However, because $D^{-1}$ is defined purely by a second order fit to a small band of the FRF, updating the compensator can be automated.
-\todo{What else to say here?}
+% One challenge to the inversion approach is both the system gain and resonance at 215~Hz
+% changes not only day-to-day but also (and especially) when changing cantilevers and our inversion is not robust to this. However, because $D^{-1}$ is defined purely by a second order fit to a small band of the FRF, updating the compensator can be automated.
+% \todo{What else to say here?}
 
 
 \begin{figure}[t!]
@@ -694,11 +698,11 @@ changes not only day-to-day but also (and especially) when changing cantilevers 
 % control involved in the vertical loop.
 
 \subsection{Feedforward Control}\label{sec:ff_control}
-In our AFM, there is a strong coupling between the horizontal axes and vertical deflection. Fig.~\ref{fig:mimo_frf_uxuy} shows a MIMO FRF for $u_X$ and $u_Y$ to the outputs in each axis. The dotted black curves are the open loop responses and the dashed red curves are the nominal closed-loop responses. Though the $Z$-direction inputs are not shown, the closed loop responses include the $Z$-axis controller. Note that, especially for $H_{z,u_X}$, the closed-loop response is barely improved over the open loop response and in particular, there is a sharp resonance at 215~Hz and 505~Hz. To deal with this, we employ two different strategies for CS and raster scanning.
+% In our AFM, there is a strong coupling between the horizontal axes and vertical deflection. Fig.~\ref{fig:mimo_frf_uxuy} shows a MIMO FRF for $u_X$ and $u_Y$ to the outputs in each axis. The dotted black curves are the open loop responses and the dashed red curves are the nominal closed-loop responses. Though the $Z$-direction inputs are not shown, the closed loop responses include the $Z$-axis controller. Note that, especially for $H_{z,u_X}$, the closed-loop response is barely improved over the open loop response and in particular, there is a sharp resonance at 215~Hz and 505~Hz. To deal with this, we employ two different strategies for CS and raster scanning.
 
-For CS scanning, we insert a feed-forward filter with two notches, one at 215~Hz and the other at 505~Hz. We design a similar feed-forward filter for the $Y$-axis. Both filters are shown in Fig.~\ref{fig:mimo_frf_uxuy} as the solid pink curves and the resulting overall FRF is shown as the solid blue curves. Particularly for $H_{z,u_X}$, these filters result in a dramatic reduction in the cross coupling. A similar affect could be achieve by using a simple low-pass filter. However, to achieve the same 40~dB of attenuation of the mode at 215 Hz, would require, e.g., that a two-pole LPF have its cut-off frequency at about 20~Hz. 
+For CS scanning, we insert a feed-forward filter with three notches, one at 215~Hz, one at 350~Hz and one at 505~Hz. We design a similar feed-forward filter for the $Y$-axis. Both filters are shown in Fig.~\ref{fig:mimo_frf_uxuy} as the solid pink curves and the resulting overall FRF is shown as the solid blue curves, which show a dramatic reduction in the cross coupling. A similar affect could be achieve by using a simple low-pass filter. However, to achieve the same 40~dB of attenuation of the mode at 215 Hz, would require, e.g., that a two-pole LPF have its cut-off frequency at about 20~Hz. 
 
-For raster scanning, we use a truncated Fourier series, where each Fourier coefficient is scaled by the inverse of the closed-loop FRF at the corresponding frequency. We truncate this series such that the highest frequency is smaller than 200 Hz. See, e.g., \cite{clayton_review_2009} for more details on this strategy. Note that these scheme implies that the effective bandwidth of the $X$-axis controller is higher while raster scanning than while CS-scanning. On the other hand, it also implies that the for faster scan rates, fewer Fourier coefficients are used, and so the approximation to a triangle wave is worse.
+For raster scanning, we use a truncated Fourier series, where each Fourier coefficient is scaled by the inverse of the closed-loop FRF at the corresponding frequency. We truncate this series such that the highest frequency is smaller than 200 Hz. See, e.g., \cite{clayton_review_2009} for more details on this strategy. Note that this scheme implies that the effective bandwidth of the $X$-axis controller is higher while raster scanning than while CS-scanning. On the other hand, it also implies that the for faster scan rates, fewer Fourier coefficients are used, and so the approximation to a triangle wave is worse.
 
 % =========================================================================
 \section{Implementation}\label{sec:implementation}
