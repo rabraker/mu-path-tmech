@@ -4,15 +4,42 @@ clc
 
 % ------------ Row 1, CS20NG -------------------------
 im_og = double(imread('cs20ng.png'));
-mu_len = 50;
+% im_og = im_og(1:2:512, 1:2:512);
+mu_len = 20;
 samp_frac = 0.15;
 n = size(im_og, 1);
 
 [mask, pix_idx] = CsTools.mu_path_mask(mu_len, n, n, samp_frac);
 
 figbase = 1;
-cp_bptv_bp(im_og, pix_idx, 'cs20ng', figbase)
+t_recon_cs20ng = cp_bptv_bp(im_og, pix_idx, 'cs20ng', figbase)
 
+    U_fun = @(x) idct(x);
+    Ut_fun = @(x) dct(x);
+    
+    E_fun = @(x) CsTools.E_fun1(x, pix_idx);
+    Et_fun = @(x) CsTools.Et_fun1(x, pix_idx, n, n);
+%%        
+clc
+im_og = im_og / max(im_og(:));
+b = CsTools.pixmat2vec(im_og);
+b = b(pix_idx);
+alpv = .01;
+alph = .91;
+opts = NESTA_opts('U', U_fun, 'Ut', Ut_fun, 'verbose', 0, 'TolVar', 1e-5);
+
+% [ssm, X] = fun(im_og, b, E_fun, Et_fun, opts, alpv, alph);
+% ssm
+alps_0 = [alpv; alph];
+%%
+
+
+f = @(alps) fun(im_og, b, E_fun, Et_fun, opts, alps(1), alps(2));
+
+fmopts = optimoptions('fmincon', 'MaxIterations', 10, 'Disp', 'iter');
+alps = fmincon(f, alps_0, [], [], [], [], [0;0], [], [], fmopts)
+
+%%
 
 % ------------ Row 2, DNA -------------------------
 im_og = double(rgb2gray(imread('dnn_dna_gt.png')));
@@ -26,10 +53,45 @@ figbase = 100;
 
 [mask, pix_idx] = CsTools.mu_path_mask(mu_len, n, n, samp_frac, figbase);
 
-cp_bptv_bp(im_og, pix_idx, 'dna')
+t_recon_dna = cp_bptv_bp(im_og, pix_idx, 'dna', figbase)
+
+fprintf('CS20NG reconstruction time: %.2f\n', t_recon_cs20ng);
+fprintf('DNA reconstruction time: %.2f\n', t_recon_dna);
 
 
-function cp_bptv_bp(im_og, pix_idx, prefix, figbase)
+function [ssm, X_bptv] = fun(im_og, b, E_fun, Et_fun, opts, alpv, alph)
+    n = size(im_og, 1);
+    
+%     U_fun = @(x) idct(x);
+%     Ut_fun = @(x) dct(x);
+%     
+%     E_fun = @(x) CsTools.E_fun1(x, pix_idx);
+%     Et_fun = @(x) CsTools.Et_fun1(x, pix_idx, n, n);
+%         
+%     opts = NESTA_opts('U', U_fun, 'Ut', Ut_fun, 'alpha_v', alpv, 'alpha_h', alph,...
+%         'verbose', 5, 'TolVar', 1e-5);
+
+    opts.alpha_v = alpv;
+    opts.alpha_h = alph;
+    
+    mu = 1e-5;
+    delta = 0.01;
+
+    x_bptv = NESTA_mine(E_fun, Et_fun, b, mu, delta, opts);
+
+    X_bptv = CsTools.pixvec2mat(x_bptv, n);
+    figure(7)
+    imagesc(X_bptv, [0, 1])
+    colormap('gray')
+    
+    ssm = -psnr(im_og, X_bptv, 1);
+    s= sprintf('alph = %f, alpv = %f, ssm = %f\n', alph, alpv, ssm);
+    title(s)
+    fprintf('%s', s);
+end
+
+
+function t_recon = cp_bptv_bp(im_og, pix_idx, prefix, figbase)
     
     im_og = im_og / max(im_og(:));
     n = size(im_og, 1);
@@ -41,7 +103,7 @@ function cp_bptv_bp(im_og, pix_idx, prefix, figbase)
     Et_fun = @(x) CsTools.Et_fun1(x, pix_idx, n, n);
     
     
-    opts = NESTA_opts('U', U_fun, 'Ut', Ut_fun, 'alpha_v', 0.25, 'alpha_h', 1,...
+    opts = NESTA_opts('U', U_fun, 'Ut', Ut_fun, 'alpha_v', 0.0705, 'alpha_h', .4037,...
         'verbose', 5, 'TolVar', 1e-5);
     
     b = CsTools.pixmat2vec(im_og);
@@ -49,8 +111,9 @@ function cp_bptv_bp(im_og, pix_idx, prefix, figbase)
     
     mu = 1e-3;
     delta = .001
-    
+    tic 
     x_bptv = NESTA_mine(E_fun, Et_fun, b, mu, delta, opts);
+    t_recon = toc;
     X_bptv = CsTools.pixvec2mat(x_bptv, n);
     
     
@@ -84,7 +147,7 @@ function cp_bptv_bp(im_og, pix_idx, prefix, figbase)
     [Fig_og_zoom] = imshow_local(im_og(slice_y, slice_x), 4 + figbase);
     [Fig_bp_zoom] = imshow_local(X_bp(slice_y, slice_x), 5 + figbase);
     [Fig_bptv_zoom] = imshow_local(X_bptv(slice_y, slice_x), 6 + figbase);
-    
+    return
     save_fig(Fig_dna_og, fullfile(PATHS.tmech_fig(), [prefix, '_og']), false)
     save_fig(Fig_dna_bp, fullfile(PATHS.tmech_fig(), [prefix, '_bp']), false)
     save_fig(Fig_dna_bptv, fullfile(PATHS.tmech_fig(), [prefix, '_bptv']), false)

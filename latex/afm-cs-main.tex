@@ -455,24 +455,20 @@ When $RR^T=I$, the sub-problems in lines 6 and 7 have a closed-form solution. De
 
 
 A comparison between BPDN and BPVV is shown in
-Fig.~\ref{fig:BPTV_demonstration}. Images of two different samples
-(a square grating and a DNA image) were acquired using an Agilent 5500
-AFM with a standard raster scan (first and fourth columns in the figure). These
-images were then resampled using a random $\mu$-path pattern of size 40 pixels
-with 25\% of the pixels sampled. Images were reconstructed using BPDN (second
-and fifth columns) and BPVV (third and sixth columns). The reconstruction
-results show the artifacts apparent in the BPDN reconstruction are largely
-mitigated using BPVV. Thus, in the remainder of the paper, we focus exclusively on BPVV.
+Fig.~\ref{fig:BPTV_demonstration}. The first column two raster scans: the top is 512 by 512 pixel image of a CS20NG grating acquired with an Agilent 5400 AFM and the bottom is a 256 by 256 pixel image of DNA acquired with an Agilent 5500 AFM.
+For the CS20NG grating, we sampled 15\% of the pixels with 50 pixel $\mu$-paths. We sampled 25\% of the DNA image with 25 pixel long $\mu$-paths. The second columns shows the full frame reconstructions using BPDN and the third columns shows the result using BPVV. The fourth column zooms in on the region indicated by the red box in column one. Similarly, the fifth and six columns show the detail of the reconstructions. The reconstruction results show the artifacts apparent in the BPDN reconstruction are largely
+mitigated using BPVV. Thus, in the remainder of the paper, we focus exclusively on BPVV. As for reconstruction time, it took about 1.5 seconds to reconstruct the DNA image and about 7 seconds for the CS20NG.
 	
+
+% =========================================================================
+\section{Experimental setup} \label{sec:experimentalSetup}
+% =========================================================================
 \begin{figure}[ht!]
   \includegraphics[width=1\columnwidth]{figures/exp_setup.pdf}
   \caption{Schematic diagram of the expermental AFM setup.}
   \label{fig:exp_setup}
 \end{figure}
 
-% =========================================================================
-\section{Experimental setup} \label{sec:experimentalSetup}
-% =========================================================================
 Our experimental setup, illustrated in Fig.~\ref{fig:exp_setup},
 consists of an Agilent 5400 AFM  retrofitted with an nPoint NPXY100A
 piezoelectric stage, a cRIO-9082 embedded controller (National
@@ -1164,11 +1160,18 @@ advantage of CS over raster narrows. For example, the 4~Hz raster scan and 5~Hz,
 is a result of the constant overhead imposed by the engage/disengage and
 $XY$-move states in CS.
 
+
+\begin{figure*}
+  \includesvg[width=1\linewidth]{figures/cs_raster_images_6-4-2019.svg}
+  \caption{}
+  \label{fig:many}
+\end{figure*}
+
 \subsection{Comparison to sub-line sampling}
 Compressed sensing so far does not look good if we compare to subline sampling. The left panel of Fig.~\ref{fig:subline} shows a 5~Hz raster scan taken with 128 lines which takes approximately 25 seconds. We use that data to produce a 128 by 512 pixel image, and then use basic linear interpolation to fill produce a 512 by 512 pixel image. The CS image with the nearest acquisition time (15\% at 4~Hz) is shown in the right panel. The raster scan looks better and has basically the same RDI, and better SSIM and PSNR numbers. We conclude there is no reason to use CS.
 \begin{figure}
   \includesvg[width=1\columnwidth]{figures/subline_vs_cs.svg}
-  \caption{(left) A 128 line raster scan interpolated onto 512 lines. (left) the CS scan with the nearest time.}
+  \caption{(left) A 128 line raster scan interpolated onto 512 lines. (right) The CS scan with the nearest time.}
   \label{fig:subline}
 \end{figure}
 
