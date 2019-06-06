@@ -1,8 +1,10 @@
 
 
-function [cs_paths] = get_cs_paths(data_root, data_name)
-  
-  parent_root = get_parent_root(data_root);
+function [cs_paths] = get_cs_paths(data_root, data_name, parent_folder)
+  if nargin < 3
+      parent_folder = 'parents';
+  end
+  parent_root = get_parent_root(data_root, parent_folder);
   parent_name = get_parent_name(data_name, '_out_');
   parent_meta_name = strrep(parent_name, '.csv', '.json');
   

@@ -1,4 +1,4 @@
-% [raster_paths] = get_raster_paths(data_root, data_name)
+% [raster_paths] = get_raster_paths(data_root, data_name,  parent_folder)
 %
 % Given data_root and data_name, returns a struct raster_paths with the 
 % following fields:
@@ -8,8 +8,11 @@
 % raster_paths.parent_path
 % raster_paths.data_path_mat
 
-function [raster_paths] = get_raster_paths(data_root, data_name)
-  parent_root = get_parent_root(data_root);
+function [raster_paths] = get_raster_paths(data_root, data_name, parent_folder)
+  if nargin < 3
+      parent_folder = 'parents';
+  end
+  parent_root = get_parent_root(data_root, parent_folder);
   parent_name = get_parent_name(data_name, '_out_', '.json');
   
   raster_exp_meta_name = strrep(data_name, '.csv', '-meta.json');
