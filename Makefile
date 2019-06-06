@@ -6,9 +6,7 @@ out = $(figpath)/dna_og.svg \
 	$(figpath)/z_control_design.svg
 
 
-all:block_diagrams $(out)
-
-block_diagrams:
+all: $(out)
 	cd latex && $(MAKE)
 
 
