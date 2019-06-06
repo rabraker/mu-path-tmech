@@ -46,7 +46,11 @@ function [hands, legs] = plot_all_cycles(self, ax1, ax2, ax3, ax4, bounds, xy_sc
     ax4 = gca();
 
   else % assume first arg is ax1
-    plotuz = true;
+      if ~isempty(ax1)
+          plotuz = true;
+      else
+          plotuz = false;
+      end
   end
   % The case, unless we find out otherwise.
   plotze = false;
