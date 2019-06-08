@@ -993,30 +993,31 @@ penalized by the RDI.
 \section{Experimental Results}\label{sec:results}
 We took scans of the CS-20NG sample grating over an area with holes on a 500 nm
 pitch. The holes are 20 nm deep.
-We scanned 5 micron by 5 micron images with 512
-lines each, yielding 512 by 512 pixel images. As before, the $\mu$-path scans
-are 500 nm long, as this allows us to work around the lack of a $Z$-axis sensor.
-This yields a $\mu$-path size of 52 pixels.
+We scanned 5 micron by 5 micron images using standard raster scans with 512, 128 and 64 lines. The raster scans with 128 and 64 lines were binned horizontally to first produce 128 by 512 and 64 by 512 images. We then interpolated these images vertically to produce 512 by 512 pixel images.
+
+We also took $\mu$-path scans with densities at 12.5\%, 15\% and 25\% and reconstructed 512 by 512 pixel images.
+For all CS scans, the $\mu$-paths are 500 nm long, as this allows us to work around the lack of a $Z$-axis sensor. This yields a $\mu$-path size of 52 pixels.
 
 The free value of the deflections signal was approximately -0.6 volts and we set
 the scanning reference to ${\rzs=-0.3}$~volts and the withdraw reference to
 ${\rzup=-0.8}$ volts. We set the $XY$-settle boundary to $\pm 0.05$
 microns and required 20 samples within this boundary before moving to the
 $Z$-engage state. The pre-scan length was 150 time steps.
-
-\todo{Should I scan even faster??}
-
-For the raster scans, we took scans at 1.0~Hz, 4.0~Hz, 5.0~Hz, 8.0~Hz and
-10~Hz.  The CS scans we taken with scan velocities equivalent to raster scans of 1.0~Hz,
-2.0~Hz, 4.0~Hz, 5.0~Hz and 8.0~Hz with sampling densities of 10~\% and 15~\%.
 The cantilever was an AppNano SICON, with a
 length of 450 microns and spring constant $k\in[0.02,~0.8]$~N/m.
 
+% \todo{Should I scan even faster??}
+
+For the raster scans, we took scans at 1.0~Hz, 2.5~Hz, 5.0~Hz, 8.0~Hz and
+10~Hz.  The CS scans we taken with scan velocities equivalent to raster scans of 1.0~Hz,
+2.0~Hz, 5.0~Hz and 8.0~Hz with sampling densities of 10~\% and 15~\%.
+
+
 The CS scans were reconstructed with BPVV. We set
-$\sigma = 0.1$, $\mu_f=$TKT, $\alpha_v=$TKT and $\alpha_h=$TKTKT. The data remained scaled in terms of volts.
+$\sigma = 0.1$, $\mu_f=1e-5$, $\alpha_v=0.75$ and $\alpha_h=0.0$. The data remained scaled in terms of volts.
 
 For the raster scans, we discard data from the re-trace and divided the
-remaining data into 512$\times$512 bins based on the \xc and \yc sensor
+remaining data for each scan line 512 bins based on the \xc sensor
 measurements. We then average the data in each bin to obtain the value of one
 pixel. To remove the affects of piezo creep and sample tilt, we then de-trend
 each individual line. De-trending each line causes the flat portion between the holes in the horizontal direction to appear at a different height than the flat portion between holes in the vertical direction. 
@@ -1043,14 +1044,6 @@ For each raster scan and each CS scan, we computed the SSIM, PSNR (both with
 default parameters) using the 1~Hz scan as the master and also computed the RDI
 metric. These are collected in table ~\ref{tab:rast_vs_cs_v1}.
 
-% \begin{figure*}
-%   \includesvg[width=1\textwidth]{figures/cs_raster_images_4-26-2019}
-%   \caption{Raster and compressed sensing images of a 5 micron square area of the
-%     CS-20NG grating. All images are 512$\times$512 pixels. The rows of pixels
-%     indicated by the red line are shown in Fig.~\ref{fig:pixel_rows}.}
-%   \label{fig:resultsF1_images}
-% \end{figure*}
-
 \begin{figure*}
   \includesvg[width=0.95\linewidth]{figures/cs_raster_images_6-5-2019.svg}
   \caption{Raster and compressed sensing images of a 5 micron square area of the
@@ -1059,16 +1052,14 @@ metric. These are collected in table ~\ref{tab:rast_vs_cs_v1}.
   \label{fig:resultsF1_images}
 \end{figure*}
 
-
-
-\begin{table}[t!]
-  \centering
-  \caption{Performance metrics for raster and CS scans.}
-  \begin{tabular}{cccccc}
-    \input{tables/cs_raster_table_4-26-2019_muInf_dct2.tex}
-  \end{tabular}
-  \label{tab:rast_vs_cs_v1}
-\end{table}
+% \begin{table}[t!]
+%   \centering
+%   \caption{Performance metrics for raster and CS scans.}
+%   \begin{tabular}{cccccc}
+%     \input{tables/cs_raster_table_4-26-2019_muInf_dct2.tex}
+%   \end{tabular}
+%   \label{tab:rast_vs_cs_v1}
+% \end{table}
 
 \begin{table}[t!]
   \centering
@@ -1104,6 +1095,21 @@ quality than a raster scan at a 5~Hz rate.
 % from Section \ref{sec:psnr_ssim_limits} plus or minus one standard deviation.
 % This seems to be further evidence that, at least for our experimental setup,
 % these numbers are not especially meaningful.
+
+
+Fig.~\ref{fig:improve_512} shows amount of improvement of the different sub-sampling techniques over full raster scans with 512 lines as a function of scan rate. As far as pure speed goes, the CS scan at 12.5\% is the fastest for a rate of 1~Hz, though the 64 line raster scan is close. At the same time, the image quality of the 1~Hz, 12.5\% CS scan is better than the the 1~Hz 64 line raster scan. However, this advantage quickly evaporates for faster scan rates. Indeed, for rates beyond about 5~Hz, the raster scan with 128 lines is not only faster than the 12.5\% CS scan, it also has (arguably) better image quality.
+
+Thus, we conclude that $\mu$-path based sub-sampling is only beneficial when there is an exigent reason to scan slowly. This may be the case for delicate specimens. We can roughly quantify this by computing TKTKTK
+
+SEGUE TO SOMETHING LIKE RDI HERE.
+
+
+\begin{figure}
+  \includesvg[width=1\columnwidth]{figures/improvements.svg}
+  \caption{Fraction of improvement in total scan time over a scan with 512 lines vs scan rate for the three sets of CS scans (at 25\%, 15\% and 12.5\%) and courser raster scans at 128 and 64 lines.}
+  \label{fig:improve_512}
+\end{figure}
+
 
 \begin{figure*}[ht!]
   \centering
@@ -1163,13 +1169,13 @@ is a result of the constant overhead imposed by the engage/disengage and
 $XY$-move states in CS.
 
 
-\subsection{Comparison to sub-line sampling}
-Compressed sensing so far does not look good if we compare to subline sampling. The left panel of Fig.~\ref{fig:subline} shows a 5~Hz raster scan taken with 128 lines which takes approximately 25 seconds. We use that data to produce a 128 by 512 pixel image, and then use basic linear interpolation to fill produce a 512 by 512 pixel image. The CS image with the nearest acquisition time (15\% at 4~Hz) is shown in the right panel. The raster scan looks better and has basically the same RDI, and better SSIM and PSNR numbers. We conclude there is no reason to use CS.
-\begin{figure}
-  \includesvg[width=1\columnwidth]{figures/subline_vs_cs.svg}
-  \caption{(left) A 128 line raster scan interpolated onto 512 lines. (right) The CS scan with the nearest time.}
-  \label{fig:subline}
-\end{figure}
+
+
+% \begin{figure}
+%   \includesvg[width=1\columnwidth]{figures/subline_vs_cs.svg}
+%   \caption{(left) A 128 line raster scan interpolated onto 512 lines. (right) The CS scan with the nearest time.}
+%   \label{fig:subline}
+% \end{figure}
 
 \section{Conclusions}\label{sec:conclusions}
 The main conclusion of this chapter is that with CS, it seems that we can

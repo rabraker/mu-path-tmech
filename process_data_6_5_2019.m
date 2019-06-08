@@ -126,7 +126,7 @@ if 0
     register_uzk = true;
     % fprintf('  Hz  |  actual perc  |  nom. perc  |  mu-path overhead |\n')
     % fprintf('---------------------------------------------------------\n')
-    for k=1:length(cs_exps)
+    for k=1:1 %length(cs_exps)
         cs_exps{k}.process_cs_data(use_ze, register_uzk);
         cs_exps{k}.process_cs_data(true, false);
         %     fprintf('finished processing raw CS data..\n');
@@ -169,12 +169,12 @@ if 0
         cs_exps{k}.pix_mat_uz = cs_exps{k}.pix_mat_uz - bar_bp;
         cs_exps{k}.pix_mat_raw_uz = cs_exps{k}.pix_mat_raw_uz - bar_bp;
         
-        im_tmp = cs_exps{k}.pix_mat_ze;
+        im_tmp = cs_exps{k}.pix_mat_uz;
         
         %         im_tmp = detrend_plane(im_tmp);
         im_tmp = im_tmp - mean(im_tmp(:));
         %     im_tmp = SplitBregmanROF(im_tmp, 100, 0.001);
-        ImshowDataView.imshow(im_tmp, [-thresh, thresh], ax4, ax4_2, cb_exp)
+        ImshowDataView.imshow(im_tmp, [-thresh, .25*thresh], ax4, ax4_2, cb_exp)
         title(ax4, stit)
         hold(ax4, 'on')
         drawnow();
@@ -182,7 +182,7 @@ if 0
         %plot(ax4, [idx_left, idx_left], [1, 512], 'r')
         %plot(ax4, [idx_right, idx_right], [1, 512], 'r')
     end
-    
+    %%
     
     for k=1:length(cs_exps)
         cs_exps{k}.save()
@@ -227,6 +227,8 @@ rastm_512 = ScanMetrics();
 rastm_128 = ScanMetrics();
 rastm_64 = ScanMetrics();
 rast_imk_fit = {};
+
+dct_ = @(x) dct(x);
 for k=1:length(rast_exps)
     if k== master_rast_idx
         continue
@@ -504,7 +506,7 @@ fac = (xs(1) + wo)/xs(1);
 
 for k=1:5
 rate_k = rastm_512.rate(k);
-clr = ha_ssm.ColorOrder;
+clr = ha.ColorOrder;
 
 x1 = xs(k);
 
@@ -523,8 +525,9 @@ end
 
 leg0 = legend([h3, h3a, h3b, h4, h5], 'Position', [0.0998 0.9172 0.7362 0.0639], 'NumColumns', 5);
 xlim(ha, [6, 530])
-
 %%
+
+
 % offsets = [50, 10, 10, 5, 5, 5];
 % for k=1:5
 %     st = sprintf('%.1f Hz', rastm_512.rate(k));
@@ -596,7 +599,7 @@ tx = text(ha_ssm, mean(X(1:2)), mean(Y([1,3])), st, 'VerticalAlignment', 'middle
 
 end
 xlim(ha_ssm, [6, 530])
-leg = legend([h4, h4a, h4b, h5, h6], 'Position', [0.0998 0.8934 0.8724 0.0639], 'NumColumns', 5);
+leg1 = legend([h4, h4a, h4b, h5, h6], 'Position', [0.0998 0.8934 0.8724 0.0639], 'NumColumns', 5);
 
 % -------------- PSNR
 h7 = semilogx_color_points(ha_psn, rastm_512.time(1:end), rastm_512.psnr(1:end), 'x', 2);
@@ -657,32 +660,37 @@ save_fig(Fig_rows, fullfile(PATHS.tmech_fig(), 'cs_raster_pixel_rows_6-5-2019'),
 %%
 
 
-figure(10); clf
+F_trade = mkfig(10, 3.5, 3); clf
+ha_t = tight_subplot(1, 1, 0.01, [0.15, 0.15], [0.15, 0.02], false);
 % plot(rastm_512.rate, rastm_512.time)
 hold on
 
-h1 = plot(rastm_64.rate, rastm_64.time);
+nrm_s = rastm_512.time;
+h1 = plot(rastm_64.rate, rastm_64.time./nrm_s, '-o');
 hold on
-h2 = plot(csm_12.rate, csm_12.time, '--');
+h2 = plot(csm_12.rate, csm_12.time./nrm_s, '--o');
 
 
-h3 = plot(rastm_128.rate, rastm_128.time);
+h3 = plot(rastm_128.rate, rastm_128.time./nrm_s, '-o');
 
-h4a = plot(csm_15.rate, csm_15.time, '--');
-h4 = plot(csm_25.rate, csm_25.time, '--');
+h4a = plot(csm_15.rate, csm_15.time./nrm_s, '--o');
+h4 = plot(csm_25.rate, csm_25.time./nrm_s, '--o');
 % title('25~\% sampling')
 % plot(csm_15.rate, csm_15.time)
-h1.DisplayName = 'raster 64 lines'
-h2.DisplayName = 'CS 12.5 \%'
+h1.DisplayName = 'raster 64 lines';
+h2.DisplayName = 'CS 12.5 \%';
 
 h3.DisplayName = 'raster 128 lines';
 h4a.DisplayName = 'CS 15 \%';
 h4.DisplayName = 'CS 25 \%';
-legend([h1, h2, h3, h4a, h4])
+leg_t = legend([h1, h3, h2, h4a, h4], 'Position', [0.1610 0.8389 0.6566 0.1599],...
+    'NumColumns', 2, 'Box', 'off');
 
 xlabel('rate [Hz]')
-ylabel('time [sec.]')
+ylabel('fraction of 512 line scan time')
+grid on
 
+save_fig(F_trade, 'latex/figures/improvements', false)
 %%
 
 tmu_12 = [];
