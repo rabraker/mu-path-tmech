@@ -941,54 +941,41 @@ compared to the un-aligned images, there is still noticeable stretching,
 particularly in the $Y$-direction. Notably, with the alignment technique,
 the SSIM lies between 0.7 and 0.73 and the PSNR ranges from 22.51 to 24.99 and appears more stable in time.
 
+% \subsection{A new metric}
+% \begin{figure}[t!]
+%   \centering
+%   \includesvg[width=1\columnwidth]{figures/damage_illustration.svg}
+%   \caption{The RDI metric defined in \eqref{eqn:RDI} penalizes everything in the
+%     red shaded region and does not penalize anything in the un-shaded region.}
+%   \label{fig:damage_illustrate}
+% \end{figure}
 
-
-
-% Due to this unfortunate drift, in Section~\ref{sec:results:final}, we will use a
-% 1~Hz scan as the baseline image. Hopefully, this will give a decent trade-off
-% between having an image with minimal drift and scanning slowly enough that it
-% accurately represents the sample grating. Due to the improved $Z$-axis
-% bandwidth, a 1~Hz scan should still have better (or at least comparable) quality
-% than the 0.25~Hz scan taken in Chapter~\ref{chap:cs_init}. Additionally,
-% Fig.\ref{fig:rast_aligned_1} provides us with an (approximate) upper bound for
-% our expectations when looking at the experimental results in
-% Section~\ref{sec:results:final}.
-
-\subsection{A new metric}
-\begin{figure}[t!]
-  \centering
-  \includesvg[width=1\columnwidth]{figures/damage_illustration.svg}
-  \caption{The RDI metric defined in \eqref{eqn:RDI} penalizes everything in the
-    red shaded region and does not penalize anything in the un-shaded region.}
-  \label{fig:damage_illustrate}
-\end{figure}
-
-Th PSNR and SSIM metrics only assess the similarity of two images.
-However, in AFM imaging, pure image quality is not the
-only concern, particularly for delicate samples. What is needed is a figure of
-merit for how much damage was done to specimen during the imaging process. While
-this is not really a concern while imaging a hard calibration grating, it plays
-a prominent role biological samples~\cite{ando_highspeed_2008}. In general,
-damage occurs while scanning into an uphill region, which results in a positive
-deflection signal. The actual damage done by a given $Z_d$ will depend on the
-spring constant of the cantilever and the softness of the specimen. Nonetheless,
-we can use the positive deviations of $Z_d$ as a relative measure of damage
-between different scan speeds or scanning methods, for a given cantilever and
-specimen. This motivates a metric we term the relative damage index (RDI), which
-we define as
-\begin{align}
-  \text{RDI} &= \frac{1}{T_s}\sum_{k\in I} \frac{1}{k} \left(Z_{d,k} - r_{Z,s}\right)^2 \label{eqn:RDI}\\
-  I &= \{k: k\in[0,~N-1],~ Z_{d,k}-r_{Z,s} > 0 \} \nonumber
-\end{align}
-where $N$ is the total number of samples in a given scan, $Z_{d,k}$ is the
-deflection signal at sample $k$ and $r_{Z,\textrm{s}}$ is the scanning setpoint.
-The RDI is basically the power in positive deflection. By excluding negative
-values of the deflection, we do not penalize the CS algorithm while it is
-re-engaging with the specimen \emph{unless} it overshoots the scanning setpoint,
-which we do want to penalize. This is illustrated in
-Fig.~\ref{fig:damage_illustrate}, which shows several CS cycles with a poorly
-tuned controller. Only deflection signals in the red-shaded region will be
-penalized by the RDI.
+% Th PSNR and SSIM metrics only assess the similarity of two images.
+% However, in AFM imaging, pure image quality is not the
+% only concern, particularly for delicate samples. What is needed is a figure of
+% merit for how much damage was done to specimen during the imaging process. While
+% this is not really a concern while imaging a hard calibration grating, it plays
+% a prominent role biological samples~\cite{ando_highspeed_2008}. In general,
+% damage occurs while scanning into an uphill region, which results in a positive
+% deflection signal. The actual damage done by a given $Z_d$ will depend on the
+% spring constant of the cantilever and the softness of the specimen. Nonetheless,
+% we can use the positive deviations of $Z_d$ as a relative measure of damage
+% between different scan speeds or scanning methods, for a given cantilever and
+% specimen. This motivates a metric we term the relative damage index (RDI), which
+% we define as
+% \begin{align}
+%   \text{RDI} &= \frac{1}{T_s}\sum_{k\in I} \frac{1}{k} \left(Z_{d,k} - r_{Z,s}\right)^2 \label{eqn:RDI}\\
+%   I &= \{k: k\in[0,~N-1],~ Z_{d,k}-r_{Z,s} > 0 \} \nonumber
+% \end{align}
+% where $N$ is the total number of samples in a given scan, $Z_{d,k}$ is the
+% deflection signal at sample $k$ and $r_{Z,\textrm{s}}$ is the scanning setpoint.
+% The RDI is basically the power in positive deflection. By excluding negative
+% values of the deflection, we do not penalize the CS algorithm while it is
+% re-engaging with the specimen \emph{unless} it overshoots the scanning setpoint,
+% which we do want to penalize. This is illustrated in
+% Fig.~\ref{fig:damage_illustrate}, which shows several CS cycles with a poorly
+% tuned controller. Only deflection signals in the red-shaded region will be
+% penalized by the RDI.
 
 \section{Experimental Results}\label{sec:results}
 We took scans of the CS-20NG sample grating over an area with holes on a 500 nm
@@ -1034,11 +1021,6 @@ represent a range of $\pm$20 nm.
 
 The resulting images are shown in Fig.~\ref{fig:resultsF1_images}. The rows of
 pixels indicated by the red lines are shown Fig.~\ref{fig:pixel_rows}.
-
-% The sub-slice removed a 30 pixel
-% boundary from each edge. Despite this alignment, the middle pixels tend to show
-% a smaller error than those towards the top and bottom, which is similar to the
-% affect observed before in Fig.~\ref{fig:baseline_errors}.
 
 For each raster scan and each CS scan, we computed the SSIM, PSNR (both with
 default parameters) using the 1~Hz scan as the master and also computed the RDI
@@ -1087,21 +1069,17 @@ scans except the 8~Hz version have as good or better SSIM numbers than the
 raster scans. It makes no sense for a CS scan at a 5~Hz rate to have better
 quality than a raster scan at a 5~Hz rate.
 
-% It is interesting to also compare
-% these numbers to the batch of 1~Hz raster scans we compared in
-% Section~\ref{sec:limits}.
-% The blue shaded bands of
-% Figs~\ref{fig:time_ssim_psnr} indicate the mean of the SSIM and PSNR metrics
-% from Section \ref{sec:psnr_ssim_limits} plus or minus one standard deviation.
-% This seems to be further evidence that, at least for our experimental setup,
-% these numbers are not especially meaningful.
-
-
 Fig.~\ref{fig:improve_512} shows amount of improvement of the different sub-sampling techniques over full raster scans with 512 lines as a function of scan rate. As far as pure speed goes, the CS scan at 12.5\% is the fastest for a rate of 1~Hz, though the 64 line raster scan is close. At the same time, the image quality of the 1~Hz, 12.5\% CS scan is better than the the 1~Hz 64 line raster scan. However, this advantage quickly evaporates for faster scan rates. Indeed, for rates beyond about 5~Hz, the raster scan with 128 lines is not only faster than the 12.5\% CS scan, it also has (arguably) better image quality.
 
-Thus, we conclude that $\mu$-path based sub-sampling is only beneficial when there is an exigent reason to scan slowly. This may be the case for delicate specimens. We can roughly quantify this by computing TKTKTK
+Thus, we conclude that $\mu$-path based sub-sampling is only beneficial when there is an exigent reason to scan slowly. This may be the case for delicate specimens. We can roughly quantify this by computing the power in the deflection signal during scanning
+\begin{align}
+  \text{RDI} &= \frac{1}{T_s}\sum_{k=0}^N \frac{1}{k} \left(Z_{d,k} - r_{Z,s}\right)^2 \label{eqn:RDI}\\
+\end{align}
+The idea behind the idea is that increased scan rates lead to larger deflection signals (and thereby increased force into the specimen) at each surface feature, which the RDI accumulates.
 
-SEGUE TO SOMETHING LIKE RDI HERE.
+The values of the RDI for each of the $\mu$-path and raster scans are shown in Fig.~\ref{fig:time_damage} as a function of total imaging time. As one would expect, as imaging time decreases, the RDI for each scan type increases.
+
+% More importantly though, 
 
 
 \begin{figure}
