@@ -14,11 +14,11 @@ n = size(im_og, 1);
 figbase = 1;
 t_recon_cs20ng = cp_bptv_bp(im_og, pix_idx, 'cs20ng', figbase)
 
-    U_fun = @(x) idct(x);
-    Ut_fun = @(x) dct(x);
+U_fun = @(x) idct(x);
+Ut_fun = @(x) dct(x);
     
-    E_fun = @(x) CsTools.E_fun1(x, pix_idx);
-    Et_fun = @(x) CsTools.Et_fun1(x, pix_idx, n, n);
+E_fun = @(x) CsTools.E_fun1(x, pix_idx);
+Et_fun = @(x) CsTools.Et_fun1(x, pix_idx, n, n);
 %%        
 clc
 im_og = im_og / max(im_og(:));
