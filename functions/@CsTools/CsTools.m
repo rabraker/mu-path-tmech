@@ -13,7 +13,7 @@ classdef CsTools
     
     Mpix = pixvec2mat(vpix, nrows, ncol);
     
-    [pix_mask, pix_idx] = mu_path_mask(mupath_len, n, m, samplingRatio, repeat_sampling);
+    [pix_mask, pix_idx, npaths] = mu_path_mask(mupath_len, n, m, samplingRatio, repeat_sampling);
     
     [Ir] = bregman_split_delxy(I,E,epsy, epsx, mu, lam,gam,maxiter,tol)
     
