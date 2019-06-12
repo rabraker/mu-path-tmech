@@ -93,7 +93,7 @@
   comparable imaging rates using both the peak signal-to-noise ratio and the
   structured similarity index metric
   and a new metric we call the relative damage index.
-  \todo{Will this conclusion still hold?}
+  \todo{Re-write abstract, especially conclusions}
   These experiments demonstrate that at slow
   scan rates, the $\mu-$path scheme produces similar image quality with
   significantly less sampling (and thus less tip-sample interaction) and that at
@@ -210,6 +210,9 @@ simulations, and a preliminary implementation, demonstrates that the approach
 can achieve significant scanning time reduction while maintaining faithful image
 reconstruction \cite{maxwell2014compressed,Luo:2015tu, braker_hardware_2018}. This paper
 builds upon that earlier work in several significant ways.
+
+
+
 % % ------------------ TKTKTKT ------------------
 % \todo{Strike this?}
 % First, we demonstrate
@@ -268,8 +271,8 @@ measure that describes how each of the rows of $R$ (the measurements)
 In the following, we assume that $U^TU=I$, though in the simulation and
 experimental results, we take $U$ as the Discrete Cosine Transform (DCT) basis.
 The DCT basis generally keeps a good balance between achieving a low
-mutual coherence between $U$ and the required structure of the AFM sensing
-matrices $R$ and providing a high sparsity of typical AFM sample images. 
+mutual coherence between $U$ and the $\mu$-path sensing
+matrices $R$ and providing a high sparsity for typical AFM sample images. 
 	
 Basis pursuit with denoising (BPDN) is one common realization of the CS-based
 reconstruction problem, and is given by the optimization
@@ -342,12 +345,12 @@ optimization objective. That is, \eqref{op:bp} is modified to
   \min_{x\in Q_p}~f(x) &= \min_{x\in Q_p} \left\|U^Tx\right\|_1
                          + \alpha\left\|D_vx\right\|_1
                          + \beta\left\|D_hx\right\|_1 \label{op:bp_tv}\\
-                       &=\min_{x\in Q_p} \left\|Wx\right\|_1 \label{op:bp_tvW}
+                       &=\min_{x\in Q_p} \left\|W^Tx\right\|_1 \label{op:bp_tvW}
                          % \quad W = \begin{bmatrix}U&\alpha_hD^T_h&\alpha_vD^T_v \end{bmatrix}^T \nonumber
 \end{align}
 where
 \begin{equation*}
-W = \begin{bmatrix}U&\alpha_hD^T_h&\alpha_vD^T_v \end{bmatrix}^T
+W = \begin{bmatrix}U^T&\alpha D_h&\beta D_v \end{bmatrix}
 \end{equation*}
 with ${D_v x=\text{vec}(\nabla_v X)}$ (resp., ${D_v x=\text{vec}(\nabla_v X)}$) representing a 
 discrete gradient of a matrix in the vertical (resp., horizontal) direction (see, e.g., \cite[Section 6.1,]{becker_nesta_2011}). 
@@ -369,75 +372,77 @@ The parameters $\alpha$ and $\beta$ are weighting parameters.
 The description of BPVV in \eqref{op:bp_tvW} can be interpreted as changing our assumption of sparsity in the DCT basis to assuming sparsity in an overcomplete dictionary \cite{candes_redundant_2011}.
 \todo{I believe this is correct: Sean/Yufan can you confirm or reject?}
 
-Moreover, when written as \eqref{op:bp_tvW}, the problem is in a form that may be solved with NESTA~\cite{becker_nesta_2011}. For completeness, we give an overview here.
-To that end, we re-write the cost $f(x)$ in \eqref{op:bp_tvW} as
-\begin{equation*}
-  f(x) = \max_{u\in Q_d} \left\langle u, Wx \right\rangle,\quad Q_d = \{u:~||u||_{\infty} \leq 1\}.
-\end{equation*}
+Moreover, when written as \eqref{op:bp_tvW}, the problem is in a form that may be solved with NESTA~\cite{becker_nesta_2011}.
 
-One of the core features of the NESTA algorithm is to replace the non-smooth functional $f(x)$ with a smoothed approximation
-\begin{equation}
-  f_{\mu} = \max_{u\in Q_d} \left\langle u,
-    W x \right\rangle - \frac{\mu}{2}||u||_2^2. \label{eqn:fcn_prox}
-\end{equation}
-The gradient of \eqref{eqn:fcn_prox} is given by
-\begin{equation*}
-  \nabla f_{\mu}(x)[i] = W^Tu_{\mu}(x)
-\end{equation*}
-where
-\begin{equation*}
-  (u_{\mu}(x))[i] = 
-\begin{cases}
-    \mu^{-1}(Wx)[i], & |W x[i]| < \mu,\\
-    \text{sgn}(W x[i]), & \text{else}.
-  \end{cases}
-\end{equation*}
-The optimization \eqref{op:bp_tv} may now be solved using Algorithm~\ref{ag:NESTA}.
+% For completeness, we give an overview here.
+% To that end, we re-write the cost $f(x)$ in \eqref{op:bp_tvW} as
+% \begin{equation*}
+%   f(x) = \max_{u\in Q_d} \left\langle u, W^Tx \right\rangle,\quad Q_d = \{u:~||u||_{\infty} \leq 1\}.
+% \end{equation*}
 
-\begin{algorithm}
-  \SetKwInOut{Initialize}{Initialize} \SetKwInOut{Output}{Output}
-		
-  \Initialize{$x \in Q_p, \mu=0.9||W x_0||_{\infty}$, $L_{\mu} = \frac{1}{\mu}||W||^2_2$}
-    % $x^{k+1} = x^{k}$\\
-  \While{$\mu < \mu_{\textrm{final}}$ } {
-    $k=0$\\
-      \While{$\Delta f_{\mu} > \delta$} {
-        $\alpha_k = \frac{1}{2}(k+1)$ \\
-        $\tau_k = \frac{2}{k+3}$ \\
-        $\displaystyle y_k = \text{arg } \min_{x\in Q_p}
-          \frac{L_{\mu}}{2}||x - x_k||_2^2 + \langle \nabla f(x_k),~ x\rangle$\\
-        $\displaystyle {z_k = \text{arg } \min_{x\in Q_p} \frac{L_{\mu}}{2}||x-x_0||_2^2 +
-        \langle \sum_{i=0}^k \alpha_i \nabla f(x_i), ~x \rangle}$\\
-        $x_{k+1} = \tau_kz_k + (1-\tau_k)y_k$\\
-        $k \leftarrow k + 1$\\
-      }
-      $x_0 = x_k$\\
-      $\mu = \gamma \mu$\\
-      $L_{\mu} = (1/\mu)||W||^2_2$
-    }
-  \Output{Reconstruction $x_k$}
-  \caption{NESTA algorithm}
-  \label{ag:NESTA}
-\end{algorithm}
-  \todo{seems like a waste of space to reprint the algo, since its really no different than the reference}
-
-
-In the termination condition for the inner loop, $\Delta f_{\mu} = |f_{\mu}(x_k) - \bar{f}_{\mu}(x_k)|/\bar{f}_{\mu}(x_k)$ where
-\begin{equation}
-\bar{f}_{\mu}(x_k) = \frac{1}{\min\{10, k\}} \sum_{\ell=1}^{\min\{10,k\}} f_{\mu}(x_{k-\ell})
-\end{equation}
-When $RR^T=I$, the sub-problems in lines 6 and 7 have a closed-form solution. Details can be found in~\cite{becker_nesta_2011}.
-
-% The sub-problems in lines 6 and 7 have the form
+% One of the core features of the NESTA algorithm is to replace the non-smooth functional $f(x)$ with a smoothed approximation
 % \begin{equation}
-%   p = \textrm{arg } \min_{x\in Q_p} \frac{L}{2}||x - r|| + \langle g,~x - r\rangle
+%   f_{\mu} = \max_{u\in Q_d} \left\langle u,
+%     W^T x \right\rangle - \frac{\mu}{2}||u||_2^2. \label{eqn:fcn_prox}
 % \end{equation}
-% for some vectors $g$ and $r$ and, as shown in~\cite{becker_nesta_2011}, have a closed-form solution given by
-% \begin{align}
-%   \lambda & = \textrm{max}(0, \sigma^{-1}\left| b - Rq\right| - L\\
-%   q &= r - L^{-1}g\\
-%   p &= \left(I - \frac{\lambda}{\lambda + L} R^TR\right)\left( \frac{\lambda}{L}R^Tb + q\right).
-% \end{align}
+% The gradient of \eqref{eqn:fcn_prox} is given by
+% \begin{equation*}
+%   \nabla f_{\mu}(x)[i] = Wu_{\mu}(x)
+% \end{equation*}
+% where
+% \begin{equation*}
+%   (u_{\mu}(x))[i] = 
+% \begin{cases}
+%     \mu^{-1}(W^Tx)[i], & |W^T x[i]| < \mu,\\
+%     \text{sgn}(W^T x[i]), & \text{else}.
+%   \end{cases}
+% \end{equation*}
+% The optimization \eqref{op:bp_tv} may now be solved using Algorithm~\ref{ag:NESTA}.
+
+% \begin{algorithm}
+%   \SetKwInOut{Initialize}{Initialize} \SetKwInOut{Output}{Output}
+		
+%   \Initialize{$x \in Q_p, \mu=0.9||W^T x_0||_{\infty}$, $L_{\mu} = \frac{1}{\mu}||W||^2_2$}
+%     % $x^{k+1} = x^{k}$\\
+%   \While{$\mu < \mu_{\textrm{final}}$ } {
+%     $k=0$\\
+%       \While{$\Delta f_{\mu} > \delta$} {
+%         $\alpha_k = \frac{1}{2}(k+1)$ \\
+%         $\tau_k = \frac{2}{k+3}$ \\
+%         $\displaystyle y_k = \text{arg } \min_{x\in Q_p}
+%           \frac{L_{\mu}}{2}||x - x_k||_2^2 + \langle \nabla f(x_k),~ x\rangle$\\
+%         $\displaystyle {z_k = \text{arg } \min_{x\in Q_p} \frac{L_{\mu}}{2}||x-x_0||_2^2 +
+%         \langle \sum_{i=0}^k \alpha_i \nabla f(x_i), ~x \rangle}$\\
+%         $x_{k+1} = \tau_kz_k + (1-\tau_k)y_k$\\
+%         $k \leftarrow k + 1$\\
+%       }
+%       $x_0 = x_k$\\
+%       $\mu = \gamma \mu$\\
+%       $L_{\mu} = (1/\mu)||W||^2_2$
+%     }
+%   \Output{Reconstruction $x_k$}
+%   \caption{NESTA algorithm}
+%   \label{ag:NESTA}
+% \end{algorithm}
+%   \todo{seems like a waste of space to reprint the algo, since its really no different than the reference}
+
+
+% In the termination condition for the inner loop, $\Delta f_{\mu} = |f_{\mu}(x_k) - \bar{f}_{\mu}(x_k)|/\bar{f}_{\mu}(x_k)$ where
+% \begin{equation}
+% \bar{f}_{\mu}(x_k) = \frac{1}{\min\{10, k\}} \sum_{\ell=1}^{\min\{10,k\}} f_{\mu}(x_{k-\ell})
+% \end{equation}
+% When $RR^T=I$, the sub-problems in lines 6 and 7 have a closed-form solution. Details can be found in~\cite{becker_nesta_2011}.
+
+% % The sub-problems in lines 6 and 7 have the form
+% % \begin{equation}
+% %   p = \textrm{arg } \min_{x\in Q_p} \frac{L}{2}||x - r|| + \langle g,~x - r\rangle
+% % \end{equation}
+% % for some vectors $g$ and $r$ and, as shown in~\cite{becker_nesta_2011}, have a closed-form solution given by
+% % \begin{align}
+% %   \lambda & = \textrm{max}(0, \sigma^{-1}\left| b - Rq\right| - L\\
+% %   q &= r - L^{-1}g\\
+% %   p &= \left(I - \frac{\lambda}{\lambda + L} R^TR\right)\left( \frac{\lambda}{L}R^Tb + q\right).
+% % \end{align}
 
 
 A comparison between BPDN and BPVV is shown in
@@ -473,229 +478,9 @@ implemented using a 25 kHz sampling rate.
 
 
 % =========================================================================
-\section{Control}\label{sec:control}
-The control structure for each axis is similar and essentially consists of a set of filters in series with a PI controller. The open-loop frequency response for the $Z$-axis is shown in Fig.~\ref{fig:z_control} (black curve) and in Fig.~\ref{fig:mimo_frf_uxuy} for the $X$ and $Y$ axes (red curves). The first resonance of each axis is the bending mode. For the $Z$ axis, this resonance is at 215~Hz and at approximately 350~Hz for the $X$ and $Y$ axes.
-
-The filter for the $Z$-axis controller inverts the complex-conjugate pole-zero pair at 215~Hz. This allows the gain of the PI controller to be increased substantially. The closed-loop achieves a bandwidth of about 450~Hz, as shown by the black curve in Fig.~\ref{fig:z_control}.
-
-We take a similar approach to the $X$ and $Y$ axes. The filter inverts the bending modes at 350~Hz and adds a notch filter for the main resonant peak at 650~Hz. The resulting closed-loops are shown in the (1,1) and (2,2) positions of Fig.~\ref{fig:mimo_frf_uxuy}. In general, the $X$-axis positioning requirements are more stringent for both CS and raster scanning
-
-Unfortunately, as Fig.~\ref{fig:mimo_frf_uxuy} makes clear, there is a strong cross-coupling between the axes. The coupling from the horizontal plane to the $Z$ axis is particularly problematic and our SISO control scheme does little to attenuate the resonances of $G_{Z,u_X}$ and $G_{Z,u_Y}$. In particular, there are modes in both these transfer functions at 215 and 505 Hz that do not appear in a SISO model of $G_{X,u_x}$ or $G_{y,u_Y}$.
-
-For raster scans, the frequency content of the $X$-axis reference (which is a triangle wave) decays like $1/n^2$ with a gain proportional to the raster frequency. In contrast, the $X$-axis reference for a $\mu$-path scan is composed of a sequence of steps and ramps. The inclusion of the (discontinuous) steps means we should expect the $\mu$-path $X$ reference to decay like $1/n$. 
-Thus,  while the cross-coupling can induce $Z$-axis vibrations for faster raster scans, it is especially problematic for $\mu$-path scanning. In principle, one could mitigate these issues with a full MIMO control design. In this work, we opt for a much simpler feedforward scheme described in the next subsection.
-
-% The control law used for the $Y$-axis is a simple PI controller of the
-% form
-% \begin{equation}
-%   \frac{U(z)}{E_Y(z)}=D(z) = \frac{K_Iz}{z-1},
-%   \label{eqn:dzI}
-% \end{equation}
-% where, the error signal $E_Y(z) = Y(z)-R_Y$.
-% 
-% \todo{Should I implement something better for $Y$-axis, e.g., cancel complex
-%   pole-zeros at 350 hz and add notch filter???}
-
-% The $Z$-axis control is slightly more complicated than the simple $Y$-axis
-% integral controller and is described in the following subsection.
-% \subsection{Z-axis Control Design}\label{sec:zaxis_cs_control}
-% The main challenge to increasing the $Z$-axis bandwidth is the bending mode
-% resonance at 215 Hz, which can be seen in the FRF from $u_Z$ to $Z_{d}$ in
-% Fig.~\ref{fig:z_control} (blue curve). We address this by inverting the complex
-% pole-zero pair at 215 Hz. Thus, the entire $Z$-axis controller consists of a PI
-% controller, $D_I(z)$ cascaded with the resonance inversion, $D^{-1}(z)$, as shown in Fig.~\ref{fig:afm_bd_dinv}. The DC-gain
-% of $D$ is (approximately) the same as the DC-gain of the plant.
-% The inclusion of $D^{-1}$ allows us to substantially increase the PI gain and
-% achieve a closed-loop bandwidth of about 480 Hz. This is the black curve in Fig.~\ref{fig:z_control}.
-
-
-% There are multiple advantages to this method: first,
-% an inverse compensator still makes sense as a feedforward, open-loop compensator
-% if the feedback path is broken. This situation can and does occur during parts
-% of the CS cycle. Second, the inverse compensator
-% requires no tuning as it is defined only by a fit to the measured FRF.
-
-% One challenge to the inversion approach is both the system gain and resonance at 215~Hz
-% changes not only day-to-day but also (and especially) when changing cantilevers and our inversion is not robust to this. However, because $D^{-1}$ is defined purely by a second order fit to a small band of the FRF, updating the compensator can be automated.
-% \todo{What else to say here?}
-
-
-\begin{figure}[t!]
-  \centering
-  \includesvg[width=1\columnwidth]{figures/z_control_design.svg}
-  \caption{FRFs of the $Z$-axis. The blue curve is the open loop response from $u_Z$ to deflection. By inverting the bending mode at 215~Hz, we achieve the black curve in closed-loop.}
-  \label{fig:z_control}
-\end{figure}
-
-
-\begin{figure*}
-  \centering
-  \includesvg[width=1\textwidth]{figures/MIMO_CL_uxuy.svg}
-  \caption{MIMO closed and open loop FRFs, showing the dramatic affect on $G_{Z,u_X}$ and $G_{Z,u_Y}$ when the feedforward compensators are used for the $X$ and $Y$ axes.}
-  \label{fig:mimo_frf_uxuy}
-\end{figure*}
-
-\begin{figure*}[t]
-  \centering
-  \includegraphics[width=0.75\textwidth]{figures/AFM_loop_z.pdf}
-  \caption{Block diagram of the $Z$-axis control loop. The anti-windup is active
-    for decision index $i\in\{0,1,5\}$, which correspond to states such that
-    $r_Z=\rzup$.}
-  \label{fig:afm_bd_dinv}
-\end{figure*}
-
-% One cause for such different gains is variation in the length of the cantilever
-% (and possibly how the laser was adjusted). This is illustrated in
-% Fig.~\ref{fig:z_axis_gain}. Here, we consider a cantilever with length $h$ that
-% rests on the surface of some specimen with a nominal angle of $\theta$. In this
-% drawing, the laser is perpendicular to the sample surface. Given a vertical
-% perturbation $\Delta z$, we have that
-% \begin{equation}
-%   \Delta \alpha \approx \frac{d}{h} \Delta z,
-% \end{equation}
-% where $d$ is the distance from the cantilever to the detector and
-% $\Delta \alpha$ is the change in position of the incident laser spot on the
-% detector. Thus, given the same change in the vertical position, we will see a
-% larger change in the deflection signal for a shorter cantilever. In other words,
-% a short cantilever will exhibit a larger DC-gain in the $G_{u_Z,Z_d}$ transfer
-% function.
-% \begin{figure}
-%   \begin{minipage}[t]{.46\textwidth}
-%     % L B R T
-%     \includesvg[width=1\textwidth]{figures/z_cant_evolution.svg}
-%     \caption{FRFs of three different cantilevers, showing substantial
-%       differences in the DC-gain and smaller, but still significant differences
-%       the frequency of the modes.}
-%     \label{fig:z_evolution}
-%   \end{minipage}
-%   \hfill
-%   \begin{minipage}[t]{.46\textwidth}
-%     % L B R T
-%     \includegraphics[width=1\textwidth]{figures/z_axis_gain_schematic-crop.pdf}
-%     \caption{Schematic drawing of how the length of the cantilever affects the
-%       $z$-axis gain.}
-%     \label{fig:z_axis_gain}
-%   \end{minipage}
-% \end{figure}
-
-% Fig.~\ref{fig:z_evolution} shows the frequency response of $G_{u_Z,Z_d}$ near
-% the bending mode for three different cantilevers. Cantilevers (A) and (B) are
-% both AppNano SICON cantilevers and have a nominal length of 450 microns.
-% Cantilever (C) is an NCLR and has a nominal length of 225 microns.
-% Interestingly, the SICON cantilevers show substantial variation. Unfortunately,
-% the manufacture does not provide a tolerance on the nominal length, so it is
-% difficult to tease out whether that variation is due to manufacturing
-% variability or other factors not explained by this analysis.
-
-% Notably, the frequency of the pole and zero do appear to shift and our inversion
-% scheme is not robust to this. To deal with this, I have built a (mostly)
-% automated system ID routine into the imaging software. This routine is a
-% specialized version of the techniques described previously in
-% Chapter~\ref{chap:modeling}. First, it obtains an FRF of the bending mode over a
-% frequency range spanning 180~Hz to 240~Hz (the same set of points as in
-% Fig.~\ref{fig:z_evolution}). The input and output sinusoids are demodulated in
-% quasi-realtime as they come off the FPGA. Once this is complete, a 2-pole,
-% 2-zero transfer function model of the form
-% \begin{equation*}
-%   \hat{D}(z) = k \frac{z^2 + b_1z + b_o}{z^2 + a_1z + a_o}
-% \end{equation*}
-% is fit to the FRF, using the same optimization scheme as \eqref{eqn:logfit}.
-% This is done inside the LabView VI by calling a custom DLL, which leverages
-% CMPFIT~\cite{cmpfit,markwardt_mpfit_2009}, a
-% Levenberg-Marquardt~\cite{more_levenberg_1978} routine written in C. To promote
-% a stable fit, the optimization enforces the necessary conditions that
-% \begin{align*}
-%   |a_1| &< 2, \quad  |a_o| < 1\\
-%   |b_1| &< 2, \quad  |b_o| < 1.
-% \end{align*}
-% The routine then checks that both the poles and zeros are indeed stabile, saves
-% the data to a JSON file and passes the transfer function parameters into the
-% imaging portion of the application which finally uploads the parameters into the
-% FPGA imaging bitfile. Optionally, one can by-pass this step and simply load the
-% previously saved JSON file.
-
-% One of the benefits of this approach is that the DC-gain of the transfer
-% function $G_{u_Z,Z_d}$ becomes (approximately) normalized to unity, which makes
-% re-tuning the control system after changing tips far easier to non-existent. The
-% benefit to automating the process is that it drastically reduces the friction
-% required to obtain an up-to-date compensator, which means that an up-to-date
-% compensator is more likely to be used~\cite{abramovitch_25years_2015}.
-
-
-% Fig.~\ref{fig:afm_bd_dinv} shows a block diagram if the $Z$-axis control loop.
-% We point out a small change from Chapter~\ref{chap:cs_init}: the addition of
-% $D^{-1}(z)$ changes the correct signal to use to represent the sample surface.
-% If we take the output of the entire compensator, $u_Z=D_ID^{-1}e_z$, then we
-% will get a lot of wiggles in the resulting signal. Rather, we need to take only
-% the output of the integrator to represent the surface.
-% % \begin{figure}
-% %   \centering
-% %   \includegraphics[width=1\columnwidth]{figures/AFM_loop_Dinv-crop.pdf}
-% %   \caption{Block diagram of the $Z$-axis control loop with the inverse
-% %   compensator. }
-% %   \label{fig:afm_bd_dinv}
-% % \end{figure}
-% \begin{figure*}[t]
-%   \centering
-%   \includegraphics[width=0.75\textwidth]{figures/AFM_loop_Dinv_antiwup-crop.pdf}
-%   \caption{Block diagram of the $Z$-axis control loop. The anti-windup is active
-%     for decision index $i\in\{0,1,5\}$, which correspond to states such that
-%     $r_Z=r_{Z,\textrm{up}}$.}
-%   \label{fig:afm_bd_dinv_final}
-% \end{figure*}
-
-
-% It should be noted that this control is sufficient to eliminate the limit-cycle
-% behavior described in Section~\ref{sec:aproachspeed}:
-
-% % \begin{figure}[tbhp!]
-% %   \centering\includegraphics[width=3.0in]{figures-SBA/uz_multiplexer_KI_anderssonLab2}
-% %   \caption{The $z$-piezo movement is driven by switching between feedback from
-% %   the $z$-axis position signal and from the deflection signal. The shaded area
-% %   represents the digital control system, while the non-shaded region is the
-% %   physical system.}
-% %   \label{fig:zMultiplex_anderssonLab}
-% % \end{figure}
-	
-% As illustrated in Fig.~\ref{fig:zMultiplex_anderssonLab}, the voltage applied to
-% the $z$-piezo is adjusted by switching the feedback signal between the $z$-axis
-% position sensor (when the tip is off the surface) and the deflection signal
-% (when the tip is engaged). The difference equation associated with
-% \eqref{eqn:dzI} for the $z$-axis is
-% \begin{equation}
-%   u_z(k) = K_Ie(k) + u_z(k-1).
-%   \label{eqn:intdiff}
-% \end{equation}
-
-% In the $z$-axis position control mode, the $z$-axis position is controlled to a
-% fixed value $z_{ref}$ which, in general, is slightly above the sample surface.
-% The difference between the measured $z$-axis position and $z_{ref}$,
-% ${e(k) = z_{ref} - z(k)}$, is used as the error signal. In the deflection
-% control mode, when the tip is in contact with the sample, the deflection signal
-% is controlled to a fixed value $l_{ref}$ to ensure a constant tip-sample force.
-% The sample surface acts as a disturbance to the control loop. Therefore, the
-% $z$-axis position measurements can be taken to represent the surface topography
-% of the sample. In this case, the difference between the measured deflection and
-% $l_{ref}$ is the error, $e(k) = l_{ref} - l(k)$.
-	
-% We note that the $z$-axis control described here operates the AFM in constant
-% force mode during imaging. It is straightforward to perform scanning under
-% different AFM modes, such as tapping mode, simply by adjusting the signals and
-% control involved in the vertical loop.
-
-\subsection{Feedforward Control}\label{sec:ff_control}
-% In our AFM, there is a strong coupling between the horizontal axes and vertical deflection. Fig.~\ref{fig:mimo_frf_uxuy} shows a MIMO FRF for $u_X$ and $u_Y$ to the outputs in each axis. The dotted black curves are the open loop responses and the dashed red curves are the nominal closed-loop responses. Though the $Z$-direction inputs are not shown, the closed loop responses include the $Z$-axis controller. Note that, especially for $H_{z,u_X}$, the closed-loop response is barely improved over the open loop response and in particular, there is a sharp resonance at 215~Hz and 505~Hz. To deal with this, we employ two different strategies for CS and raster scanning.
-
-For CS scanning, we insert a feed-forward filter with three notches, one at 215~Hz, one at 350~Hz and one at 505~Hz. We design a similar feed-forward filter for the $Y$-axis. Both filters are shown in Fig.~\ref{fig:mimo_frf_uxuy} as the solid pink curves and the resulting overall FRF is shown as the solid blue curves, which show a dramatic reduction in the cross coupling. A similar affect could be achieve by using a simple low-pass filter. However, to achieve the same 40~dB of attenuation of the mode at 215 Hz, would require, e.g., that a two-pole LPF have its cut-off frequency at about 20~Hz. 
-
-For raster scanning, we use a truncated Fourier series, where each Fourier coefficient is scaled by the inverse of the closed-loop FRF at the corresponding frequency. We truncate this series such that the highest frequency is smaller than 200 Hz. See, e.g., \cite{clayton_review_2009} for more details on this strategy. Note that this scheme implies that the effective bandwidth of the $X$-axis controller is higher while raster scanning than while CS-scanning. On the other hand, it also implies that the for faster scan rates, fewer Fourier coefficients are used, and so the approximation to a triangle wave is worse.
-
-% =========================================================================
 \section{Implementation}\label{sec:implementation}
 % =========================================================================
-	
-% =========================================================================
-\subsection{State machine}
+
 Implementing the $\mu$-path scheme involves operating the AFM in several
 distinct stages. In the $xy$-direction, the system must transition from tracking
 a step command (in the transition to a new measurement location) to tracking a
@@ -753,8 +538,6 @@ which selects either the scanning setpoint $r_{Z,s}$ or the retraction setpoint
 $r_{Z,\textrm{up}}$ based the current state.
 When dis-engagement does occur, the $Z$-axis control loop implements an anti-windup scheme.
 
-
-
 % Ultimately the concern is damage to the sample and tip,
 % which is caused by the force imparted by the cantilever probe
 % \cite{clayton_review_2009}. The deflection signal, though un-calibrated (meaning
@@ -766,32 +549,39 @@ When dis-engagement does occur, the $Z$-axis control loop implements an anti-win
 % Fig.~\ref{fig:z_drift}), and have in some way decided that this is sufficient,
 % all else being equal, to not damage things too much.
 
-
-\subsection{The pre-scan}
-\begin{figure*}
-  \begin{subfigure}{.33\textwidth}
-    \includesvg[width=1\textwidth]{figures/zbounce_uz_example.svg}
-    \caption{ }
-    % \label{fig: }
-  \end{subfigure}
-  \begin{subfigure}{.33\textwidth}
-    \includesvg[width=1\textwidth]{figures/prescan_uz_example.svg}
-    \caption{ }
-    \label{fig:uz_prescan}
-  \end{subfigure}
-  \begin{subfigure}{.33\textwidth}
-    \includesvg[width=1\textwidth]{figures/prescan_zbounce_PSD.svg}
-    \caption{ }
-    % \label{fig: }
-  \end{subfigure}
-  \caption{(a) A ``$Z$-bounce'' experiment where the $XY$-stage is motionless
-    and the cantilever is repeatedly engaged and disengaged. (b) One cycle of a
-    tightly packed set of CS-cycles where the movement between each measurement
-    location is 0. (c) PSDs from the portions of the trajectories which are
-    colored blue and turquoise, averaged over many such cycles, demonstrating
-    that the scan process itself reduces vibration in the $Z$-axis.}
-  \label{fig:prescan_difference}
+\begin{figure*}[ht!]
+  \centering
+  \includegraphics[width=1\textwidth]{figures/AFM_loop_xyz.pdf}
+  \caption{Block diagram of the $Z$-axis control loop. The anti-windup is active
+    for decision index $i\in\{0,1,5\}$, which correspond to states such that
+    $r_Z=\rzup$.}
+  \label{fig:afm_bd_dinv}
 \end{figure*}
+\subsection{The pre-scan}
+% \begin{figure*}
+%   \begin{subfigure}{.33\textwidth}
+%     \includesvg[width=1\textwidth]{figures/zbounce_uz_example.svg}
+%     \caption{ }
+%     % \label{fig: }
+%   \end{subfigure}
+%   \begin{subfigure}{.33\textwidth}
+%     \includesvg[width=1\textwidth]{figures/prescan_uz_example.svg}
+%     \caption{ }
+%     \label{fig:uz_prescan}
+%   \end{subfigure}
+%   \begin{subfigure}{.33\textwidth}
+%     \includesvg[width=1\textwidth]{figures/prescan_zbounce_PSD.svg}
+%     \caption{ }
+%     % \label{fig: }
+%   \end{subfigure}
+%   \caption{(a) A ``$Z$-bounce'' experiment where the $XY$-stage is motionless
+%     and the cantilever is repeatedly engaged and disengaged. (b) One cycle of a
+%     tightly packed set of CS-cycles where the movement between each measurement
+%     location is 0. (c) PSDs from the portions of the trajectories which are
+%     colored blue and turquoise, averaged over many such cycles, demonstrating
+%     that the scan process itself reduces vibration in the $Z$-axis.}
+%   \label{fig:prescan_difference}
+% \end{figure*}
 After the tip-descent, we begin scanning in a ``pre-scan'' phase (state (3)).
 During this phase, 
 
@@ -809,6 +599,7 @@ there are as few disturbances as possible entering the control loop. Finally,
 the left panel of Fig.~\ref{fig:prescan_difference} shows the PSDs of the left
 and right panels (but averaged over many similar cycles). Note that the PSD is
 only computed from the combination of the blue and turquoise signals.
+
 
 What we see then, is that, for some unknown (to me) reason, scanning reduces the
 amount of energy that shows up near 215 Hz. The idea behind the pre-scan is to
@@ -829,47 +620,100 @@ per $\mu$-path.
 % position sensor, we would not care about the drift transient: the control signal
 % drifts to keep the $Z$-position constant.
 
-% \section{Post-processing}\label{sec:post_process}
-% Here, we discuss how we post-process the raster and CS images.
+\subsection{Control}\label{sec:control}
+\begin{figure}
+  \centering
+  \includesvg[width=1\columnwidth]{figures/z_control_design.svg}
+  \caption{FRFs of the $Z$-axis. The blue curve is the open loop response from $u_Z$ to deflection. By inverting the bending mode at 215~Hz, we achieve the black curve in closed-loop.}
+  \label{fig:z_control}
+\end{figure}
 
-% \subsection{Aligning images via cross-correlation}\label{sec:align}
-% To get metrics that are meaningful in any sense, we need the master image and
-% the comparee to be aligned. We take two steps to help ensure this. First, during
-% each batch of images, the nPoint stage remains under closed loop control.
-% Between images, the FPGA control loop idles in state-0, as discussed above in
-% Section~\ref{sec:idle_0}. This was not necessary duing the initial
-% implementation because then, the nPoint stage was controlled by the nPoint PI
-% controller. While this helps things substantially, there is still an alignment
-% issue between subsequent images, which I believe stems from the original Agilent
-% piezo tube, which is a three axis tube. The $XY$-axes of the tube are
-% uncontrolled during imaging, and in fact, after a firmware ``upgrade'', the
-% option to close the $XY$-loop has been grayed out in the PicoView software.
+The control structure for each axis is similar and essentially consists of a set of filters in series with a PI controller. The open-loop frequency response for the $Z$-axis is shown in Fig.~\ref{fig:z_control} (black curve) and in Fig.~\ref{fig:mimo_frf_uxuy} for the $X$ and $Y$ axes (red curves). The first resonance of each axis is the bending mode. For the $Z$ axis, this resonance is at 215~Hz and at approximately 350~Hz for the $X$ and $Y$ axes.
 
-% To help deal with this, we compare sub-slices of the master image and the
-% comparee. The results in this chapter use a sub-image obtained by removing a
-% border of 25 pixels from each edge. Thus, for the purposes of comparison, the
-% original 512$\times$512 pixel image becomes a 462$\times$462 pixel image. Let
-% $X$ represent the original, master image and ${\tilde X=X_{25:-25, 25:-25}}$,
-% using Python notation. To find the correct subslice of the comparee, we use a
-% two dimensional cross-correlation, which is defined as
+The filter for the $Z$-axis controller inverts the complex-conjugate pole-zero pair at 215~Hz. This allows the gain of the PI controller to be increased substantially. The closed-loop achieves a bandwidth of about 450~Hz, as shown by the black curve in Fig.~\ref{fig:z_control}.
+
+We take a similar approach to the $X$ and $Y$ axes. The filter inverts the bending modes at 350~Hz and adds a notch filter for the main resonant peak at 650~Hz. The resulting closed-loops are shown in the (1,1) and (2,2) positions of Fig.~\ref{fig:mimo_frf_uxuy}. In general, the $X$-axis positioning requirements are more stringent for both CS and raster scanning
+
+Unfortunately, as Fig.~\ref{fig:mimo_frf_uxuy} makes clear, there is a strong cross-coupling between the axes. The coupling from the horizontal plane to the $Z$ axis is particularly problematic and our SISO control scheme does little to attenuate the resonances of $G_{Z,u_X}$ and $G_{Z,u_Y}$. In particular, there are modes in both these transfer functions at 215 and 505 Hz that do not appear in a SISO model of $G_{X,u_x}$ or $G_{y,u_Y}$.
+
+For raster scans, the frequency content of the $X$-axis reference (which is a triangle wave) decays like $1/n^2$ with a gain proportional to the raster frequency. In contrast, the $X$-axis reference for a $\mu$-path scan is composed of a sequence of steps and ramps. The inclusion of the (discontinuous) steps means we should expect the $\mu$-path $X$ reference to decay like $1/n$. 
+Thus,  while the cross-coupling can induce $Z$-axis vibrations for faster raster scans, it is especially problematic for $\mu$-path scanning. In principle, one could mitigate these issues with a full MIMO control design. In this work, we opt for a much simpler feedforward scheme described in the next subsection.
+
+% The control law used for the $Y$-axis is a simple PI controller of the
+% form
 % \begin{equation}
-%   Z_{k,\ell} = \sum_{m=0}^{M-1}\sum_{n=0}^{N-1} \tilde{X}_{m-k, n-\ell}Y_{m-k, n-\ell}.
+%   \frac{U(z)}{E_Y(z)}=D(z) = \frac{K_Iz}{z-1},
+%   \label{eqn:dzI}
 % \end{equation}
-% where $Y$ is the comparee.
+% where, the error signal $E_Y(z) = Y(z)-R_Y$.
+% 
+% \todo{Should I implement something better for $Y$-axis, e.g., cancel complex
+%   pole-zeros at 350 hz and add notch filter???}
 
-% The index of the maximum value of the matrix $Z$
+% The $Z$-axis control is slightly more complicated than the simple $Y$-axis
+% integral controller and is described in the following subsection.
+% \subsection{Z-axis Control Design}\label{sec:zaxis_cs_control}
+% The main challenge to increasing the $Z$-axis bandwidth is the bending mode
+% resonance at 215 Hz, which can be seen in the FRF from $u_Z$ to $Z_{d}$ in
+% Fig.~\ref{fig:z_control} (blue curve). We address this by inverting the complex
+% pole-zero pair at 215 Hz. Thus, the entire $Z$-axis controller consists of a PI
+% controller, $D_I(z)$ cascaded with the resonance inversion, $D^{-1}(z)$, as shown in Fig.~\ref{fig:afm_bd_dinv}. The DC-gain
+% of $D$ is (approximately) the same as the DC-gain of the plant.
+% The inclusion of $D^{-1}$ allows us to substantially increase the PI gain and
+% achieve a closed-loop bandwidth of about 480 Hz. This is the black curve in Fig.~\ref{fig:z_control}.
+
+% There are multiple advantages to this method: first,
+% an inverse compensator still makes sense as a feedforward, open-loop compensator
+% if the feedback path is broken. This situation can and does occur during parts
+% of the CS cycle. Second, the inverse compensator
+% requires no tuning as it is defined only by a fit to the measured FRF.
+
+
+\begin{figure*}
+  \centering
+  \includesvg[width=1\textwidth]{figures/MIMO_CL_uxuy.svg}
+  \caption{MIMO closed and open loop FRFs, showing the dramatic affect on $G_{Z,u_X}$ and $G_{Z,u_Y}$ when the feedforward compensators are used for the $X$ and $Y$ axes.}
+  \label{fig:mimo_frf_uxuy}
+\end{figure*}
+
+
+% As illustrated in Fig.~\ref{fig:zMultiplex_anderssonLab}, the voltage applied to
+% the $z$-piezo is adjusted by switching the feedback signal between the $z$-axis
+% position sensor (when the tip is off the surface) and the deflection signal
+% (when the tip is engaged). The difference equation associated with
+% \eqref{eqn:dzI} for the $z$-axis is
 % \begin{equation}
-%   (i^*,j^*) = \textrm{arg~} \max_{i,j}Z_{i,j}
+%   u_z(k) = K_Ie(k) + u_z(k-1).
+%   \label{eqn:intdiff}
 % \end{equation}
-% corresponds to the lower left corner of the correct subslice. Thus, the
-% comparisons will computed against $\tilde{Y} = Y_{i^*:i^*+487, j^*:j^*+487}$.
-% For an example of this in action, see the Fig.~\ref{fig:baseline_errors} in the
-% next section.
 
-% Unfortunately, the mis-alignment is not simply constant offset, but rather
-% drifts over time. This can be seen, e.g., in Fig.~\ref{fig:rast_aligned_0p5}.
-% Thus, while the technique described here mitigates the issue, it does not fully
-% eliminate the problem.
+% In the $z$-axis position control mode, the $z$-axis position is controlled to a
+% fixed value $z_{ref}$ which, in general, is slightly above the sample surface.
+% The difference between the measured $z$-axis position and $z_{ref}$,
+% ${e(k) = z_{ref} - z(k)}$, is used as the error signal. In the deflection
+% control mode, when the tip is in contact with the sample, the deflection signal
+% is controlled to a fixed value $l_{ref}$ to ensure a constant tip-sample force.
+% The sample surface acts as a disturbance to the control loop. Therefore, the
+% $z$-axis position measurements can be taken to represent the surface topography
+% of the sample. In this case, the difference between the measured deflection and
+% $l_{ref}$ is the error, $e(k) = l_{ref} - l(k)$.
+	
+% We note that the $z$-axis control described here operates the AFM in constant
+% force mode during imaging. It is straightforward to perform scanning under
+% different AFM modes, such as tapping mode, simply by adjusting the signals and
+% control involved in the vertical loop.
+
+\subsection{Feedforward Control}\label{sec:ff_control}
+% In our AFM, there is a strong coupling between the horizontal axes and vertical deflection. Fig.~\ref{fig:mimo_frf_uxuy} shows a MIMO FRF for $u_X$ and $u_Y$ to the outputs in each axis. The dotted black curves are the open loop responses and the dashed red curves are the nominal closed-loop responses. Though the $Z$-direction inputs are not shown, the closed loop responses include the $Z$-axis controller. Note that, especially for $H_{z,u_X}$, the closed-loop response is barely improved over the open loop response and in particular, there is a sharp resonance at 215~Hz and 505~Hz. To deal with this, we employ two different strategies for CS and raster scanning.
+
+For CS scanning, we insert a feed-forward filter with three notches, one at 215~Hz, one at 350~Hz and one at 505~Hz. We design a similar feed-forward filter for the $Y$-axis. Both filters are shown in Fig.~\ref{fig:mimo_frf_uxuy} as the solid pink curves and the resulting overall FRF is shown as the solid blue curves, which show a dramatic reduction in the cross coupling. A similar affect could be achieve by using a simple low-pass filter. However, to achieve the same 40~dB of attenuation of the mode at 215 Hz, would require, e.g., that a two-pole LPF have its cut-off frequency at about 20~Hz. 
+
+For raster scanning, we use a truncated Fourier series, where each Fourier coefficient is scaled by the inverse of the closed-loop FRF at the corresponding frequency. We truncate this series such that the highest frequency is smaller than 200 Hz. See, e.g., \cite{clayton_review_2009} for more details on this strategy. Note that this scheme implies that the effective bandwidth of the $X$-axis controller is higher while raster scanning than while CS-scanning. On the other hand, it also implies that the for faster scan rates, fewer Fourier coefficients are used, and so the approximation to a triangle wave is worse.
+\begin{figure}
+  \includesvg[width=1\columnwidth]{figures/with_wo_ff.svg}
+  \caption{Scans over mica. (left) Without feedforward. (right) with feedforward.}
+  \label{fig:with_ff}
+\end{figure}
 
 
 \section{Metrics}\label{sec:rdi}
@@ -911,22 +755,9 @@ metrics. The best PSNR here is 16.57 and the worst is 9.02.
 The best SSIM is 0.54 and the worst is 0.28.
 
 \begin{figure}[t!]
-  % ------------ 1.0 Hz ---------------------
-  \begin{subfigure}{.48\textwidth}
-    \includesvg[width=1\textwidth]{figures/baseline_errors_noalign_1Hz.svg}
-    \caption{1.0~Hz, no alignment.}
-    \label{fig:rast_unaligned_1}
-  \end{subfigure}
-  \hfill
-  \begin{subfigure}{.48\textwidth}
-    \includesvg[width=1\textwidth]{figures/baseline_errors_aligned_1Hz.svg}
-    \caption{1.0~Hz, with alignment.}
-    \label{fig:rast_aligned_1}
-  \end{subfigure}
-% 
-  \caption{Errors between a ''master'' and 6 different raster scans, all taken
-    sequentially and at a scan rate of 0.5 Hz. (a) Errors without alignment (b)
-    The same data as above in (a) but aligned via cross correlation.}
+  \includesvg[width=1\columnwidth]{figures/baseline_errors_aligned_1Hz.svg}
+  \caption{Errors between the first and second (left column) and first and sixth (right column) raster scans in a sequence of six 1.0~Hz raster scans. (top) Errors without alignment (bottom)
+    The same data but aligned via cross correlation.}
   \label{fig:baseline_errors}
 \end{figure}
 
@@ -940,6 +771,49 @@ aligned master and the remaining 6 images. Although the situation is improved
 compared to the un-aligned images, there is still noticeable stretching,
 particularly in the $Y$-direction. Notably, with the alignment technique,
 the SSIM lies between 0.7 and 0.73 and the PSNR ranges from 22.51 to 24.99 and appears more stable in time.
+% \section{Post-processing}\label{sec:post_process}
+% Here, we discuss how we post-process the raster and CS images.
+
+% \subsection{Aligning images via cross-correlation}\label{sec:align}
+% To get metrics that are meaningful in any sense, we need the master image and
+% the comparee to be aligned. We take two steps to help ensure this. First, during
+% each batch of images, the nPoint stage remains under closed loop control.
+% Between images, the FPGA control loop idles in state-0, as discussed above in
+% Section~\ref{sec:idle_0}. This was not necessary duing the initial
+% implementation because then, the nPoint stage was controlled by the nPoint PI
+% controller. While this helps things substantially, there is still an alignment
+% issue between subsequent images, which I believe stems from the original Agilent
+% piezo tube, which is a three axis tube. The $XY$-axes of the tube are
+% uncontrolled during imaging, and in fact, after a firmware ``upgrade'', the
+% option to close the $XY$-loop has been grayed out in the PicoView software.
+
+% To help deal with this, we compare sub-slices of the master image and the
+% comparee. The results in this chapter use a sub-image obtained by removing a
+% border of 25 pixels from each edge. Thus, for the purposes of comparison, the
+% original 512$\times$512 pixel image becomes a 462$\times$462 pixel image. Let
+% $X$ represent the original, master image and ${\tilde X=X_{25:-25, 25:-25}}$,
+% using Python notation. To find the correct subslice of the comparee, we use a
+% two dimensional cross-correlation, which is defined as
+% \begin{equation}
+%   Z_{k,\ell} = \sum_{m=0}^{M-1}\sum_{n=0}^{N-1} \tilde{X}_{m-k, n-\ell}Y_{m-k, n-\ell}.
+% \end{equation}
+% where $Y$ is the comparee.
+
+% The index of the maximum value of the matrix $Z$
+% \begin{equation}
+%   (i^*,j^*) = \textrm{arg~} \max_{i,j}Z_{i,j}
+% \end{equation}
+% corresponds to the lower left corner of the correct subslice. Thus, the
+% comparisons will computed against $\tilde{Y} = Y_{i^*:i^*+487, j^*:j^*+487}$.
+% For an example of this in action, see the Fig.~\ref{fig:baseline_errors} in the
+% next section.
+
+% Unfortunately, the mis-alignment is not simply constant offset, but rather
+% drifts over time. This can be seen, e.g., in Fig.~\ref{fig:rast_aligned_0p5}.
+% Thus, while the technique described here mitigates the issue, it does not fully
+% eliminate the problem.
+% =========================================================================
+
 
 % \subsection{A new metric}
 % \begin{figure}[t!]
@@ -1054,12 +928,12 @@ metric. These are collected in table ~\ref{tab:rast_vs_cs_v1}.
   \end{tabular}
 \end{table}
 
-\begin{figure*}[t!]
-  \includesvg[width=1\textwidth]{figures/cs_raster_pixel_rows_6-5-2019.svg}
+\begin{figure}[t!]
+  \includesvg[width=1\columnwidth]{figures/cs_raster_pixel_rows_6-5-2019.svg}
   \caption{Rows of pixels, as indicated by the red lines in
     Fig.~\ref{fig:resultsF1_images}. For clarity, not all images are included.}
   \label{fig:pixel_rows}
-\end{figure*}
+\end{figure}
 
 Unfortunately, the SSIM and PSNR metrics are not particularly illuminating. It
 is easiest to see this by plotting PSNR and SSIM against total acquisition time,
@@ -1090,30 +964,29 @@ The values of the RDI for each of the $\mu$-path and raster scans are shown in F
 \end{figure}
 
 
-\begin{figure*}[ht!]
+\begin{figure}[ht!]
   \centering
-  \begin{subfigure}{1\textwidth}
+  \begin{subfigure}{1\columnwidth}
     \centering
-    \includesvg[width=0.8\textwidth]{figures/cs_rast_time_vs_ssim.svg}
+    \includesvg[width=1\columnwidth]{figures/cs_rast_time_vs_ssim.svg}
     \caption{}
     \label{fig:time_ssim}
   \end{subfigure}
-  \begin{subfigure}{1\textwidth}
+  \begin{subfigure}{1\columnwidth}
     \centering
-    \includesvg[width=0.8\textwidth]{figures/cs_rast_time_vs_psnr.svg}
+    \includesvg[width=1\columnwidth]{figures/cs_rast_time_vs_psnr.svg}
     \caption{}
     \label{fig:time_psnr}
   \end{subfigure}
-  \begin{subfigure}{1\textwidth}
+  \begin{subfigure}{1\columnwidth}
     \centering
-    \includesvg[width=0.8\textwidth]{figures/cs_rast_damage.svg}
+    \includesvg[width=1\columnwidth]{figures/cs_rast_damage.svg}
     \caption{}
     \label{fig:time_damage}
   \end{subfigure}
 \caption{Metrics for raster scan and $\mu$-path scans at 10\% and 15\% sampling. (a) SSIM as a function of total acquisition time. (b) PSNR  as a function of total acquisition time. (c) RDI as a function of total acquisition time. The scan rate is indicated by color while the scan style is indicated by marker style.}
-    
   % \label{fig:time_vs_metrics}
-\end{figure*}
+\end{figure}
 
 Where CS seems to really shine is if we look at the RDI for a given time or scan
 rate. This is plotted in Fig.~\ref{fig:time_damage}. For example, the 10~Hz
