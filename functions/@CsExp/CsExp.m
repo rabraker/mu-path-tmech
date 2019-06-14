@@ -552,7 +552,7 @@ function solve_nesta(self, recalc, use_2d, use_ze, opts)
       end
       
       
-      if ~recalc && ~isempty(self.Img_bp) && sum(self.Img_bp(:)) ~= 0
+      if ~recalc && ~isempty(self.pix_mat_uz) && sum(self.pix_mat_uz(:)) ~= 0
         warning(['BP solution already calculated, so skipping optimization.',...
           ' Pass recalc flag to recompute.']);
         return;
@@ -582,10 +582,8 @@ function solve_nesta(self, recalc, use_2d, use_ze, opts)
 
       if ~exist('opts', 'var')
         opts = NESTA_opts('Verbose', 10, 'errFcn', @(x)norm(x),...
-            'U', M_fun, 'Ut', Mt_fun);
+            'U', M_fun, 'Ut', Mt_fun, 'mu', 1e-5, 'sigma', 1e-2);
       end
-      delta = 1e-2;
-      mu = 1e-5;
       
       tic
       [x_est] = NESTA_mine(E_fun, Et_fun, b, mu, delta, opts);

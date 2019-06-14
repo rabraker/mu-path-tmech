@@ -1,4 +1,4 @@
-function [xk,niter] =NESTA_mine(A,At,b,muf,delta,opts)
+function [xk,niter] =NESTA_mine(A, At, b, opts)
 % [xk,niter,residuals,outputData] =NESTA(A,At,b,muf,delta,opts)
 %
 % Solves a L1 minimization problem under a quadratic constraint using the
@@ -21,13 +21,6 @@ function [xk,niter] =NESTA_mine(A,At,b,muf,delta,opts)
 % Inputs:   A and At - measurement matrix and adjoint (either a matrix, in which
 %               case At is unused, or function handles).  m x n dimensions.
 %           b   - Observed data, a m x 1 array
-%           muf - The desired value of mu at the last continuation step.
-%                 A smaller mu leads to higher accuracy.
-%           delta - l2 error bound.  This enforces how close the variable
-%               must fit the observations b, i.e. || y - Ax ||_2 <= delta
-%               If delta = 0, enforces y = Ax
-%               Common heuristic: delta = sqrt(m + 2*sqrt(2*m))*sigma;
-%               where sigma=std(noise).
 %           opts - A struct of options. See NESTA_opts().
 % 
 %
@@ -42,9 +35,11 @@ function [xk,niter] =NESTA_mine(A,At,b,muf,delta,opts)
 % 
 
 
-  if nargin < 6 || (isempty(opts) && isnumeric(opts))
+  if nargin < 4 || (isempty(opts) && isnumeric(opts))
     opts = NESTA_opts();
   end
+  muf = opts.mu;
+  sigma = opts.sigma;
   
   % -- We can handle non-projections IF a (fast) routine for computing
   %    the psuedo-inverse is available.
@@ -87,7 +82,7 @@ function [xk,niter] =NESTA_mine(A,At,b,muf,delta,opts)
     if opts.Verbose
       fprintf('   \nBeginning %s Minimization: mu = %g\n\n',opts.TypeMin,mu);
     end
-    [xk, niter_int] = Core_Nesterov_mine(A, At, b, mu, delta, opts);
+    [xk, niter_int] = Core_Nesterov_mine(A, At, b, mu, sigma, opts);
     
     opts.xplug = xk;
     niter = niter_int + niter;
