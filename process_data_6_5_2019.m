@@ -5,7 +5,6 @@ close all
 addpath functions
 
 % initialize paths.
-% init_paths();
 
 size_dir = '5microns';
 fname = fullfile(PATHS.sysid, 'x-axis_sines_info_intsamps_zaxisFourierCoef_10-29-2018-01.mat');
@@ -45,62 +44,62 @@ end
 fprintf('finished loading raster data\n')
 
 if 0
-target_pix = 512;
-use_ze = false;
-% last image is 128 pixels
-x1s = [36,   27,  27,  27,  27, 27, 6*4];
-x2s = [493, 493, 493, 495, 494, 494, 122*4];
-figbase = 10;
-for k=1:length(rast_exps)
-    rast_exps{k}.uz = log_creep_detrend(rast_exps{k}.uz, []);
-    
-    if rast_exps{k}.npix_y_og ~= target_pix
-        rast_exps{k}.bin_raster_really_slow([], use_ze, target_pix);
-        rast_exps{k}.bin_raster_really_slow([], true, target_pix);
-        rast_exps{k}.interp_y(target_pix, true);
-        stit = sprintf('(raster %.1f sec) interpolated from %d pix %.2f Hz',...
-            length(rast_exps{k}.ze)*AFM.Ts, rast_exps{k}.npix_y_og,...
-            rast_exps{k}.meta_in.raster_freq);
+    target_pix = 512;
+    use_ze = false;
+    % last image is 128 pixels
+    x1s = [36,   27,  27,  27,  27, 27, 6*4];
+    x2s = [493, 493, 493, 495, 494, 494, 122*4];
+    figbase = 10;
+    for k=1:length(rast_exps)
+        rast_exps{k}.uz = log_creep_detrend(rast_exps{k}.uz, []);
         
-    else
-        rast_exps{k}.bin_raster_really_slow([], use_ze);
-        rast_exps{k}.bin_raster_really_slow([], true);
-        %rast_exps{k}.pix_mat = rast_exps{k}.interp_missing(rast_exps{k}.pix_mat);
+        if rast_exps{k}.npix_y_og ~= target_pix
+            rast_exps{k}.bin_raster_really_slow([], use_ze, target_pix);
+            rast_exps{k}.bin_raster_really_slow([], true, target_pix);
+            rast_exps{k}.interp_y(target_pix, true);
+            stit = sprintf('(raster %.1f sec) interpolated from %d pix %.2f Hz',...
+                length(rast_exps{k}.ze)*AFM.Ts, rast_exps{k}.npix_y_og,...
+                rast_exps{k}.meta_in.raster_freq);
+            
+        else
+            rast_exps{k}.bin_raster_really_slow([], use_ze);
+            rast_exps{k}.bin_raster_really_slow([], true);
+            %rast_exps{k}.pix_mat = rast_exps{k}.interp_missing(rast_exps{k}.pix_mat);
+            
+            stit = sprintf('(raster %.1f sec) %.2f Hz', length(rast_exps{k}.ze)*AFM.Ts,...
+                rast_exps{k}.meta_in.raster_freq);
+        end
         
-        stit = sprintf('(raster %.1f sec) %.2f Hz', length(rast_exps{k}.ze)*AFM.Ts,...
-            rast_exps{k}.meta_in.raster_freq);
+        %[idx_left, idx_right] = find_pin_idxs(rast_exps{k}.pix_mat);
+        idx_left = 61;
+        idx_right = 480;
+        %   pixmat_ = rast_exps{k}.pix_mat;
+        pixmat_ = pin_along_column(rast_exps{k}.pix_mat, idx_left, idx_right);
+        %   pixmat_ = pixmats_raw{k};
+        rast_exps{k}.pix_mat_pinned = pixmat_ - mean(pixmat_(:)); %mean(vec(pixmat_(:, 12:500)));
+        rast_exps{k}.pin_idx_s = [idx_left, idx_right];
+        [~, ax1] = plot_raster_data(rast_exps{k}.pix_mat_pinned, figbase*k, stit);
+        hold(ax1, 'on')
+        plot(ax1, [idx_left, idx_left], [1, 512], 'r')
+        plot(ax1, [idx_right, idx_right], [1, 512], 'r')
+        
     end
     
-    %[idx_left, idx_right] = find_pin_idxs(rast_exps{k}.pix_mat);
-    idx_left = 61;
-    idx_right = 480;
-    %   pixmat_ = rast_exps{k}.pix_mat;
-    pixmat_ = pin_along_column(rast_exps{k}.pix_mat, idx_left, idx_right);
-    %   pixmat_ = pixmats_raw{k};
-    rast_exps{k}.pix_mat_pinned = pixmat_ - mean(pixmat_(:)); %mean(vec(pixmat_(:, 12:500)));
-    rast_exps{k}.pin_idx_s = [idx_left, idx_right];
-    [~, ax1] = plot_raster_data(rast_exps{k}.pix_mat_pinned, figbase*k, stit);
-    hold(ax1, 'on')
-    plot(ax1, [idx_left, idx_left], [1, 512], 'r')
-    plot(ax1, [idx_right, idx_right], [1, 512], 'r')
+    % save the first image so we can simulate reconstruction in plot_bptv_vs_bp.m
+    %
+    % img = rast_exps{1}.pix_mat_pinned;
+    % img = img - min(img(:));
+    % img = (img/max(img(:)) ) * 255/1.7;
+    % img = uint8(img);
+    %
+    % imwrite(img, 'cs20ng.png')
     
+    
+    for k=1:length(rast_exps)
+        rast_exps{k}.save(true)
+    end
 end
 
-% save the first image so we can simulate reconstruction in plot_bptv_vs_bp.m
-%
-% img = rast_exps{1}.pix_mat_pinned;
-% img = img - min(img(:));
-% img = (img/max(img(:)) ) * 255/1.7;
-% img = uint8(img);
-%
-% imwrite(img, 'cs20ng.png')
-
-%%
-for k=1:length(rast_exps)
-    rast_exps{k}.save(true)
-end
-end
-%%
 
 cs_exps = cell(length(cs_files), 1);
 for k=1:length(cs_files)
@@ -115,18 +114,18 @@ for k=1:length(cs_files)
     cs_exps{k}.print_state_times();
 end
 fprintf('finished loading cs data\n')
-
+%%
 bp = true;
-recalc = true;
+recalc = false;
 use_dct2 = false;
 thresh = (20/7)*(1/1000)*20;
 
 use_ze=false;
-if 0
+if 1
     register_uzk = true;
     % fprintf('  Hz  |  actual perc  |  nom. perc  |  mu-path overhead |\n')
     % fprintf('---------------------------------------------------------\n')
-    for k=1:1 %length(cs_exps)
+    for k=1:length(cs_exps)
         cs_exps{k}.process_cs_data(use_ze, register_uzk);
         cs_exps{k}.process_cs_data(true, false);
         %     fprintf('finished processing raw CS data..\n');
@@ -140,12 +139,13 @@ if 0
         
         ht = cs_exps{k}.feature_height;
         if 1
+            %%
             U_fun = @(x) idct(x);
             Ut_fun = @(x) dct(x);
-            
+          
             opts = NESTA_opts('U', U_fun, 'Ut', Ut_fun, 'alpha_v', 0., 'alpha_h', 0.75,...
-                'verbose', 0, 'TolVar', 1e-5);
-            
+                'verbose', 0, 'TolVar', 1e-5, 'mu', 1e-5, 'sigma', 1e-2);
+            %%
             cs_exps{k}.solve_nesta(recalc, use_dct2, use_ze, opts);
             cs_exps{k}.solve_nesta(recalc, use_dct2, true, opts);
             %[idx_left, idx_right] = find_pin_idxs(cs_exps{k}.pix_mat_uz);
@@ -183,7 +183,8 @@ if 0
         %plot(ax4, [idx_right, idx_right], [1, 512], 'r')
     end
     %%
-    
+    write_cs_meta_data(cs_exps, opts, 'latex/cs_data.txt');
+    %%
     for k=1:length(cs_exps)
         cs_exps{k}.save()
     end
@@ -319,7 +320,7 @@ end
 
 %
 %%
-Fig1 = mkfig(3000, 7, (5.5/3)*5); clf;
+Fig1 = mkfig(3000, 5.5, (5.5/3)*5); clf;
 ha1 = tight_subplot(5, 3, [0.022, 0.01], [.02, .02], [.01, .01], true);
 ha1 = reshape(ha1', 3, [])';
 
@@ -692,19 +693,25 @@ grid on
 
 save_fig(F_trade, 'latex/figures/improvements', false)
 %%
-
+clc
 tmu_12 = [];
 tmu_15 = [];
 tmu_25 = [];
+rates_12 = [];
+rates_15 = [];
+rates_25 = [];
 for k=1:length(cs_exps)
    tmu = cs_exps{k}.get_mean_mu_overhead();
-   cs_exps{k}.sub_sample_frac()*100
+   cs_exps{k}.sub_sample_frac()*100;
    if abs(cs_exps{k}.sub_sample_frac()*100 - 12) < 1
        tmu_12(end+1) = tmu;
+       rates_12(end+1) = cs_exps{k}.equiv_raster_rate();
    elseif abs(cs_exps{k}.sub_sample_frac()*100 - 15) <  1
        tmu_15(end+1) = tmu;
+       rates_15(end+1) = cs_exps{k}.equiv_raster_rate();
    elseif abs(cs_exps{k}.sub_sample_frac()*100 - 25) < 1.5
-       tmu_25(end+1) = tmu
+       tmu_25(end+1) = tmu;
+       rates_25(end+1) = cs_exps{k}.equiv_raster_rate();
    end
 end
 
@@ -716,6 +723,8 @@ plot(x12, tmu_12, 'bx')
 hold on
 plot(x15, tmu_15, 'rx')
 plot(x25, tmu_25, 'mx')
+
+save('tmu_s.mat', 'tmu_12', 'tmu_15', 'tmu_25', 'rates_12', 'rates_15', 'rates_25');
 
 %%
 % skip the 0.5Hz scan
@@ -752,6 +761,38 @@ title(ha(2), stit2)
 
 save_fig(Fig_subl, fullfile(PATHS.tmech_fig, 'subline_vs_cs'), false)
 
+
+
+
+function write_cs_meta_data(cs_exps, nesta_opts, fname)
+    
+%     fracs = zeros(length(cs_exps), 1);
+%     rates = zeros(length(cs_exps), 1);
+%     
+%     for k=1:length(cs_exps)
+%        fracs(k) = cs_exps{k}.meta_in.actual_sub_samble_perc; 
+%        rates(k) = cs_exps{k}.equiv_raster_rate(); 
+%     end
+%     fracs = unique(round(fracs, 1));
+%     rates = unique(round(rates, 1));
+
+% latex catchfilebetweentags doesnt seem to like snake_case, so use CamelCase.
+    mu_len_mic = cs_exps{1}.meta_in.mu_length;
+    mu_len_pix = cs_exps{1}.meta_in.npix * (mu_len_mic / cs_exps{1}.meta_in.width);
+    scan_meta = struct('preScanSamples', cs_exps{1}.meta_in.pre_scan_samples,...
+        'xyBoundaryMic', cs_exps{1}.meta_exp.state_machine_params.xy_error_threshold*AFM.volts2mic_xy,...
+        'xySetSamps', cs_exps{1}.meta_exp.state_machine_params.xy_settled_samples_threshold,...
+        'muLenNM', mu_len_mic*1000,...
+        'muLenPix', round(mu_len_pix, 0),...
+        'spScan', cs_exps{1}.meta_exp.z_axis_params.setpoint_scan,...
+        'spMv', cs_exps{1}.meta_exp.z_axis_params.setpoint_up,...
+        'alph', nesta_opts.alpha_h,...
+        'alpv', nesta_opts.alpha_v,...
+        'muf', nesta_opts.mu,...
+        'sigma', nesta_opts.sigma);
+    
+    data_writer({scan_meta}, fname);
+end
 
 function ha = semilogx_color_points(ax, x, y, marker, ord_start)
     if nargin < 5
