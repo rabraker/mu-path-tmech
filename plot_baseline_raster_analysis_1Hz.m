@@ -41,7 +41,7 @@ raster_files = {...
 pixmaps = cell(length(raster_files), 1);
 for k=1:length(raster_files)
   raster_paths = get_raster_paths(dat_root, raster_files{k});
-  rast_exps{k} = RasterExp(raster_paths, 'reload_raw', true);
+  rast_exps{k} = RasterExp(raster_paths, 'reload_raw', false);
 end
 
 %%
@@ -70,7 +70,7 @@ for k=1:length(rast_exps)
 end
 
 for k=1:length(rast_exps)
-  %rast_exps{k}.save()
+  rast_exps{k}.save()
 end
 
 %%
@@ -86,18 +86,20 @@ modes = [false, true];
 F = mkfig(3000, 3.5, 3.5); clf
 [ha, pos] = tight_subplot(2, 2, [.02, .01 ], [.027, 0.055], .005);
 ha = reshape(ha', 2, [])';
-
+clc
+suffix = {'NoAlgn', 'Algn'}
+names = {'one2two', 'one2six'};
+ST = struct();
 for j=1:2
   mode = modes(j);
 
   thresh = (20/7)*(1/1000)*20;
   
-  fprintf('---------------------------------------------------\n');
-  titles = {'image 1 & 2', 'image 1 & 6'};
+  titles = {'image 1 \& 2', 'image 1 \& 6'};
   for k=1:2 
     imk = pixmats{k+1};
     imk = imk - mean(imk(:));
-    
+
     if mode == true
       imk_slice = imk(slice, slice);
       im1_ontok_fit = norm_align(imk_slice, im_master);
@@ -106,12 +108,18 @@ for j=1:2
       im1_ontok_fit = im_master;
     end
     [psn_1k, ssm_1k] = ssim_psnr_norm(im1_ontok_fit, imk_slice, 2*thresh);
+    name = [names{k}, suffix{j}]
+    psn_name = [name, 'Psnr'];
+    ssm_name = [name, 'Ssim'];
+    ST.(psn_name) = psn_1k;
+    ST.(ssm_name) = ssm_1k;
+    
     dmg = rast_exps{k+1}.damage_metric();
     mx = max(imk_slice(:));
     mn = min(imk_slice(:));
-    stit = titles{k}; %sprintf('PSNR=%.2f, SSIM=%.2f', psn_1k, ssm_1k);
+    stit = titles{k}; 
     
-    fprintf("%s\n", stit);
+%     fprintf("%s: 'PSNR=%.2f, SSIM=%.2f'\n", stit, psn_1k, ssm_1k);
     ime=imk_slice - im1_ontok_fit; %, 'parent', h(k), 'Scaling', 'joint')
     ime = ime-mean(ime(:));
     imagesc(ha(j, k), ime, [-2*thresh, thresh*2]); %, [-0.5*thresh, 0.5*thresh]);
@@ -126,7 +134,10 @@ for j=1:2
   set(ha(end), 'Visible', 'off');
 
 end
+%%
+data_writer({ST}, 'latex/baseline_errors.txt', '%.2g')
 
+%%
 save_fig(F, 'latex/figures/baseline_errors_aligned_1Hz', false)
 
 
