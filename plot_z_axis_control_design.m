@@ -35,13 +35,13 @@ Hyr_old = feedback(D_ki_old*G_frf, 1);
 Hyr_noinv = feedback(D_ki*dat.K*G_frf, 1);
 
 
-F2 = mkfig(2, 3.48, 2); clf
-[ha, pos] = tight_subplot(1, 1, [.02, .01 ], [.165, 0.03], [.12, .02]);
+F2 = mkfig(2, 3.48, 1.8); clf
+[ha, pos] = tight_subplot(1, 1, [.02, .01 ], [.165, 0.03], [.1, .02]);
 
 
-h1 = frf_bode_mag(Loop, ss_data.freq_s, ha, 'Hz', 'Color', [0.35, 0.75, 0.93], 'LineWidth', 1.2);
-h2 = frf_bode_mag(G_frf, ss_data.freq_s, ha, 'Hz', '-k', 'LineWidth', 1.2);
-h4 = frf_bode_mag(Hyr, ss_data.freq_s, ha, 'Hz', '-r', 'LineWidth', 1.2);
+h1 = frf_bode_mag(Loop, ss_data.freq_s, ha, 'Hz', ':b');
+h2 = frf_bode_mag(G_frf, ss_data.freq_s, ha, 'Hz', '-k'); %, 'LineWidth', 1.1);
+h4 = frf_bode_mag(Hyr, ss_data.freq_s, ha, 'Hz', '-.r'); % 'LineWidth', 1.1);
 
 ylim(ha(1), [-40, 20]);
 
@@ -49,8 +49,8 @@ h1.DisplayName = 'Loop gain';
 h2.DisplayName = '$G_{Z_d,u_Z}$';
 h4.DisplayName = '$H_{Z_d, r_{Z}}$ ';
 leg = legend([h1, h2, h4]);
-
-set(leg, 'Location', 'southwest', 'FontSize', 10);
+set(ha, 'FontSize', 8)
+set(leg, 'Location', 'southwest', 'FontSize', 8);
 
 % [pm, gm] = margin(Loop)
 save_fig(F2, fullfile(PATHS.tmech_fig(), 'z_control_design'), false);

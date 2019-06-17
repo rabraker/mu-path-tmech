@@ -56,7 +56,7 @@ if 0
 end
 
 width = 3.5;
-height = 3.8;
+height = 2.5;
 F5 = mkfig(25, width, height); clf
 margh = [0.1, 0.02];
 margw = [0.105, 0.05];

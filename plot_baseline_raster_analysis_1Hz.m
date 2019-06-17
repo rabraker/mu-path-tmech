@@ -86,6 +86,11 @@ modes = [false, true];
 F = mkfig(3000, 3.5, 3.5); clf
 [ha, pos] = tight_subplot(2, 2, [.02, .01 ], [.027, 0.055], .005);
 ha = reshape(ha', 2, [])';
+
+F6 = mkfig(3002, 3.5, 3.5/2); clf
+[ha6, pos] = tight_subplot(1, 2, [.02, .01 ], [.027, 0.055], .005);
+
+
 clc
 suffix = {'NoAlgn', 'Algn'}
 names = {'one2two', 'one2six'};
@@ -122,23 +127,28 @@ for j=1:2
 %     fprintf("%s: 'PSNR=%.2f, SSIM=%.2f'\n", stit, psn_1k, ssm_1k);
     ime=imk_slice - im1_ontok_fit; %, 'parent', h(k), 'Scaling', 'joint')
     ime = ime-mean(ime(:));
-    imagesc(ha(j, k), ime, [-2*thresh, thresh*2]); %, [-0.5*thresh, 0.5*thresh]);
+    imagesc(ha(j, k), ime, [-thresh, thresh]); %, [-0.5*thresh, 0.5*thresh]);
     colormap('gray')
     
     set(ha(j, k), 'YTick', [], 'XTick', [])
     if j == 1
         title(ha(j, k), stit)
     end
+    
+    if k==2
+        imagesc(ha6(j), ime, [-thresh, thresh]);
+        colormap('gray')
+        set(ha6(j), 'YTick', [], 'XTick', [])
+    end
   end
 
-  set(ha(end), 'Visible', 'off');
+%   set(ha(end), 'Visible', 'off');
 
 end
-%%
-data_writer({ST}, 'latex/baseline_errors.txt', '%.2g')
 
-%%
+data_writer({ST}, 'latex/baseline_errors.txt', '%.2g')
 save_fig(F, 'latex/figures/baseline_errors_aligned_1Hz', false)
+save_fig(F6, 'latex/figures/baseline_errors_1and6', false)
 
 
 %%

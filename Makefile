@@ -4,7 +4,8 @@ figpath = latex/figures
 out = $(figpath)/dna_og.svg \
 	$(figpath)/MIMO_CL_uxuy.svg \
 	$(figpath)/z_control_design.svg \
-	$(figpath)/with_wo_ff.svg
+	$(figpath)/with_wo_ff.svg       \
+	$(figpath)/baseline_errors_aligned_1Hz.svg
 
 # Stupid overleaf always changes the file permissions of matlab_wrapper.py to
 # 644 (non-executable), so we cant run it as ./matlab_wrapper.py
@@ -25,4 +26,7 @@ $(figpath)/MIMO_CL_uxuy.svg:build_controllers_with_xyFF_DxDy.m
 
 
 $(figpath)/z_control_design.svg:plot_z_axis_control_design.m
+	python matlab_wrapper.py $<
+
+$(figpath)/baseline_errors_aligned_1Hz.svg:plot_baseline_raster_analysis_1Hz.m
 	python matlab_wrapper.py $<

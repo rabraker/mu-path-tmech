@@ -62,9 +62,9 @@ Fig = mkfig(100, 3.5, 4); clf
 ha = tight_subplot(4, 1, [.05, .05], [0.075, .03], [.15, .03], false);
 
 
-tstart = 7.4;
+tstart = 7.25;
 CS_idx1 = cs_exps{1}.find_cycle_idx(tstart);
-CS_idx2 = CS_idx1 + 1;
+CS_idx2 = CS_idx1 + 2;
 
 %
 % The Bad Case
@@ -73,11 +73,11 @@ state_names = {'move', 'tdown', 'tsettle', 'scan', 'tup'};
 
 % The Good Case
 traj_names = {'y', 'x', 'uz', 'ze'};
-names = {'$Y$ [$\mu$m]', '$X$ [$\mu$m]', '$u_Z [nm]$', 'deflection [v]'};
+names = {'$Y$ [$\mu$m]', '$X$ [$\mu$m]', '$u_Z$ [nm]', 'deflection [v]'};
 
 
 
-xlm1 = [7.362, 7.5];
+xlm1 = [7.286, 7.434];
 hands = gobjects(length(state_names), 1);
 for j=1:length(traj_names)
   h_j = ha(j);
@@ -106,8 +106,6 @@ ylim(ha(2), [0, 5]);
 ylim(ha(3), [-20, 90])
 
 
-leg = legend(hands, 'NumColumns', 2, 'Position', [0.4071 0.6322 0.5624 0.1030]);
+leg = legend(hands, 'NumColumns', 1, 'Position', [0.6709 0.5861 0.2993 0.1656]);
 %%
-
-
 save_fig(Fig, 'latex/figures/cs_cycle', false)
