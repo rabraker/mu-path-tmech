@@ -43,7 +43,7 @@ for k=1:length(raster_files)
 end
 fprintf('finished loading raster data\n')
 
-if 0
+if 1
     target_pix = 512;
     use_ze = false;
     % last image is 128 pixels
@@ -100,7 +100,7 @@ if 0
     end
 end
 
-
+%%
 cs_exps = cell(length(cs_files), 1);
 for k=1:length(cs_files)
     [dat_root, dat_name, ext] = fileparts(cs_files{k});
@@ -110,16 +110,16 @@ for k=1:length(cs_files)
     
     cs_exps{k} = CsExp(cs_paths, 'feature_height', hole_depth, 'gg', gg,...
         'load_full', true, 'reload_raw', false);
-    
+%     cs_exps{k}.uz = fft_notch(cs_exps{k}.uz, AFM.Ts, 212, 218);
     cs_exps{k}.print_state_times();
 end
 fprintf('finished loading cs data\n')
-%%
+
 bp = true;
 recalc = false;
 use_dct2 = false;
 thresh = (20/7)*(1/1000)*20;
-
+%%
 use_ze=false;
 if 1
     register_uzk = true;
@@ -138,15 +138,15 @@ if 1
             cs_exps{k}.get_mean_mu_overhead());
         
         ht = cs_exps{k}.feature_height;
+        U_fun = @(x) idct(x);
+        Ut_fun = @(x) dct(x);
+
+%         U_fun = @(x) CsTools.Ufun_dct2(x, 512);
+%         Ut_fun = @(x) CsTools.Utfun_dct2(x, 512);
+        opts = NESTA_opts('U', U_fun, 'Ut', Ut_fun, 'alpha_v', 0.1, 'alpha_h', .75,...
+            'verbose', 0, 'TolVar', 1e-5, 'mu', 1e-5, 'sigma', 1e-2);
         if 1
-            %%
-            U_fun = @(x) idct(x);
-            Ut_fun = @(x) dct(x);
-          
-            opts = NESTA_opts('U', U_fun, 'Ut', Ut_fun, 'alpha_v', 0., 'alpha_h', 0.75,...
-                'verbose', 0, 'TolVar', 1e-5, 'mu', 1e-5, 'sigma', 1e-2);
-            %%
-            cs_exps{k}.solve_nesta(recalc, use_dct2, use_ze, opts);
+            cs_exps{k}.solve_nesta(true, use_dct2, use_ze, opts);
             cs_exps{k}.solve_nesta(recalc, use_dct2, true, opts);
             %[idx_left, idx_right] = find_pin_idxs(cs_exps{k}.pix_mat_uz);
             %         idx_left = idx_left - 5;
@@ -182,14 +182,13 @@ if 1
         %plot(ax4, [idx_left, idx_left], [1, 512], 'r')
         %plot(ax4, [idx_right, idx_right], [1, 512], 'r')
     end
-    %%
+
     write_cs_meta_data(cs_exps, opts, 'latex/cs_data.txt');
-    %%
+%%    
     for k=1:length(cs_exps)
         cs_exps{k}.save()
     end
 end
-%%
 % 
 % 
 % [~, axs1] = make_cs_traj_figs(figbase, 3);
@@ -320,13 +319,17 @@ end
 
 %
 %%
-Fig1 = mkfig(3000, 5.5, (5.5/3)*5); clf;
-ha1 = tight_subplot(5, 3, [0.022, 0.01], [.02, .02], [.01, .01], true);
+% Fig1 = mkfig(3000, 5.5, (5.5/3)*5); clf;
+% ha1 = tight_subplot(5, 3, [0.022, 0.01], [.02, .02], [.01, .01], true);
+% ha1 = reshape(ha1', 3, [])';
+Fig1 = mkfig(3000, 5.5, 9.1*(3/5)); clf;
+ha1 = tight_subplot(3, 3, [0.03, 0.01], [.01, .03], [.01, .01], true);
 ha1 = reshape(ha1', 3, [])';
 
-% Fig_err = mkfig(3001, 9, 9); clf
-% ha_err = tight_subplot(4, 4, [0.025, 0.015], [.01, .02], [.05, .02], true);
-%
+Fig_subl = mkfig(3001, 5.6, 9.1*(2/5)); clf
+ha_subl = tight_subplot(2, 3, [0.04, 0.01], [.01, .04], [.01, .01], true);
+ha_subl = reshape(ha_subl', 3, [])';
+
 Fig_rows = mkfig(3002, 7, 4.5); clf
 ha_row = tight_subplot(2, 1, [0.1, 0.015], [.1, .05], [.085, .02], false);
 xlabel(ha_row(2), 'x-direction pixel', 'FontSize', 14)
@@ -337,19 +340,22 @@ ylabel(ha_row(2), 'height [nm]', 'FontSize', 14)
 
 grid(ha_row(1), 'on')
 grid(ha_row(2), 'on')
-row_idx = 175;
+row_idx = 169;
 
 row_hands = gobjects(3, 1);
-x1 = 10;
-x2 = 500;
+
+clr_range = [-thresh, thresh];
 for k=1:length(rast_exps)
     switch rast_exps{k}.npix_y_og
         case 512
             fig_row = 1;
+            ax_im = ha1(1, :);
         case 128
-            fig_row = 2;
-        case 64 
-            fig_row = 3;
+            fig_row = NaN;
+            ax_im = ha_subl(1, :);
+        case 64
+            fig_row = NaN;
+            ax_im = ha_subl(2, :);
         otherwise
             fprintf('Dony know what to do with npix = %d\n', rast_exps{k}.npix_y_og)
             continue
@@ -368,14 +374,15 @@ for k=1:length(rast_exps)
                 rast_exps{k}.meta_in.raster_freq)
             continue
     end
-            
+    ax_im = ax_im(fig_col);
+    
     imk = rast_exps{k}.pix_mat_pinned;% - mean(rast_exps{k}.pix_mat_pinned(:));
     
     rate_k = rast_exps{k}.meta_in.raster_freq;
-    imagesc(ha1(fig_row, fig_col), imk, [-thresh, thresh]);
-    colormap(ha1(fig_row, fig_col), 'gray');
+    imagesc(ax_im, imk, clr_range);
+    colormap(ax_im, 'gray');
     stit = sprintf('raster %d (%.1f Hz)', rast_exps{k}.npix_y_og, rate_k);
-    title(ha1(fig_row, fig_col), stit);
+    title(ax_im, stit, 'FontSize', 7.5)
         
         
     if fig_row == 1
@@ -392,9 +399,7 @@ for k=1:length(rast_exps)
 
 end
 remove_ticks(ha1)
-
-
-% remove_ticks(ha_err)
+remove_ticks(ha_subl)
 
 set(ha_row(1), 'XLim', [1, 512])
 set(ha_row(1), 'YLim', [-20, 10])
@@ -414,11 +419,11 @@ for k=1:length(cs_exps)
     switch round(cs_exps{k}.meta_in.actual_sub_samble_perc, 0)
 %         round(cs_exps{k}.sub_sample_frac*100, 0) 
         case 12
-            fig_row = 4;
+            fig_row = 2;
         case 13
-            fig_row = 4;            
+            fig_row = 2;            
         case 25
-            fig_row = 5;
+            fig_row = 3;
         otherwise
             fprintf('Dony know what to do with sample frac = %.0f\n', cs_exps{k}.sub_sample_frac*100)
             continue
@@ -436,10 +441,11 @@ for k=1:length(cs_exps)
     end    
 
     imk = cs_exps{k}.pix_mat_uz;
-    imagesc(ha1(fig_row, fig_col), imk, [-thresh, thresh]);
+    imagesc(ha1(fig_row, fig_col), imk, clr_range);
     colormap(ha1(fig_row, fig_col), 'gray');
-    title(ha1(fig_row, fig_col), sprintf('CS (%.1f \\%%, %.1f Hz)',...
-        cs_exps{k}.sub_sample_frac()*100, cs_exps{k}.equiv_raster_rate()));
+    stit = sprintf('CS (%.1f \\%%, %.1f Hz)',...
+        cs_exps{k}.sub_sample_frac()*100, cs_exps{k}.equiv_raster_rate());
+    title(ha1(fig_row, fig_col), stit, 'FontSize', 7.5);
     
     if abs(cs_exps{k}.equiv_raster_rate()-2)< .1 ||...
             (abs(cs_exps{k}.equiv_raster_rate()- 5)<.1 && abs(cs_exps{k}.sub_sample_frac()*100 - 12)< 1) ||...
@@ -473,34 +479,36 @@ set(leg2, 'NumColumns', 4, 'FontSize', 11, 'Position', [0.1032 0.4253 0.8589 0.0
 
 %%
 
-F_rdi = mkfig(3, 7., 3); clf
-ha = tight_subplot(1, 1, .1, [0.155, 0.05], [0.1, 0.04], false);
+F_rdi = mkfig(3, 4., 3); clf
+ha = tight_subplot(1, 1, .01, [0.1, 0.1], [0.1, 0.02], false);
+ha.FontSize = 8;
 hold(ha(1), 'on')
 grid(ha(1), 'on')
 set(ha(1), 'XScale', 'log');
 
-h3 = semilogx_color_points(ha(1), rastm_512.time, rastm_512.damage, 'x');
+h3 = semilogx_color_points(ha(1), rastm_512.time(2:end), rastm_512.damage(2:end), 'x', 2);
 h3a = semilogx_color_points(ha(1), rastm_128.time, rastm_128.damage, '+');
 h3b = semilogx_color_points(ha(1), rastm_64.time, rastm_64.damage, 's');
 
 xlabel(ha(1), 'total time [s]')
 ylabel(ha(1), 'RDI')
 
-
-
 h4 = semilogx_color_points(ha(1), csm_12.time, csm_12.damage, 'o');
 h5 = semilogx_color_points(ha(1), csm_25.time, csm_25.damage, '*');
 
+ha_none = axes('Position', [0.1473 0.8912 0.1788 0.0358]);
+hold(ha_none, 'on');
+h3_ = plot(1,1, 'xk', 'DisplayName', 'raster 512 lines');
+h3a_ = plot(1,1, '+k', 'DisplayName', 'raster 128 lines');
+h3b_ = plot(1,1, 'sk', 'DisplayName', 'raster 64 lines');
+h4_ = plot(1,1, 'ok', 'DisplayName', 'CS: 12.5\%');
+h5_ = plot(1,1, '*k', 'DisplayName','CS: 25\%');
+leg0 = legend([h3_, h3a_, h3b_, h4_, h5_], 'Position', [0.0998 0.9108 0.8724 0.0639], 'NumColumns', 3);
+ha_none.Visible = 'off';
+xlim(ha_none, [0, 0.01])
 
-h3.DisplayName = 'raster 512';
-h3a.DisplayName = 'raster 128';
-h3b.DisplayName = 'raster 64';
-
-h4.DisplayName = 'CS: 10\%';
-h5.DisplayName = 'CS: 25\%';
-
-xs = logspace(log10(7), log10(50), 5); %[7, 15, 40, 100, 200];
-wo = 3;
+xs = logspace(log10(7), log10(100), 5); %[7, 15, 40, 100, 200];
+wo = 5;
 yo = 35;
 h = 3;
 fac = (xs(1) + wo)/xs(1);
@@ -523,31 +531,13 @@ st = sprintf('%.1f Hz', rate_k);
 tx = text(ha, mean(X(1:2)), mean(Y([1,3])), st, 'VerticalAlignment', 'middle', 'HorizontalAlignment', 'center');
 
 end
-
-leg0 = legend([h3, h3a, h3b, h4, h5], 'Position', [0.0998 0.9172 0.7362 0.0639], 'NumColumns', 5);
-xlim(ha, [6, 530])
+ylim(ha, [0, 38])
+xlim(ha, [6, 230])
 %%
 
-
-% offsets = [50, 10, 10, 5, 5, 5];
-% for k=1:5
-%     st = sprintf('%.1f Hz', rastm_512.rate(k));
-%     t1 = text(rastm_512.time(k)+offsets(k), rastm_512.damage(k), st, 'HorizontalAlignment', 'left');
-% end
-% 
-% offsets = [10, 10, 10, 5, 5];
-% for k=1:5
-%     st = sprintf('%.1f Hz', csm_25.rate(k));
-%     t1 = text(csm_25.time(k)+offsets(k), csm_25.damage(k), st, 'HorizontalAlignment', 'left');
-% end
-
-% ---------------------------------------------------------------------- %
-
-F_ssm = mkfig(4, 7, 3.); clf
-ha_ssm = tight_subplot(1, 1, .1, [0.155, 0.1], [0.1, 0.02], false);
-F_psn = mkfig(5, 7, 3.); clf
-ha_psn = tight_subplot(1, 1, .1, [0.155, 0.1], [0.1, 0.02], false);
-
+F_ssm = mkfig(4, 4, 3.); clf
+ha_ssm = tight_subplot(1, 1, .01, [0.1, 0.1], [0.1, 0.02], false);
+ha_ssm.FontSize = 8;
 xlabel(ha_ssm, 'total time [s]')
 ylabel(ha_ssm, 'SSIM')
 hold(ha_ssm, 'on')
@@ -555,31 +545,34 @@ grid(ha_ssm, 'on')
 
 set(ha_ssm, 'XScale', 'log')
 
-ylabel(ha_psn, 'PSNR')
-xlabel(ha_psn, 'total time [s]')
-
-hold(ha_psn, 'on')
-grid(ha_psn, 'on')
-set(ha_psn, 'XScale', 'log')
-
-h4 = semilogx_color_points(ha_ssm, rastm_512.time(1:end), rastm_512.ssim(1:end), 'x', 2);
+h4 = semilogx_color_points(ha_ssm, rastm_512.time(2:end), rastm_512.ssim(2:end), 'x', 2);
 h4a = semilogx_color_points(ha_ssm, rastm_128.time, rastm_128.ssim, '+');
 h4b = semilogx_color_points(ha_ssm, rastm_64.time, rastm_64.ssim, 's');
 
 h5 = semilogx_color_points(ha_ssm, csm_12.time, csm_12.ssim, 'o');
 h6 = semilogx_color_points(ha_ssm, csm_25.time, csm_25.ssim, '*');
 
-h4.DisplayName = 'raster 512 lines';
-h4a.DisplayName = 'raster 128 lines';
-h4b.DisplayName = 'raster 64 lines';
+% I want all the marker legends to be the same color. The idea here is to plot
+% dummy markers on a second axes, produce the legend for that, then make the
+% other axis not visible, and set its xlim to be smaller than the x-value of the
+% markers, which will make them invisible.
+ha_none = axes('Position', [0.1473 0.8912 0.1788 0.0358]);
+hold(ha_none, 'on');
+h4_ = plot(1,1, 'xk', 'DisplayName', 'raster 512 lines');
+h4a_ = plot(1,1, '+k', 'DisplayName', 'raster 128 lines');
+h4b_ = plot(1,1, 'sk', 'DisplayName', 'raster 64 lines');
+h5_ = plot(1,1, 'ok', 'DisplayName', 'CS: 12.5\%');
+h6_ = plot(1,1, '*k', 'DisplayName','CS: 25\%');
+leg1 = legend([h4_, h4a_, h4b_, h5_, h6_], 'Position', [0.0998 0.8949 0.8724 0.0956], 'NumColumns', 3);
+ha_none.Visible = 'off';
+xlim(ha_none, [0, 0.01])
 
-h5.DisplayName = 'CS: 12.5\%';
-h6.DisplayName = 'CS: 25\%';
+
 ylim(ha_ssm, [0.65, 0.83])
-xs = logspace(log10(7), log10(50), 5); %[7, 15, 40, 100, 200];
-wo = 3;
-yo = 0.81;
-h = 0.02;
+xs = logspace(log10(7), log10(100), 5); %[7, 15, 40, 100, 200];
+wo = 5;
+yo = 0.815;
+h = 0.015;
 fac = (xs(1) + wo)/xs(1);
 for k=1:5
 rate_k = rastm_512.rate(k);
@@ -596,36 +589,51 @@ C= clr(k,:);
 pt = patch(ha_ssm, X, Y, C);
 
 st = sprintf('%.1f Hz', rate_k);
-tx = text(ha_ssm, mean(X(1:2)), mean(Y([1,3])), st, 'VerticalAlignment', 'middle', 'HorizontalAlignment', 'center');
+tx = text(ha_ssm, mean(X(1:2)), mean(Y([1,3])), st,...
+    'VerticalAlignment', 'middle', 'HorizontalAlignment', 'center');
 
 end
-xlim(ha_ssm, [6, 530])
-leg1 = legend([h4, h4a, h4b, h5, h6], 'Position', [0.0998 0.8934 0.8724 0.0639], 'NumColumns', 5);
+xlim(ha_ssm, [6, 230])
 
+%%
 % -------------- PSNR
-h7 = semilogx_color_points(ha_psn, rastm_512.time(1:end), rastm_512.psnr(1:end), 'x', 2);
+F_psn = mkfig(5, 4, 3.); clf
+ha_psn = tight_subplot(1, 1, .01, [0.1, 0.1], [0.1, 0.02], false);
+ha_psn.FontSize = 8;
+ylabel(ha_psn, 'PSNR')
+xlabel(ha_psn, 'total time [s]')
+
+hold(ha_psn, 'on')
+grid(ha_psn, 'on')
+set(ha_psn, 'XScale', 'log')
+
+
+h7 = semilogx_color_points(ha_psn, rastm_512.time(2:end), rastm_512.psnr(2:end), 'x', 2);
 h7a = semilogx_color_points(ha_psn, rastm_128.time, rastm_128.psnr, '+');
 h7b = semilogx_color_points(ha_psn, rastm_64.time, rastm_64.psnr, 's');
 
-hold(ha_ssm, 'on')
-grid(ha_ssm, 'on')
+hold(ha_psn, 'on')
+grid(ha_psn, 'on')
 
 h8 = semilogx_color_points(ha_psn, csm_12.time, csm_12.psnr, 'o');
 h9 = semilogx_color_points(ha_psn, csm_25.time, csm_25.psnr, '*');
 
+ha_none = axes('Position', [0.1473 0.8912 0.1788 0.0358]);
+hold(ha_none, 'on');
+h7_ = plot(1,1, 'xk', 'DisplayName', 'raster 512 lines');
+h7a_ = plot(1,1, '+k', 'DisplayName', 'raster 128 lines');
+h7b_ = plot(1,1, 'sk', 'DisplayName', 'raster 64 lines');
+h8_ = plot(1,1, 'ok', 'DisplayName', 'CS: 12.5\%');
+h9_ = plot(1,1, '*k', 'DisplayName','CS: 25\%');
+leg2 = legend([h7_, h7a_, h7b_, h8_, h9_], 'Position', [0.0998 0.8914 0.8724 0.0956], 'NumColumns', 3);
+ha_none.Visible = 'off';
+xlim(ha_none, [0, 0.01])
 
-h7.DisplayName = 'raster 512 lines';
-h7a.DisplayName = 'raster 128 lines';
-h7b.DisplayName = 'raster 64 lines';
-
-h8.DisplayName = 'CS: 12.5\%';
-h9.DisplayName = 'CS: 25\%';
-
-xs = logspace(log10(7), log10(50), 5); %[7, 15, 40, 100, 200];
-wo = 3;
+xs = logspace(log10(7), log10(100), 5); %[7, 15, 40, 100, 200];
+wo = 5;
 fac = (xs(1) + wo)/xs(1);
-h = 0.75;
-yo = 24.2;
+h = 0.6;
+yo = 24.4;
 for k=1:5
 rate_k = rastm_512.rate(k);
 clr = ha_psn.ColorOrder;
@@ -640,12 +648,17 @@ C= clr(k,:);
 pt = patch(ha_psn, X, Y, C);
 
 st = sprintf('%.1f Hz', rate_k);
-tx = text(mean(X(1:2)), mean(Y([1,3])), st, 'VerticalAlignment', 'middle', 'HorizontalAlignment', 'center');
+tx = text(ha_psn, mean(X(1:2)), mean(Y([1,3])), st, 'VerticalAlignment', 'middle', 'HorizontalAlignment', 'center');
 
 end
-leg = legend([h7, h7a, h7b, h8, h9], 'Position', [0.0998 0.8934 0.8724 0.0639], 'NumColumns', 5);
-xlim(ha_psn, [6, 530])
+ylim(ha_psn, [18, 25])
+xlim(ha_psn, [6, 230])
 %%
+% set(ha1(end), 'Visible', 'off')
+% set(ha_err(end), 'Visible', 'off')
+save_fig(Fig1, fullfile(PATHS.tmech_fig(), 'cs_raster_images_6-5-2019'), false)
+save_fig(Fig_subl, fullfile(PATHS.tmech_fig(), 'cs_raster_images_subl_6-5-2019'),false)
+save_fig(Fig_rows, fullfile(PATHS.tmech_fig(), 'cs_raster_pixel_rows_6-5-2019'), false)
 
 
 %%
@@ -653,12 +666,8 @@ save_fig(F_rdi, fullfile(PATHS.tmech_fig(), 'cs_rast_damage'), false)
 save_fig(F_ssm, fullfile(PATHS.tmech_fig(), 'cs_rast_time_vs_ssim'), false)
 save_fig(F_psn, fullfile(PATHS.tmech_fig(), 'cs_rast_time_vs_psnr'), false)
 %%
-% set(ha1(end), 'Visible', 'off')
-% set(ha_err(end), 'Visible', 'off')
-save_fig(Fig1, fullfile(PATHS.tmech_fig(), 'cs_raster_images_6-5-2019'), false)
-% save_fig(Fig_err, fullfile(PATHS.tmech_fig(), 'cs_raster_images_err_4-26-2019'),false)
-save_fig(Fig_rows, fullfile(PATHS.tmech_fig(), 'cs_raster_pixel_rows_6-5-2019'), false)
-%%
+
+
 
 
 F_trade = mkfig(10, 3.5, 3); clf
@@ -728,39 +737,19 @@ save('tmu_s.mat', 'tmu_12', 'tmu_15', 'tmu_25', 'rates_12', 'rates_15', 'rates_2
 
 %%
 % skip the 0.5Hz scan
-sm = scan_metrics(1:end)
-S1 = scan_metrics_table(sm)
+% sm = scan_metrics(1:end)
+% S1 = scan_metrics_table(sm)
+% fid = fopen(fullfile(PATHS.tmech_table(), 'cs_raster_table_6-5-2019_muInf_dct2.tex'), 'w+');
+% fprintf(fid, '%s', S1);
+% fclose(fid);
 
-S2 = state_times_table(cs_exps)
-
-fid = fopen(fullfile(PATHS.tmech_table(), 'cs_raster_table_4-26-2019_muInf_dct2.tex'), 'w+');
-fprintf(fid, '%s', S1);
-fclose(fid);
-
-fid = fopen(fullfile(PATHS.tmech_table(), 'cs_state_times_table_4-26-2019_muInf_dct2.tex'), 'w+');
+hz_skip = [2.0, 4.0];
+frac_skip = 15.02;
+S2 = state_times_table(cs_exps, hz_skip, frac_skip)
+fid = fopen(fullfile(PATHS.tmech_table(), 'cs_state_times_table_6-5-2019_muInf_dct2.tex'), 'w+');
 fprintf(fid, '%s', S2);
 fclose(fid);
 %%
-% Compare the 5-hz, 128 line raster to 4Hz, 15\% CS
-Fig_subl = mkfig(1010, 3.5, 2); clf
-ha = tight_subplot(1, 2, [0.02, 0.02], [0.01, 0.16], [0.01, 0.01], true);
-
-imagesc(ha(1), rast_exps{end}.pix_mat_pinned, [-thresh, thresh]);
-colormap(ha(1), 'gray')
-imagesc(ha(2), cs_exps{end-2}.pix_mat_uz, [-thresh, thresh]);
-colormap(ha(2), 'gray')
-remove_ticks(ha)
-
-stit1 = sprintf( '(raster 25.6 sec.) \n5~Hz, 128 lines interpolated')
-title(ha(1),stit1)
-stit2 = sprintf('(CS %.1f sec.) \n%.1f \\%%, %.0f~Hz',...
-    cs_exps{8}.time_total(),...
-    cs_exps{8}.sub_sample_frac()*100,...
-    cs_exps{8}.meta_in.tip_velocity*0.5/cs_exps{8}.meta_in.width)
-title(ha(2), stit2)
-
-save_fig(Fig_subl, fullfile(PATHS.tmech_fig, 'subline_vs_cs'), false)
-
 
 
 
@@ -820,14 +809,22 @@ function S = scan_metrics_table(csm_s)
     end
 end
 
-function S = state_times_table(cs_exps)
+function S = state_times_table(cs_exps, hz_skip, frac_skip)
     S = 'description & move & engage & pre-scan & scan & tip-up & total\\';
     S = sprintf('%s\n\\toprule\n', S);
     for k=1:length(cs_exps)
         cst = cs_exps{k}.get_state_times();
-        description = sprintf('%.1f Hz, %.2f~\\%%',...
-            cs_exps{k}.meta_in.tip_velocity/(cs_exps{2}.meta_in.width * 2),...
-            cs_exps{k}.meta_in.actual_sub_samble_perc);
+        rate = cs_exps{k}.equiv_raster_rate();
+        frac = cs_exps{k}.meta_in.actual_sub_samble_perc;
+        
+        if any(abs(frac_skip - frac) < 0.5)
+            continue
+        end
+        if any(abs(hz_skip - rate) < 0.2)
+            continue
+        end
+
+        description = sprintf('%.1f Hz, %.1f~\\%%',rate, frac);
         
         S = sprintf('%s%s &%.2f & %.2f & %.2f & %.2f & %.2f & %.2f\\\\\n', S,...
             description, cst.move, cst.tdown, cst.tsettle, cst.scan,...

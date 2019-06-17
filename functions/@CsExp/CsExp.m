@@ -586,7 +586,7 @@ function solve_nesta(self, recalc, use_2d, use_ze, opts)
       end
       
       tic
-      [x_est] = NESTA_mine(E_fun, Et_fun, b, mu, delta, opts);
+      [x_est] = NESTA_mine(E_fun, Et_fun, b, opts);
 
       img = CsTools.pixvec2mat(x_est*max_diff_b, n);
 
