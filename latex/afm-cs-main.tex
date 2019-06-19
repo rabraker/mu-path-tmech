@@ -19,7 +19,7 @@
 \usepackage[ruled,linesnumbered]{algorithm2e}
 \usepackage{placeins}
 \usepackage[disable]{todonotes}
-
+ 
 
 % Indent paragraphs inside enumerate
 \usepackage{enumitem}
@@ -217,9 +217,9 @@ efficiency. The $\mu$-path pattern consists of randomly placed short,
 horizontal scans (see Fig.~\ref{fig:mu_mask} for one such pattern) and
 is designed to balance the randomness needed to ensure good
 reconstruction with continuous scanning to reduce the number of tip
-engagements. %Though the pattern is motivated from CS, it also works well in practice for inpainting reconstruction \cite{luo2015comparison}.
-\todo{Would be beneficial to shrink intro, if possible}
+engagements.
 
+\textbf{Contributions}
 Our previous work on the $\mu$-path pattern using theoretical
 calculations, simulations, and a preliminary implementation,
 demonstrates that the approach can achieve significant scanning time
@@ -227,11 +227,12 @@ reduction while maintaining faithful image reconstruction
 \cite{maxwell2014compressed,Luo:2015tu, braker_hardware_2018}. This
 paper builds upon that earlier work in several significant ways.
 
-\textbf{Contributions} Much of the prior work on undersampled AFM
+Much of the prior work on undersampled AFM
 images is based purely on simulations \cite{han_optimal_2018,
   Luo_nano_2015, oxvig_structure_2017, jensen_reconstruction_2013,
-  maxwell_acc_2014, Chen_2012jx}.
+  maxwell_acc_2014, Chen_2012jx} and consequently, there is little discussion of the physical practicality of the proposed methods. For example, most estimates of the potential time savings of sub-sampling techniques are not informed by experiments. Often, a discussion of the harmonic content of the proposed reference signals is typically neglected \cite{luo_continuous_2019, Chen_2012jx,han_optimal_2018}, even though this is a critical concern in AFM. As we show in Section~\ref{sec:control}, the discontinuous nature of the $\mu$-path pattern essentially requires that the control system be to filter the higher frequency content of the step inputs between $\mu$-paths.
 
+Despite this, we show in Section~\ref{sec:results} that $\mu$-path scanning provides a non-trivial speed increase compared to a full quality raster scan. 
 % % ------------------ TKTKTKT ------------------
 % \todo{Strike this?} First, we demonstrate performance using both
 % randomly-placed $\mu-$paths and designed $\mu-$paths that are
@@ -783,11 +784,11 @@ setup, actuation in the $XY$-plane happens via the nPoint piezo stage
 and the $XY$-direction of the original piezo scanner is uncontrolled.
 This leads to substantial drift between images. To illustrate this, we
 took a sequence of 6 raster scans of a sample grating, each at a 1~Hz
-scan rate over a 5 micron by 5 micron area. The top row of
+scan rate over a 5 micron by 5 micron area. The left image of
 Fig.~\ref{fig:baseline_errors} shows the error between the first and
-second image and the first and 6th image. The PSNR and SSIM between
-images one and six are \baseline{one2twoNoAlgnPsnr} and
-\baseline{one2twoNoAlgnSsim}; between images one and six they are
+ sixth image. The PSNR and SSIM between
+images the first and second images are \baseline{one2twoNoAlgnPsnr} and
+\baseline{one2twoNoAlgnSsim}; between the first and sixth are
 \baseline{one2sixNoAlgnPsnr} and \baseline{one2sixNoAlgnSsim},
 respectively, even though on their own each image has good quality.
 
@@ -795,105 +796,79 @@ To mitigate this affect, we use an image alignment technique based on
 the 2D cross-correlation between each image. Essentially, this takes a
 sub-slice of image 1 (here, a 25 pixel inset on each edge), and finds
 the offset in the other image that produces the smallest error. The
-result of this procedure are shown in the bottom row of
+result of this procedure are shown in the right image of
 Fig.~\ref{fig:baseline_errors}.
-% Taking the first scan as the master, we compute the PSNR and SSIM
-% metrics. The best PSNR here is 16.57 and the worst is 9.02. The best
-% SSIM is 0.54 and the worst is 0.28.
 Although the situation is improved compared to the un-aligned images,
-there is still noticeable stretching, particularly in the
-$Y$-direction. Notably, with the alignment technique, the SSIM is
-\baseline{one2twoAlgnSsim} for images one and two, and
-\baseline{one2sixAlgnSsim} for images one and six; the PSNR is
-\baseline{one2twoAlgnPsnr} and \baseline{one2sixAlgnPsnr}
+there is still noticeable stretching (the upper and lower portions appear considerably worse than the middle). Notably however, with the alignment technique, the SSIM is
+\baseline{one2twoAlgnSsim} for both sets of images and
+while the PSNR is increases to \baseline{one2twoAlgnPsnr} and \baseline{one2sixAlgnPsnr}
 respectively.
 
 \begin{figure}[t!]
   \centering
   % \includesvg[width=0.7\columnwidth]{figures/baseline_errors_aligned_1Hz.svg}
   \includesvg[width=0.7\columnwidth]{figures/baseline_errors_1and6.svg}
-  \caption{Errors between the first and second (left column) and first
-    and sixth (right column) raster scans in a sequence of six 1.0~Hz
-    raster scans. (top) Errors without alignment (bottom) The same
+  \caption{Errors between the first and sixth raster scans in a sequence of six 1.0~Hz
+    raster scans. (left) Errors without alignment (right) The same
     data but aligned via cross correlation.}
   \label{fig:baseline_errors}
 \end{figure}
 
 
 \subsection{A new metric}
-% \begin{figure}[t!]
-%   \centering
-%   \includesvg[width=1\columnwidth]{figures/damage_illustration.svg}
-%   \caption{The RDI metric defined in \eqref{eqn:RDI} penalizes
-%   everything in the red shaded region and does not penalize anything
-%   in the un-shaded region.}
-%   \label{fig:damage_illustrate}
-% \end{figure}
+Th PSNR and SSIM metrics only assess the similarity of two images.
+However, in AFM imaging, pure image quality is not the only concern,
+particularly for delicate samples. What is needed is a figure of
+merit for how much damage was done to specimen during the imaging
+process. While damage to the specimen is not really a concern while imaging a hard
+calibration grating, it plays a prominent role for biological
+samples~\cite{ando_highspeed_2008}, though damage to the probe itself is still a concern.
+In general, the faster the scan rate,
+the more difficulty the $Z$-axis control
+will have following the sample surface,
+which results in a larger $Z_d$ over more time. 
+The actual damage done by a given $Z_d$ will
+depend on the spring constant of the cantilever and the softness of
+the specimen. Nonetheless, we propose a metric, which we call the Relative Damage Index (RDI)
+which computes the power in the deflection signal for a given scan. That is,
 
-% Th PSNR and SSIM metrics only assess the similarity of two images.
-% However, in AFM imaging, pure image quality is not the only concern,
-% particularly for delicate samples. What is needed is a figure of
-% merit for how much damage was done to specimen during the imaging
-% process. While this is not really a concern while imaging a hard
-% calibration grating, it plays a prominent role biological
-% samples~\cite{ando_highspeed_2008}. In general, damage occurs while
-% scanning into an uphill region, which results in a positive
-% deflection signal. The actual damage done by a given $Z_d$ will
-% depend on the spring constant of the cantilever and the softness of
-% the specimen. Nonetheless, we can use the positive deviations of
-% $Z_d$ as a relative measure of damage between different scan speeds
-% or scanning methods, for a given cantilever and specimen. This
-% motivates a metric we term the relative damage index (RDI), which we
-% define as
-% \begin{align}
-%   \text{RDI} &= \frac{1}{T_s}\sum_{k\in I} \frac{1}{k} \left(Z_{d,k} - r_{Z,s}\right)^2 \label{eqn:RDI}\\
-%   I &= \{k: k\in[0,~N-1],~ Z_{d,k}-r_{Z,s} > 0 \} \nonumber
-% \end{align}
-% where $N$ is the total number of samples in a given scan, $Z_{d,k}$
-% is the deflection signal at sample $k$ and $r_{Z,\textrm{s}}$ is the
-% scanning setpoint. The RDI is basically the power in positive
-% deflection. By excluding negative values of the deflection, we do
-% not penalize the CS algorithm while it is re-engaging with the
-% specimen \emph{unless} it overshoots the scanning setpoint, which we
-% do want to penalize. This is illustrated in
-% Fig.~\ref{fig:damage_illustrate}, which shows several CS cycles with
-% a poorly tuned controller. Only deflection signals in the red-shaded
-% region will be penalized by the RDI.
+\begin{align}
+  \text{RDI} &= \frac{1}{T_s}\sum_{k=0}^N \frac{1}{k} \left(Z_{d,k} - r_{Z,s}\right)^2 \label{eqn:RDI}\\
+\end{align}
+The idea behind the RDI is that increased scan rates lead to larger
+deflection signals (and thereby increased force into the specimen) at
+each surface feature, which the RDI accumulates.
 
 \section{Experimental Results}\label{sec:results}
 We compared $\mu$-path scanning to two scenarios. First, we compare it
-to full resolution raster scans at several scan rates. Second we
-compare to course raster scans.
-% For both comparisons, we use the same set of $\mu$-path scans.
+to full resolution raster scans at several scan rates in Section~\ref{sec:cp_full}.
+Second we compare to course raster scans in Section \ref{sec:cp_subline}.
 
-\subsection{Comparison to full raster}
+\subsection{Comparison to full raster}\label{sec:cp_full}
 We took scans of a Ted Pella CS-20NG sample grating over an area with
 holes on a 500 nm pitch. The holes are 20 nm deep. We scanned 5 micron
 by 5 micron images using standard raster scans with 512 lines. For the
 raster scans, we took scans at 1.0~Hz, 2.5~Hz, 5.0~Hz, 8.0~Hz and
-10~Hz. We also took $\mu$-path scans with densities at 12.5\%, 15\%
-and 25\% and reconstructed 512 by 512 pixel images. The CS scans we
+10~Hz. We also took $\mu$-path scans with densities at 12.5\%,
+and 25\% and reconstructed 512 by 512 pixel images. The CS scans were
 taken with scan velocities equivalent to raster scan rates of 1.0~Hz,
 2.0~Hz, 5.0~Hz and 8.0~Hz. For all CS scans, the $\mu$-paths are
 $\scanD{muLenNM}$ nm long, which translates to $\scanD{muLenPix}$
 pixels.
 
 The free value of the deflections signal was approximately -0.6 volts
-and we set the scanning reference to ${\rzs=\scanD{spScan}}$~volts and
-the withdraw reference to ${\rzup=\scanD{spMv}}$ volts. We set the
+and we set the scanning reference to ${\rzs=\scanD{spScan}}$~volts (for both raster and CS)
+and the withdraw reference to ${\rzup=\scanD{spMv}}$ volts. We set the
 $XY$-settle boundary to $\pm \scanD{xyBoundaryMic}$ microns and
 required $\scanD{xySetSamps}$ samples within this boundary before
 moving to the $Z$-engage state. The pre-scan length was
-$\scanD{preScanSamples}$ time steps. The cantilever was an Budget
+$\scanD{preScanSamples}$ time steps. The cantilever was a Budget
 Sensors ContAI-G, with a nominal length of 450 microns and spring
 constant of $k=0.2$~N/m.
 
 % \SSData{G2}$& $g_6 = \SSData{G6}
 The CS scans were reconstructed with BPVV. We set
-${\sigma = \scanD{sigma}}$, ${\mu_f=\scanD{muf}}$,
-${\alpha_v=\scanD{alpv}}$ and ${\alpha_h=\scanD{alph}}$. The data
-remained scaled in terms of volts.
-
+${\alpha_v=\scanD{alpv}}$ and ${\alpha_h=\scanD{alph}}$. 
 For the raster scans, we discard data from the re-trace and divided
 the remaining data for each scan line into 512 bins based on the \xc
 sensor measurements. We then average the data in each bin to obtain
@@ -906,21 +881,11 @@ select a column of pixels on the left and right side of each image
 that does not cross any holes (i.e., a vertical line through the flat
 area), register each scan line to a common height along these columns.
 This step eases comparison with the CS scans and was inspired by a
-feature in \texttt{SPIW} \cite{spiw}.
-
-As a final step, we subtract the mean from each CS and raster image,
-so that they can all be mapped to the same color intensity in the
-images. The color maps represent a range of $\pm$20 nm.
-
-
-The resulting images are shown in Fig.~\ref{fig:resultsF1_images}. The
+feature in the AFM image processing toolbox \texttt{SPIW} \cite{spiw}.
+The resulting images are shown in Fig.~\ref{fig:resultsF1_images}.
+The color maps represent a range of $\pm$20 nm. The
 rows of pixels indicated by the red lines are shown as cross sections
 Fig.~\ref{fig:pixel_rows}.
-
-For each raster scan and each CS scan, we computed the SSIM, PSNR
-(both with default parameters) using the 1~Hz scan as the master and
-also computed the RDI metric. These are collected in table
-~\ref{tab:rast_vs_cs_v1}.
 
 \begin{figure*}
   \centering
@@ -937,7 +902,7 @@ also computed the RDI metric. These are collected in table
 %   \centering
 %   \caption{Performance metrics for raster and CS scans.}
 %   \begin{tabular}{cccccc}
-%     \input{tables/cs_raster_table_4-26-2019_muInf_dct2.tex}
+%     \input{tables/cs_raster_table_6-5-2019_muInf_dct2.tex}
 %   \end{tabular}
 %   \label{tab:rast_vs_cs_v1}
 % \end{table}
@@ -959,43 +924,15 @@ also computed the RDI metric. These are collected in table
     included.}
   \label{fig:pixel_rows}
 \end{figure}
-
+For each raster scan and each CS scan, we computed the SSIM and PSNR
+ using the 1~Hz scan as the master and
+also computed the RDI metric. These are plotted against total acquisition time
+in Fig.~\ref{fig:time_ssim} and ~\ref{fig:time_psnr}.
 Unfortunately, the SSIM and PSNR metrics are not particularly
-illuminating. It is easiest to see this by plotting PSNR and SSIM
-against total acquisition time, which is shown in
-Fig.~\ref{fig:time_ssim} and ~\ref{fig:time_psnr}. There are several
-inconsistencies. First, the 4~Hz raster scan has the lowest PSNR of
-all the raster scans, while the 8~Hz scan has the highest. Second, all
-of the 15\% CS scans except the 8~Hz version have as good or better
-SSIM numbers than the raster scans. It makes no sense for a CS scan at
-a 5~Hz rate to have better quality than a raster scan at a 5~Hz rate.
-
-Fig.~\ref{fig:improve_512} shows amount of improvement of the
-different sub-sampling techniques over full raster scans with 512
-lines as a function of scan rate. As far as pure speed goes, the CS
-scan at 12.5\% is the fastest for a rate of 1~Hz, though the 64 line
-raster scan is close. At the same time, the image quality of the 1~Hz,
-12.5\% CS scan is better than the the 1~Hz 64 line raster scan.
-However, this advantage quickly evaporates for faster scan rates.
-Indeed, for rates beyond about 5~Hz, the raster scan with 128 lines is
-not only faster than the 12.5\% CS scan, it also has (arguably) better
-image quality.
-
-Thus, we conclude that $\mu$-path based sub-sampling is only
-beneficial when there is an exigent reason to scan slowly. This may be
-the case for delicate specimens. We can roughly quantify this by
-computing the power in the deflection signal during scanning
-\begin{align}
-  \text{RDI} &= \frac{1}{T_s}\sum_{k=0}^N \frac{1}{k} \left(Z_{d,k} - r_{Z,s}\right)^2 \label{eqn:RDI}\\
-\end{align}
-The idea behind the idea is that increased scan rates lead to larger
-deflection signals (and thereby increased force into the specimen) at
-each surface feature, which the RDI accumulates.
-
-The values of the RDI for each of the $\mu$-path and raster scans are
-shown in Fig.~\ref{fig:time_damage} as a function of total imaging
-time. As one would expect, as imaging time decreases, the RDI for each
-scan type increases.
+illuminating. There are several inconsistencies. For example, it makes no sense
+the 1 Hz CS scan at 25\% has a \emph{worse} PSNR and SSIM than 5 Hz version;
+nor does it make sense that the 8~Hz full raster scan has a worse SSIM and PSNR than
+the 10~Hz full raster scan.
 
 \begin{figure*}[t!]
   \centering
@@ -1023,25 +960,17 @@ scan type increases.
     style. (a) SSIM as a function of total acquisition time. (b) PSNR
     as a function of total acquisition time. (c) RDI as a function of
     total acquisition time.}
-  % \label{fig:time_vs_metrics}
+  \label{fig:time_vs_metrics}
 \end{figure*}
 
-Where CS seems to really shine is if we look at the RDI for a given
-time or scan rate. This is plotted in Fig.~\ref{fig:time_damage}. For
-example, the 10~Hz raster scan, which takes about 51 seconds, gives an
-RDI of 23.7. All of the CS scans, except for the 15\% scan at 1~Hz
-(which is only 0.9 seconds longer) are faster than the 10~Hz raster
-scan, yet have much lower RDI values, ranging from 1.21 to 13.13.
-Unsurprisingly, the relationship between scan speed and RDI is quite
-linear. For the raster scans, the left panel of
-Fig.~\ref{fig:time_damage} just plots the inverse relationship of the
-right panel, since scan time is inversely proportional to raster
-frequency. This is not quite the case for the CS scans due to the
-sub-sampling and the fixed overhead which does not scale with scan
-rate (e.g., the amount of time for the $XY$-move etc remains
-essentially constant for a given scan density).
 
-From the left panel of Fig.~\ref{fig:time_damage}, we see that for a
+Things are clearer if we plot the RDI for each scan against total acquisition time, which is
+shown inf Fig.~\ref{fig:time_damage} and 
+this is where CS seems to shine.
+This is plotted in Fig.~\ref{fig:time_damage}.
+As one would expect, as imaging time decreases, the RDI for each
+scan type increases. 
+From Fig.~\ref{fig:time_damage}, we see that for a
 fixed RDI, CS has a faster imaging acquisition rate. The amount of
 improvement is best if we need a very low RDI: for example, if we want
 to hold the RDI below 2, then we have to take the 1~Hz raster scan
@@ -1053,15 +982,14 @@ CS over raster narrows. For example, the 4~Hz raster scan and 5~Hz,
 faster. This is a result of the constant overhead imposed by the
 engage/disengage and $XY$-move states in CS.
 
-% More importantly though,
-\subsection{Comparison to Sub-line Sampling}
-Perhaps the simplest alternative to $\mu$-path sampling is to simply
-take a standard raster scan with fewer lines. This is the technique we
-consider in this subsection. Many of sub-line sampling papers assume
+\subsection{Comparison to Sub-line Sampling} \label{sec:cp_subline}
+ Many of sub-line sampling papers assume
 that the lines to sample are selected randomly \cite{han_optimal_2018,
-  Luo_nano_2015}. In contrast, we take an even simpler approach scan
-every 4th and every 8th line. This yields images with 128 and 64 lines
-respectively. For each of these scenarios, we first divide the data
+  Luo_nano_2015}. An even simpler alternative to
+$\mu$-path sampling is to simply 
+take a standard raster scan with fewer lines. This is the technique we
+consider in this subsection, by scanning images with 
+ 128 and 64 lines. For each of these scenarios, we first divide the data
 for each line into 512 bins. This gives an image that is 128 (resp.,
 64) pixels by 512 pixels. We then linearly interpolate along each
 column to produce a 512 by 512 pixel image. Again, we take these
@@ -1072,6 +1000,17 @@ Note the defect on the hole located in the second column, sixth row
 from the top. The CS-scans do a poor job detecting this, while both
 course raster scans do so. However, the other artifacts in 64 line
 scan obscure the defect.
+
+Fig.~\ref{fig:improve_512} shows the amount of improvement of the
+different sub-sampling techniques over full raster scans with 512
+lines as a function of scan rate. As far as pure speed goes, the CS
+scan at 12.5\% is the fastest for a rate of 1~Hz, though the 64 line
+raster scan is close. At the same time, the image quality of the 1~Hz,
+12.5\% CS scan is better than the the 1~Hz 64 line raster scan.
+However, this advantage quickly evaporates for faster scan rates.
+Indeed, for rates beyond about 5~Hz, the raster scan with 128 lines is
+not only faster than the 12.5\% CS scan, it also has (arguably) better
+image quality.
 
 \begin{figure*}
   \centering
@@ -1104,11 +1043,7 @@ scan obscure the defect.
 \section{Conclusions}\label{sec:conclusions}
 The main conclusion of this chapter is that with CS, it seems that we
 can acquire images faster yet (putatively) with less specimen damage
-than is possible with raster scanning, which we showed by introducing
-a new metric, the RDI. Of course, a natural criticism is that we did
-not validate the RDI against delicate specimens. We leave this as an
-area for future work.
-
+than is possible while raster scanning a full image. On the other hand, it appears that reconstructing a course raster scan makes more sense for faster scan rates. This is notable, since a course raster scan only requires an additional step in post-processing. It remains to be seen if this conclusion holds for a wide range of instruments.
 
 
 
