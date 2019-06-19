@@ -146,7 +146,7 @@ for j=1:2
 
 end
 
-data_writer({ST}, 'latex/baseline_errors.txt', '%.2g')
+data_writer({ST}, 'latex/baseline_errors.txt', '%.2f')
 save_fig(F, 'latex/figures/baseline_errors_aligned_1Hz', false)
 save_fig(F6, 'latex/figures/baseline_errors_1and6', false)
 
