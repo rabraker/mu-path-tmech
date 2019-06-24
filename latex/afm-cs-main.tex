@@ -1,7 +1,8 @@
-\documentclass[twocolumn,oneside]{IEEEtran/IEEEtran}
+\documentclass[journal]{IEEEtran}
+% \documentclass[twocolumn,oneside]{IEEEtran/IEEEtran}
 % \documentclass[defaultstyle,11pt]{IEEETran}
 
-\usepackage{showframe}
+% \usepackage{showframe}
 \usepackage{amssymb}		% to get all AMS symbols
 \usepackage{amsthm}
 \usepackage{mathtools}
@@ -61,8 +62,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
-\title{Improving the Image Acquisition Rate of an Atomic Force
-  Microscope Through Sub-sampling and Reconstruction}
+\title{Improving the Image Acquisition Rate \\ of an Atomic Force Microscope \\
+Through Sub-sampling and Reconstruction}
 
 \author{Roger A. Braker, Yufan Luo, Lucy Y. Pao and Sean B. Andersson
   \thanks{The authors are with the Dept. of Electrical, Computer, and
@@ -70,10 +71,10 @@
     Boulder, CO 80309, United States. Phone: +1 (303) 492-2360. Fax:
     +1 (303) 492-2758. R. A. Braker (corresponding author
     roger.braker@colorado.edu) is a graduate student and L.Y. Pao
-    (pao@colorado.edu) is the Richard \& Joy Dorf Professor.}
+    (pao@colorado.edu) is the Palmer  Professor.}
   \thanks{This work was supported in part by the US National Science
-    Foundation (NSF Grant CMMI-1234980) and Agilent Technologies,
-    Inc.} }
+    Foundation (NSF Grant CMMI-1234980)  Agilent Technologies,
+    Inc., and the Hanse-Wissenschaftskolleg Institute for Advanced Study in Delmenhorst, Germany.} }
 
 \maketitle
 \begin{abstract}
@@ -131,7 +132,7 @@ information about the property of interest is inferred from the
 applied control or the measured dynamics of the cantilever
 \cite{Abramovitch:2007gt}. Because of its versatility, spatial
 resolution, and ability to image in vacuum, air, and liquid, AFM is
-widely used in a variety of disciplines, including physics, biology
+widely used in a variety of disciplines, including physics, biology,
 and materials science
 \cite{Dufrene:2017gm,Yang:2017im,Payton:2016hj,Altman:2015ic,Haase:2015eh}.
 	
@@ -145,7 +146,7 @@ continue to be many active research efforts to overcome this
 challenge. Since an AFM is fundamentally a mechanical microscope, many
 of the approaches to high-speed AFM (HS-AFM) have focused on
 modifications to the physical components. These have included the use
-of small, fast cantilevers \cite{viani1999fast,
+of small, fast cantilevers \cite{Viani:1999tp,
   braunsmann2010high,Adams:2016hg}, the development of faster
 actuators \cite{Maroufi:2015gt,Yong:2012kd,Kenton:2012cm}, as well as
 the application of advanced controllers
@@ -208,54 +209,35 @@ sampling of the pixels for the same sampling fraction.
 	
 In AFM, implementing a truly random pattern requires that the tip be
 engaged with the surface to collect a measurement, lifted and moved to
-the new location, and engaged again. Because the re-engagement process
+the new location, and engaged again.
+Because the re-engagement process
 is typically slow, this can lead to excessively long image acquisition
 times and negate the gains from undersampling \cite{andersson2012non}.
-In \cite{maxwell2014compressed}, we introduced a discrete
-undersampling scheme, called a $\mu$-path pattern, which consists of
-short randomly placed, horizontal scans (see Fig.~\ref{fig:mu_mask}
-for one such pattern). It is designed to balance the randomness needed
-(to ensure good reconstruction) with continuous scanning (to reduce
-the number of tip engagements).
+In \cite{maxwell2014compressed}, we introduced a discrete undersampling scheme,
+called a $\mu$-path pattern, which consists of short randomly placed,
+horizontal scans (see Fig.~\ref{fig:mu_mask} for one such pattern). It
+is designed to balance the randomness needed (to ensure good
+reconstruction) with continuous scanning (to reduce the number of tip
+engagements).
 
-Our previous work on the $\mu$-path pattern using theoretical
+Our previous work on the $\mu$-path pattern, using theoretical
 calculations, simulations, and a preliminary implementation,
-demonstrates that the approach can achieve scanning time reduction
-while maintaining faithful image reconstruction
-\cite{maxwell2014compressed,Luo:2015tu, braker_hardware_2018}. The
-main contributions of this paper relative to that past work are:
+demonstrates that the approach can achieve scanning time
+reduction while maintaining faithful image reconstruction
+\cite{maxwell2014compressed,Luo:2015tu, braker_hardware_2018}. 
+The main contributions of this paper relative to that past work are:
 \begin{itemize}
 \item We introduce a new reconstruction algorithm which is designed to
-  minimize the artifacts arising from the structure of the $\mu$-path
-  scanning pattern. This algorithm is described and compared to
-  existing reconstruction methods through simulations in Sec.
-  \ref{sec:reconstructionMethods}.
-\item In our prior experimental prototype, \cite{braker_hardware_2018}
-  we used very basic integral controllers for all three axes for both
-  raster and $\mu$-path scans. Here, we design compensators for each
-  axis using standard loop-shaping techniques
-  (Sec.~\ref{sec:control}), which result in a substantial increase in
-  closed-loop bandwidth (e.g., 50 Hz to 450~Hz for the $Z$-axis). We
-  show in Sec.~\ref{sec:ff_control} that one of the limitations of
-  $\mu$-path scanning is the discontinuous $X$-axis reference (e.g.,
-  in moving between $\mu$-paths) which excites the cross-coupling
-  modes between the $X$ and $Z$ axes, an affect which neither our
-  prior experimental work nor the numerous simulation studies have
-  accounted for. We mitigate the cross coupling with a feed-forward
-  design.
-\item We experimentally compare (Sec. \ref{sec:results}) $\mu$-path
-  scanning to not only full density raster scans but also to course
-  raster scans which are interpolated to a full image. This is in
-  contrast to typical sub-line sampling which takes scan lines at
-  random. The clear advantage to a course raster scan is that it
-  requires no modification to the instrument.
+minimize the artifacts arising from the structure of the $\mu$-path
+scanning pattern. This algorithm is described and compared to existing
+reconstruction methods through simulations in Sec. \ref{sec:reconstructionMethods}.
+\item In our prior experimental prototype \cite{braker_hardware_2018}, we used very basic integral controllers for all three axes for both raster and $\mu$-path scans. Here, we design compensators for each axis using standard loop-shaping techniques (Sec.~\ref{sec:control}), which result in a substantial increase in closed-loop bandwidth (e.g., 50 Hz to 450~Hz for the $Z$-axis).
+We show in Sec.~\ref{sec:ff_control} that one of the limitations of $\mu$-path scanning is the discontinuous $X$-axis reference (e.g., in moving between $\mu$-paths) which excites the cross-coupling modes between the $X$ and $Z$ axes, an affect which neither our prior experimental work nor the numerous simulation studies have accounted for. We mitigate the cross coupling with a feed-forward design.
+\item We experimentally compare (Sec. \ref{sec:results}) $\mu$-path scanning to not only full density raster scans but also to coarse raster scans which are interpolated to a full image. This is in contrast to typical sub-line sampling which takes scan lines at random. The clear advantage to a coarse raster scan is that it requires no modification to the instrument, only to the post-processing.
+\item The bulk of this work is based on experiment, not simulation, in contrast to prior work by ourselves \cite{Luo_nano_2015,maxwell_acc_2014} and others \cite{han_optimal_2018,jensen_reconstruction_2013,oxvig_structure_2017}. Our main focus here is on delineating the practical issues which must be addressed to effectively realize $\mu$-path scanning, which has only seen limited attention in the past.
 \end{itemize}
-In general, our main focus here is on delineating the practical issues which
-must be addressed to effectively realize $\mu$-path scanning, which
-has only seen limited attention in the past, as most of the prior 
-investigation of CS in AFM  have been based purely on simulation
-\cite{Luo_nano_2015,maxwell_acc_2014, han_optimal_2018,jensen_reconstruction_2013,oxvig_structure_2017}.
-  
+
+
 \begin{figure}
   \centering
   \includegraphics[width=0.65\columnwidth]{figures-SBA/random_mask.pdf}
@@ -486,13 +468,10 @@ NESTA~\cite{becker_nesta_2011}.
 % % in~\cite{becker_nesta_2011}, have a closed-form solution given by
 % % \begin{align}
 % %   \lambda & = \textrm{max}(0, \sigma^{-1}\left| b -
-% %     Rq\right| -
-% %   L\\
+% %     Rq\right| - L\\
 % %   q &= r - L^{-1}g\\
 % %   p &= \left(I - \frac{\lambda}{\lambda + L}
-% %     R^TR\right)\left(
-% %     \frac{\lambda}{L}R^Tb +
-% %     q\right).
+% %     R^TR\right)\left( \frac{\lambda}{L}R^Tb + q\right).
 % % \end{align}
 
 
@@ -596,24 +575,14 @@ enough that the deflection signal stays low (i.e., below the scanning
 setpoint), even while we run across the surface. We choose \rzup so
 that the interaction between the tip and sample becomes purely
 adhesive. In general, stable imaging in is not possible at \rzup and
-complete dis-engagement occasionally occurs. This can be seen in
-bottom pane of Fig.~\ref{fig:cs_cycle} during the second $XY$-move
-(black portion) where the tip detaches partway through the move.
-% Fig.~\ref{fig:afm_bd_dinv} which selects either the scanning
-% setpoint $r_{Z,s}$ or the retraction setpoint $r_{Z,\textrm{up}}$
-% based the current state.
-When dis-engagement does occur, the $Z$-axis control loop implements
-an anti-windup scheme to prevent the control from saturating.
+complete dis-engagement occasionally occurs. This can be seen in bottom pane of
+Fig.~\ref{fig:cs_cycle} during the second $XY$-move (black portion) where the tip detaches partway through the move.
+%Fig.~\ref{fig:afm_bd_dinv} which selects either the scanning setpoint $r_{Z,s}$ or the retraction setpoint $r_{Z,\textrm{up}}$ based the current state.
+When dis-engagement does occur, the $Z$-axis control loop implements an anti-windup scheme to prevent the control from saturating.
 
 
-Only moving the tip into the adhesive region during the $XY$ move
-saves considerable time compared to completely detaching the tip
-between each $\mu$-path. By eliminating the normal force into the
-sample, we are able to take dozens of images with a single probe
-without a noticeable degradation in image quality. However, completely
-characterizing the damage done to the tip and sample with this scheme
-compared complete detachment (which can also damage the probe
-\cite{meyer_atomic_1992}), remains an outstanding goal.
+Only moving the tip into the adhesive region during the $XY$ move saves considerable time
+compared to completely detaching the tip between each $\mu$-path. By eliminating the normal force into the sample, we are able to take dozens of images with a single probe without a noticeable degradation in image quality. However, completely characterizing the damage done to the tip and sample with this scheme compared complete detachment (which can also damage the probe \cite{meyer_atomic_1992}), remains an outstanding goal.
 
 \begin{figure}[t!]
   \centering \includesvg[width=1\columnwidth]{figures/cs_cycle.svg}
@@ -1071,9 +1040,22 @@ faster scan rates. This is notable, since a course raster scan only
 requires an additional step in post-processing. It remains to be seen
 if this conclusion holds for a wide range of instruments.
 
+\begin{IEEEbiography}{Roger A. Braker} is so happy that all this is almost done.
 
+\end{IEEEbiography}
 
+\begin{IEEEbiography}[{\includegraphics[width=1 in,height=1.25in,clip,keepaspectratio]{yufan.JPG}}]{Yufan Luo}
+received dual B.S. degrees in automation and in management science from Zhejiang University, Zhejiang, China, in 2011, an M.S. degree in industrial and operations engineering from the University of Michigan, Ann Arbor, MI, USA, in 2012, and a Ph.D. degree in systems engineering from Boston University in 2019. He is currently with Juniper Networks, Sunnyvale, CA.
 
+\end{IEEEbiography}
+
+\begin{IEEEbiography}{Lucy Y. Pao} is probably not so happy that Arnold's almost done.    
+
+\end{IEEEbiography}
+
+\begin{IEEEbiography}[{\includegraphics[width=1 in,height=1.25in,clip,keepaspectratio]{SeanAndersson_IEEE.jpg}}]{Sean B. Andersson}
+received the B.S. degree in engineering and applied physics from Cornell University, Ithaca, NY, USA, in 1994, the M.S. degree in mechanical engineering from Stanford University, Stanford, CA, USA, in 1995, and the Ph.D. degree in electrical and computer engineering from the University of Maryland, College Park, MD, USA, in 2003. He has worked at AlliedSignal Aerospace and Aerovironment, Inc. and is currently an Associate Professor of mechanical engineering and of systems engineering with Boston University, Boston, MA, USA. His research interests include systems and control theory with applications in scanning probe microscopy, dynamics in molecular systems, and robotics. He received an NSF CAREER award in 2009, is a senior member of the IEEE, and was an associate editor for the IEEE Transactions on Automatic Control (2014-2018) and for the SIAM Journal on Control and Optimization (2013-2018).
+\end{IEEEbiography} 
 
 %%%%%%%%% then the Bibliography, if any %%%%%%%%%
 % \bibliographystyle{plain} % or "siam", or "alpha", etc.
