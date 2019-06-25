@@ -711,8 +711,8 @@ save_fig(F_ssm, fullfile(PATHS.tmech_fig(), 'cs_rast_time_vs_ssim'), false)
 save_fig(F_psn, fullfile(PATHS.tmech_fig(), 'cs_rast_time_vs_psnr'), false)
 %%
 
-F_trade = mkfig(10, 3.5, 3); clf
-ha_t = tight_subplot(1, 1, 0.01, [0.15, 0.15], [0.15, 0.02], false);
+F_trade = mkfig(10, 3.5, 2.75); clf
+ha_t = tight_subplot(1, 1, 0.01, [0.15, 0.12], [0.15, 0.02], false);
 % plot(rastm_512.rate, rastm_512.time)
 hold on
 
@@ -724,7 +724,7 @@ h2 = plot(csm_12.rate, csm_12.time./nrm_s, '--o');
 
 h3 = plot(rastm_128.rate, rastm_128.time./nrm_s, '-o');
 
-h4a = plot(csm_15.rate, csm_15.time./nrm_s, '--o');
+% h4a = plot(csm_15.rate, csm_15.time./nrm_s, '--o');
 h4 = plot(csm_25.rate, csm_25.time./nrm_s, '--o');
 % title('25~\% sampling')
 % plot(csm_15.rate, csm_15.time)
@@ -732,9 +732,9 @@ h1.DisplayName = 'raster 64 lines';
 h2.DisplayName = 'CS 12.5 \%';
 
 h3.DisplayName = 'raster 128 lines';
-h4a.DisplayName = 'CS 15 \%';
+% h4a.DisplayName = 'CS 15 \%';
 h4.DisplayName = 'CS 25 \%';
-leg_t = legend([h1, h3, h2, h4a, h4], 'Position', [0.1610 0.8389 0.6566 0.1599],...
+leg_t = legend([h1, h3, h2, h4], 'Position', [0.2304 0.8754 0.6830 0.1207],...
     'NumColumns', 2, 'Box', 'off');
 
 xlabel('rate [Hz]')
