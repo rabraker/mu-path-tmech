@@ -509,21 +509,6 @@ hold(ha(1), 'on')
 grid(ha(1), 'on')
 set(ha(1), 'XScale', 'log');
 
-% h3 = semilogx_color_points2(ha(1), rastm_512.time(1:end), rastm_512.damage(1:end), 'x', 1);
-% h3a = semilogx_color_points2(ha(1), rastm_128.time, rastm_128.damage, '+');
-% h3b = semilogx_color_points2(ha(1), rastm_64.time, rastm_64.damage, 's');
-% 
-% xlabel(ha(1), 'total time [s]')
-% ylabel(ha(1), 'RDI')
-% 
-% h4 = semilogx_color_points2(ha(1), csm_12.time, csm_12.damage, 'o');
-% h5 = semilogx_color_points2(ha(1), csm_25.time, csm_25.damage, '*');
-% 
-% plot(ha(1), rastm_512.time(1:end), rastm_512.damage(1:end), ':k')
-% plot(ha(1), rastm_128.time, rastm_128.damage, ':k')
-% plot(ha(1), rastm_64.time, rastm_64.damage, ':k')
-% plot(ha(1), csm_12.time, csm_12.damage, ':k')
-% plot(ha(1), csm_25.time, csm_25.damage, ':k')
 h3 = semilogx_color_points2(ha(1), rastm_512, 'damage', 'x', 1, color_ord_map);
 h3a = semilogx_color_points2(ha(1), rastm_128, 'damage',  '+', 1, color_ord_map);
 h3b = semilogx_color_points2(ha(1), rastm_64, 'damage',  's', 1, color_ord_map);
@@ -565,7 +550,7 @@ clr = ha.ColorOrder;
 x1 = xs(k);
 
 x2 = x1*fac;
-w = (xs(k+1) - xs(k))*.9;%x2 - x1;
+w = (xs(k+1) - xs(k))*.9;
 
 X = [x1, x1+w, x1+w, x1];
 Y = [yo, yo, yo+h, yo+h];
@@ -590,12 +575,6 @@ hold(ha_ssm, 'on')
 grid(ha_ssm, 'on')
 
 set(ha_ssm, 'XScale', 'log')
-
-% h4 = semilogx_color_points(ha_ssm, rastm_512.time(2:end), rastm_512.ssim(2:end), 'x', 2);
-% h4a = semilogx_color_points(ha_ssm, rastm_128.time, rastm_128.ssim, '+');
-% h4b = semilogx_color_points(ha_ssm, rastm_64.time, rastm_64.ssim, 's');
-% h5 = semilogx_color_points(ha_ssm, csm_12.time, csm_12.ssim, 'o');
-% h6 = semilogx_color_points(ha_ssm, csm_25.time, csm_25.ssim, '*');
 
 h3 = semilogx_color_points2(ha_ssm, rastm_512, 'ssim', 'x', 1, color_ord_map);
 h3a = semilogx_color_points2(ha_ssm, rastm_128, 'ssim',  '+', 1, color_ord_map);
@@ -641,8 +620,8 @@ clr = ha_ssm.ColorOrder;
 x1 = xs(k);
 
 x2 = x1*fac;
-% w = x2 - x1;
-w = (xs(k+1) - xs(k))*.9;%x2 - x1;
+
+w = (xs(k+1) - xs(k))*.9;
 
 X = [x1, x1+w, x1+w, x1];
 Y = [yo, yo, yo+h, yo+h];
@@ -668,12 +647,6 @@ hold(ha_psn, 'on')
 grid(ha_psn, 'on')
 set(ha_psn, 'XScale', 'log')
 
-
-% h7 = semilogx_color_points(ha_psn, rastm_512.time(2:end), rastm_512.psnr(2:end), 'x', 2);
-% h7a = semilogx_color_points(ha_psn, rastm_128.time, rastm_128.psnr, '+');
-% h7b = semilogx_color_points(ha_psn, rastm_64.time, rastm_64.psnr, 's');
-% h8 = semilogx_color_points(ha_psn, csm_12.time, csm_12.psnr, 'o');
-% h9 = semilogx_color_points(ha_psn, csm_25.time, csm_25.psnr, '*');
 
 h3 = semilogx_color_points2(ha_psn, rastm_512, 'psnr', 'x', 1, color_ord_map);
 h3a = semilogx_color_points2(ha_psn, rastm_128, 'psnr',  '+', 1, color_ord_map);
@@ -710,8 +683,8 @@ clr = ha_psn.ColorOrder;
 
 x1 = xs(k);
 x2 = x1*fac;
-% w = x2 - x1;
-w = (xs(k+1) - xs(k))*.9;%x2 - x1;
+
+w = (xs(k+1) - xs(k))*.9;
 
 X = [x1, x1+w, x1+w, x1];
 Y = [yo, yo, yo+h, yo+h];
@@ -849,16 +822,6 @@ function write_cs_meta_data(cs_exps, nesta_opts, fname)
         'sigma', nesta_opts.sigma);
     
     data_writer({scan_meta}, fname);
-end
-
-function ha = semilogx_color_points(ax, x, y, marker, ord_start)
-    if nargin < 5
-        ord_start = 1;
-    end
-    ax.ColorOrderIndex = ord_start;
-    for k =1:length(x)
-       ha = semilogx(ax, x(k), y(k),  marker, 'MarkerSize', 8);
-    end
 end
 
 function ha = semilogx_color_points2(ax, SM, fld, marker, ord_start, ord_map)
