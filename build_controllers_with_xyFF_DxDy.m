@@ -196,7 +196,7 @@ end
 
 
 function F11 = bode_local(HH1, HH2, Gxyz_frd, Dx_ff, Dy_ff)
-    F11 = mkfig(11, 7, 5, true); clf
+    F11 = mkfig(11, 7, 5.45, true); clf
     % [ha, pos] = tight_subplot(3, 3, .01, [.061, 0.03], [.065, .02]);
     [ha] = tight_subplot(3, 2, .01, [.061, 0.03], [.065, .02]);
     ha = reshape(ha', [], 3)';
