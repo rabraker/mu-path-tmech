@@ -590,9 +590,9 @@ compared to completely detaching the tip between each $\mu$-path. By eliminating
 \begin{figure*}[ht!]
   \centering
   \includegraphics[width=1\textwidth]{figures/AFM_loop_xyz.pdf}
-  \caption{Block diagram of the $Z$-axis control loop. The anti-windup
-    is active for decision index $i\in\{0,1,5\}$, which correspond to
-    states such that $r_Z=\rzup$.}
+  \caption{Block diagram of the AFM control loop for all three axes.
+    Not shown is anti-windup for the $Z$-axis integrator, which is active
+    when $r_Z=\rzup$ (states 1 and 5) where sensor saturation is possible.}
   \label{fig:afm_bd_dinv}
 \end{figure*}
 \subsection{The pre-scan}
