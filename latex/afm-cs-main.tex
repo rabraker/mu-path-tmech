@@ -608,10 +608,10 @@ we must extend the $\mu$-path by a distance equal to the steady-state
 error following a ramp. For an arbitrary scan speed, this means the
 $\mu$-path scan would need an extra
 \begin{equation}
-  N = \left\lceil\lim_{z\rightarrow 1} \frac{1-H_x}{z-1}\right\rceil
+  N = \left\lceil\lim_{z\rightarrow 1} \frac{1-H_X}{z-1}\right\rceil
 \end{equation}
-time steps, where $H_x$ is closed-loop transfer function for the
-$x$-axis. For our system $N=111$. By initiating the scan while the
+time steps, where $H_X$ is closed-loop transfer function for the
+$X$-axis. For our system $N=111$. By initiating the scan while the
 $Z$-axis settles, we eliminate much of this overhead.
 
 \subsection{Control}\label{sec:control}
@@ -826,7 +826,7 @@ metric, which we call the Relative Damage Index (RDI) which computes
 the power in the deflection signal for a given scan. That is,
 
 \begin{align}
-  \text{RDI} &= \frac{1}{T_s}\sum_{k=1}^N \frac{1}{k} \left(Z_{d,k} - r_{Z,s}\right)^2 \label{eqn:RDI}\\
+  \text{RDI} &= \frac{1}{T_s}\sum_{k=1}^N \frac{1}{k} \left(Z_{d,k} - r_{Z,s}\right)^2 \label{eqn:RDI}
 \end{align}
 The idea behind the RDI is that increased scan rates lead to larger
 deflection signals (and thereby increased force into the specimen) at
