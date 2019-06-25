@@ -346,7 +346,7 @@ ha_subl = reshape(ha_subl', 3, [])';
 
 Fig_rows = mkfig(3002, 7, 4.5); clf
 ha_row = tight_subplot(2, 1, [0.1, 0.015], [.1, .05], [.085, .02], false);
-xlabel(ha_row(2), 'x-direction pixel', 'FontSize', 14)
+xlabel(ha_row(2), '$X$-direction pixel', 'FontSize', 14)
 ylabel(ha_row(1), 'height [nm]', 'FontSize', 14)
 title(ha_row(1), 'raster', 'FontSize', 14)
 title(ha_row(2), 'CS', 'FontSize', 14)
@@ -388,11 +388,17 @@ for k=1:length(rast_exps)
                 rast_exps{k}.meta_in.raster_freq)
             continue
     end
+
+    rate_k = rast_exps{k}.meta_in.raster_freq;
+    
+    if abs(rate_k - 1.0)<0.1 && k~=1
+        continue
+    end
+    
     ax_im = ax_im(fig_col);
     
     imk = rast_exps{k}.pix_mat_pinned;% - mean(rast_exps{k}.pix_mat_pinned(:));
     
-    rate_k = rast_exps{k}.meta_in.raster_freq;
     imagesc(ax_im, imk, clr_range);
     colormap(ax_im, 'gray');
     stit = sprintf('raster %d (%.1f Hz)', rast_exps{k}.npix_y_og, rate_k);
@@ -404,12 +410,13 @@ for k=1:length(rast_exps)
         hold(ha_row(1), 'on')
         ha_row(1).ColorOrderIndex = fig_col;
         plot(ha1(fig_row, fig_col), [1, 512], [row_idx, row_idx], 'r');
+        
         row_hands(fig_col) = plot(ha_row(1), imk(row_idx, :)*AFM.volts2nm_z());
         row_hands(fig_col).DisplayName = sprintf('%.1f Hz', rate_k);
         hold(ha_row(1), 'on')
         
     end
-    
+%     pause
 
 end
 remove_ticks(ha1)
