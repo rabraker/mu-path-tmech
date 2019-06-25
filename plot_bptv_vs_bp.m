@@ -5,7 +5,7 @@ clc
 % ------------ Row 1, CS20NG -------------------------
 im_og = double(imread('cs20ng.png'));
 % im_og = im_og(1:2:512, 1:2:512);
-mu_len = 20;
+mu_len = 50;
 samp_frac = 0.15;
 n = size(im_og, 1);
 
@@ -72,11 +72,12 @@ function [ssm, X_bptv] = fun(im_og, b, E_fun, Et_fun, opts, alpv, alph)
 
     opts.alpha_v = alpv;
     opts.alpha_h = alph;
-    
-    mu = 1e-5;
-    delta = 0.01;
+    opts.mu = 1e-5;
+    opts.sigma = 0.01;
+%     mu = 1e-5;
+%     delta = 0.01;
 
-    x_bptv = NESTA_mine(E_fun, Et_fun, b, mu, delta, opts);
+    x_bptv = NESTA_mine(E_fun, Et_fun, b, opts);
 
     X_bptv = CsTools.pixvec2mat(x_bptv, n);
     figure(7)
@@ -103,15 +104,13 @@ function t_recon = cp_bptv_bp(im_og, pix_idx, prefix, figbase)
     
     
     opts = NESTA_opts('U', U_fun, 'Ut', Ut_fun, 'alpha_v', 0.0705, 'alpha_h', .4037,...
-        'verbose', 5, 'TolVar', 1e-5);
+        'verbose', 5, 'TolVar', 1e-5, 'mu', 1e-3, 'sigma', 0.001);
     
     b = CsTools.pixmat2vec(im_og);
     b = b(pix_idx);
     
-    mu = 1e-3;
-    delta = .001
     tic 
-    x_bptv = NESTA_mine(E_fun, Et_fun, b, mu, delta, opts);
+    x_bptv = NESTA_mine(E_fun, Et_fun, b, opts);
     t_recon = toc;
     X_bptv = CsTools.pixvec2mat(x_bptv, n);
     
@@ -120,7 +119,7 @@ function t_recon = cp_bptv_bp(im_og, pix_idx, prefix, figbase)
         'verbose', 5, 'TolVar', 1e-5);
     
     
-    x_bp = NESTA_mine(E_fun, Et_fun, b, mu, delta, opts);
+    x_bp = NESTA_mine(E_fun, Et_fun, b, opts);
     X_bp = CsTools.pixvec2mat(x_bp, n);
     
     
