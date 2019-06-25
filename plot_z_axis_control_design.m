@@ -35,8 +35,8 @@ Hyr_old = feedback(D_ki_old*G_frf, 1);
 Hyr_noinv = feedback(D_ki*dat.K*G_frf, 1);
 
 
-F2 = mkfig(2, 3.48, 1.8); clf
-[ha, pos] = tight_subplot(1, 1, [.02, .01 ], [.165, 0.03], [.1, .02]);
+F2 = mkfig(2, 3.48, 2); clf
+[ha, pos] = tight_subplot(1, 1, [.02, .01 ], [.15, 0.08], [.1, .02]);
 
 
 h1 = frf_bode_mag(Loop, ss_data.freq_s, ha, 'Hz', ':b');
@@ -51,7 +51,9 @@ h4.DisplayName = '$H_{Z_d, r_{Z}}$ ';
 leg = legend([h1, h2, h4]);
 set(ha, 'FontSize', 8)
 set(leg, 'Location', 'southwest', 'FontSize', 8);
-
+ylabel(ha, 'Output $Z$ (Mag [dB])')
+title(ha, 'Input $Z$')
+%%
 % [pm, gm] = margin(Loop)
 save_fig(F2, fullfile(PATHS.tmech_fig(), 'z_control_design'), false);
 
