@@ -654,7 +654,7 @@ hysteresis model is a modified Prandtl-Ishlinskii type model and is
 based on the work of \cite{kuhnen_modeling_2003}, while the drift
 compensation models the piezo creep as a simple second-order transfer
 function with real poles and zeros. In Fig.~\ref{fig:afm_bd_dinv}, the
-hysteresis inversion is indicated by $\mathcal{H}^{-1}[\cdot]$. We
+hysteresis inversion is indicated by $\mathcal{H}_X^{-1}[\cdot]$. We
 have found that the inclusion of these extra compensators limits the
 overshoot of the $X$-axis during larger moves between different
 $\mu$-paths (e.g., without them, the $X$-axis trajectory in
@@ -715,11 +715,13 @@ induces excessively large vibrations in the vertical control.
 In principle, one could mitigate these issues with a full MIMO control
 design. In this work, we opt for a much simpler feedforward scheme.
 For CS scanning, we insert feed-forward filters ($F_X$ and $F_Y$ in
-Fig.~\ref{fig:afm_bd_dinv}) with three notches: at 215~Hz, 350~Hz, and 505~Hz. Both filters are shown in Fig.~\ref{fig:mimo_frf_uxuy} as the dashed-pink curves and the
+Fig.~\ref{fig:afm_bd_dinv}) with three notches: at 215~Hz, 350~Hz, and
+505~Hz. Both filters are shown in Fig.~\ref{fig:mimo_frf_uxuy} as the
+dashed-pink curves and the
 resulting overall FRF is shown as the blue curves, which show a
 dramatic reduction in the cross coupling. A similar effect could be
 achieve by using a simple low-pass filter. However, to achieve the
-same 40~dB of attenuation of the mode at 215~Hz, would require, e.g.,
+same 40~dB of attenuation of the mode at 215~Hz would require, e.g.,
 that a two-pole low-pass filter have its cut-off frequency at about
 20~Hz. Thus, while our feedforward scheme slows the $X$-axis down, we
 achieve better bandwidth than we would with a simple low-pass filter.
