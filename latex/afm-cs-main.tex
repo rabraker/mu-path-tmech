@@ -535,9 +535,10 @@ Transition between, and operation in, these different stages is
 implemented as a simple state machine, summarized in
 Table~\ref{tab:cs_tasks}. The main job of the state machine is to
 adjust the reference signals to accomplish each task. In the
-following, $r_X$ and $r_Y$ refer to the references for the
-$X$ and $Y$ axes while $r_{Z,s}$ and $\rzup$ refer to the $Z$-axis
-setpoints during scanning and retraction, respectively.
+following, $r_X$ and $r_Y$, $r_Z$ refer to the references for the
+$X$, $Y$, and $Z$ axes, respectively. The $Z$-axis setpoint $r_Z$
+takes on values $r_{Z,s}$ (the scanning setpoint) and $\rzup$ (the
+retraction setpoint).
 
 \begin{table}[h!]
   \centering
