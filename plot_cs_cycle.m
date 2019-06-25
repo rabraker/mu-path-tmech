@@ -105,7 +105,8 @@ end
 ylim(ha(2), [0, 5]);
 ylim(ha(3), [-20, 90])
 
+hands(3).DisplayName = 'tip settle/pre-scan';
 
-leg = legend(hands, 'NumColumns', 1, 'Position', [0.6709 0.5861 0.2993 0.1656]);
+leg = legend(hands, 'NumColumns', 1, 'Position', [0.6064 0.6017 0.3808 0.1656]);
 %%
 save_fig(Fig, 'latex/figures/cs_cycle', false)
