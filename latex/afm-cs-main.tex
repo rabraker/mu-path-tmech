@@ -471,9 +471,9 @@ NESTA~\cite{becker_nesta_2011}. Note that the BPVV designation technically holds
 
 A simulation comparison between BPDN and BPVV is shown in
 Fig.~\ref{fig:BPTV_demonstration}. The first column shows two raster
-scans: the top is a 512 by 512 pixel image of a CS20NG grating (Ted Pella, USA) acquired
+scans: the top is a 512 by 512 pixel image of a CS-20NG grating (Ted Pella, USA) acquired
 with an Agilent 5400 AFM and the bottom is a 256 by 256 pixel image of
-DNA acquired with an Agilent 5500 AFM. For the CS20NG grating, we
+DNA acquired with an Agilent 5500 AFM. For the CS-20NG grating, we
 sampled 15\% of the pixels with 50 pixel $\mu$-paths and 25\%
 of the DNA image with 25 pixel long $\mu$-paths. The second columns
 shows the full frame reconstructions using BPDN and the third columns
@@ -484,7 +484,7 @@ results show the artifacts apparent in the BPDN reconstruction are
 largely mitigated using BPVV. Thus, in the remainder of the paper, we
 focus exclusively on BPVV. These reconstructions wth BPVV took about
 1.5 seconds for the DNA image and about 7 seconds for the
-CS20NG (on a typical laptop computer).
+CS-20NG (on a typical laptop computer).
 	
 
 % =========================================================================
@@ -746,7 +746,7 @@ and $y=\textrm{vec}(Y)$. Let $L$ be the dynamic range of the master
 image $x$. Then the peak signal to noise ratio (PSNR) is given by
 \begin{equation*}
   \text{PSNR}(x,y) = 10\log_{10}\frac{L^2}
-  {\sqrt{\frac{1}{p^2} \sum_{i=1}^{m}( x_{i} - y_{i})^2 }}.
+  {\sqrt{\frac{1}{m} \sum_{i=1}^{m}( x_{i} - y_{i})^2 }}.
 \end{equation*}
 
 The goal of the SSIM is to compare two image's structure,
@@ -838,14 +838,14 @@ Sec.~\ref{sec:cp_full}. Second, we compare to coarse raster scans in
 Sec.~\ref{sec:cp_subline}.
 
 \subsection{Comparison to full raster}\label{sec:cp_full}
-We took scans of a Ted Pella CS20NG sample grating over an area with
+We took scans of a Ted Pella CS-20NG sample grating over an area with
 holes on a 500 nm pitch. The holes are 20 nm deep. We scanned 5 micron
 by 5 micron images using standard raster scans with 512 lines. For the
 raster scans, we took scans at 1.0~Hz, 2.5~Hz, 5.0~Hz, 8.0~Hz and
 10~Hz. We also took $\mu$-path scans with densities at 12.5\% and
 25\% and reconstructed 512 by 512 pixel images. The CS scans were
 taken with scan velocities equivalent to raster scan rates of 1.0~Hz,
-2.0~Hz, 5.0~Hz and 8.0~Hz. For all CS scans, the $\mu$-paths are
+2.0~Hz, 4.0~Hz, 5.0~Hz and 8.0~Hz. For all CS scans, the $\mu$-paths are
 $\scanD{muLenNM}$ nm long, which translates to $\scanD{muLenPix}$
 pixels.
 
@@ -857,11 +857,11 @@ $\pm \scanD{xyBoundaryMic}$ microns and required $\scanD{xySetSamps}$
 samples within this boundary before moving to the $Z$-engage state.
 The pre-scan length was $\scanD{preScanSamples}$ time steps. The
 cantilever was a Budget Sensors ContAI-G, with a nominal length of 450
-microns and spring constant of $k=0.2$~N/m.
+microns and spring constant of $0.2$~N/m.
 
 % \SSData{G2}$& $g_6 = \SSData{G6}
 The CS scans were reconstructed with BPVV. We set
-${\alpha_v=\scanD{alpv}}$ and ${\alpha_h=\scanD{alph}}$. For the
+${\alpha=\scanD{alph}}$ and ${\beta=\scanD{alpv}}$. For the
 raster scans, we discard data from the re-trace and divided the
 remaining data for each scan line into 512 bins based on the \xc
 sensor measurements. We then average the data in each bin to obtain
