@@ -8,7 +8,7 @@ clear all
 % Options
 figbase  = 50;
 verbose = 0;
-
+rmpath('/home/arnold/matlab/afm-cs/matlab-code/functions/')
 addpath('functions');
 addpath(fullfile('functions', 'state_space_x'));
 

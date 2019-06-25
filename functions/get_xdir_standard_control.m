@@ -1,10 +1,7 @@
 function xdirControl = get_xdir_standard_control(type, gam)
-addpath(fullfile(getCsRoot(), 'matlab-code', 'functions'));
-addpath(fullfile(getCsRoot(), 'matlab-code', 'functions', 'state_space_x'));
+
 
 md = 1;
-
-
 
 % ------- Load Plants -----
 [plants, frf_data] = CanonPlants.plants_ns14(9);

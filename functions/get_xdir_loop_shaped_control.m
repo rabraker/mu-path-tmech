@@ -4,8 +4,6 @@ function xdirControl = get_xdir_loop_shaped_control(verbose)
         verbose = true;
     end
 
-    addpath(fullfile(getCsRoot(), 'matlab-code', 'functions'));
-    
     % ------- Load Plants -----
     [plants, frf_data] = CanonPlants.plants_ns14(9, '5micron');
     
