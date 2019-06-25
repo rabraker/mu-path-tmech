@@ -826,7 +826,7 @@ metric, which we call the Relative Damage Index (RDI) which computes
 the power in the deflection signal for a given scan. That is,
 
 \begin{align}
-  \text{RDI} &= \frac{1}{T_s}\sum_{k=0}^N \frac{1}{k} \left(Z_{d,k} - r_{Z,s}\right)^2 \label{eqn:RDI}\\
+  \text{RDI} &= \frac{1}{T_s}\sum_{k=1}^N \frac{1}{k} \left(Z_{d,k} - r_{Z,s}\right)^2 \label{eqn:RDI}\\
 \end{align}
 The idea behind the RDI is that increased scan rates lead to larger
 deflection signals (and thereby increased force into the specimen) at
@@ -878,18 +878,51 @@ This step eases comparison with the CS scans and was inspired by a
 feature in the AFM image processing toolbox \texttt{SPIW} \cite{spiw}.
 The resulting images are shown in Fig.~\ref{fig:resultsF1_images}. The
 color maps represent a range of $\pm$20 nm. The rows of pixels
-indicated by the red lines are shown as cross sections
+indicated by the red lines are shown as cross sections in
 Fig.~\ref{fig:pixel_rows}.
 
+% \begin{figure}
+%   \begin{subfigure}{.48\textwidth}
+%     \includesvg[width=1\textwidth]{figures/ }
+%     \caption{ }
+%     \label{fig: }
+%   \end{subfigure}
+%   \begin{subfigure}{.48\textwidth}
+%     \includegraphics[width=1\textwidth]{figures/ }
+%     \caption{ }
+%     \label{fig: }
+%   \end{subfigure}
+%   \caption{}
+%   \label{fig: }
+% \end{figure}
 \begin{figure*}
-  \centering
-  \includesvg[scale=.98]{figures/cs_raster_images_6-5-2019.svg}
+  % \begin{center}
+  \parbox{.1\textwidth}{\phantom{p}}
+  \begin{subfigure}{.8\textwidth}
+  \includesvg[width=1\textwidth]{figures/cs_raster_images_6-5-2019.svg}
+\end{subfigure}
+\begin{subfigure}[t]{.09\textwidth}
+  \vspace{-18.2em}
+    \includesvg[width=1\textwidth]{figures/colorbar.svg}
+  \end{subfigure}
+  % \hfill
+% \end{center}
   \caption{Raster and compressed sensing images of a 5 micron by 5 micron 
     area of the CS-20NG grating. All images are 512$\times$512 pixels.
     The rows of pixels indicated by the red lines are
     shown in Fig.~\ref{fig:pixel_rows}.}
   \label{fig:resultsF1_images}
 \end{figure*}
+
+% \begin{figure*}
+%   % \centering
+%   \includesvg[scale=.98]{figures/cs_raster_images_6-5-2019.svg}
+%   \caption{Raster and compressed sensing images of a 5 micron by 5 micron 
+%     area of the CS-20NG grating. All images are 512$\times$512 pixels.
+%     The rows of pixels indicated by the red lines are
+%     shown in Fig.~\ref{fig:pixel_rows}.}
+%   \label{fig:resultsF1_images}
+% \end{figure*}
 
 % \begin{table}[t!]
 %   \centering
@@ -1033,6 +1066,11 @@ faster scan rates. This is notable, since a coarse raster scan only
 requires an additional step in post-processing. It remains to be seen
 if this conclusion holds for a wide range of instruments.
 
+%%%%%%%%% then the Bibliography, if any %%%%%%%%%
+% \bibliographystyle{plain} % or "siam", or "alpha", etc.
+\bibliographystyle{IEEEtran} % or "siam", or "alpha", etc.
+\bibliography{braker_bibs,Andersson_bibs,Yufans_bibs} % Bib database in "refs.bib"
+
 \begin{IEEEbiography}
   [{\includegraphics[width=1 in,height=1.25in,clip,keepaspectratio]{figures/braker_headshot.jpg}}]
   {Roger A. Braker} earned the B.A. degree in physics from the University of Oklahoma in 2005 and the M.S. degree in electrical engineering from the University of Colorado in 2017.
@@ -1062,11 +1100,6 @@ received dual B.S. degrees in automation and in management science from Zhejiang
 received the B.S. degree in engineering and applied physics from Cornell University, Ithaca, NY, USA, in 1994, the M.S. degree in mechanical engineering from Stanford University, Stanford, CA, USA, in 1995, and the Ph.D. degree in electrical and computer engineering from the University of Maryland, College Park, MD, USA, in 2003. He has worked at AlliedSignal Aerospace and Aerovironment, Inc. and is currently an Associate Professor of mechanical engineering and of systems engineering with Boston University, Boston, MA, USA. His research interests include systems and control theory with applications in scanning probe microscopy, dynamics in molecular systems, and robotics. He received an NSF CAREER award in 2009, is a senior member of the IEEE, and was an associate editor for the IEEE Transactions on Automatic Control (2014-2018) and for the SIAM Journal on Control and Optimization (2013-2018).
 \end{IEEEbiography} 
 
-%%%%%%%%% then the Bibliography, if any %%%%%%%%%
-% \bibliographystyle{plain} % or "siam", or "alpha", etc.
-\bibliographystyle{IEEEtran} % or "siam", or "alpha", etc.
-% \nocite{*} % list all refs in database, cited or not
-\bibliography{braker_bibs,Andersson_bibs,Yufans_bibs} % Bib database in "refs.bib"
 
 
 %%%%%%%%% then the Appendices, if any %%%%%%%%%
