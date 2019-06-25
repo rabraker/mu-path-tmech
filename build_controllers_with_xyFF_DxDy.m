@@ -89,7 +89,7 @@ du_max = du_max_orig/norm(plants.gdrift_inv, Inf);
 
 
 xdir_tf_cntrl = get_xdir_loop_shaped_control();
-%%
+%
 
 ydir_cntrl = get_ydir_standard_control();
 
@@ -101,7 +101,7 @@ Gxyz_frd(1,1) = Gvibx_(1,1);
 gdi = blkdiag(plants.gdrift_inv, 1, 1);
 Gxyz_frd = Gxyz_frd*gdi;
 [DD, Dzki, Dz_inv] = get_gz_dz(Gxyz_frd(3,3));
-%%
+%
 g_static = zpk([], [], 1, AFM.Ts);
 Dx_ff = xdir_tf_cntrl.M;
 Dy_ff = ydir_cntrl.M;
@@ -114,7 +114,7 @@ xdir_tf_cntrl.M = Dx_ff;
 ydir_cntrl.M = Dy_ff;
 [HH2] = close_three_axis(Gxyz_frd, xdir_tf_cntrl, ydir_cntrl, Dzki, Dz_inv);
 
-
+%%
 F = bode_local(HH1, HH2, Gxyz_frd, Dx_ff, Dy_ff);
 
 save_fig(F, 'latex/figures/MIMO_CL_uxuy', false)
@@ -201,15 +201,15 @@ function F11 = bode_local(HH1, HH2, Gxyz_frd, Dx_ff, Dy_ff)
     [ha] = tight_subplot(3, 2, .01, [.061, 0.03], [.065, .02]);
     ha = reshape(ha', [], 3)';
     freq_s = logspace(log10(1), log10(12500), 350)';
+
+    h4 = frf_bode_mag(Dx_ff, freq_s, ha(1,1), 'Hz', '--m');
+    h5 = frf_bode_mag(Dy_ff, freq_s, ha(2,2), 'Hz', '--m');
     
     h1 = mimo_bode_mag(HH1(:,1:2), freq_s, ha, '-r');
-    
     h2 = mimo_bode_mag(HH2(:, 1:2), freq_s, ha, '-b');
     h3 = mimo_bode_mag(Gxyz_frd(:, 1:2), freq_s, ha, '-k');
     
-    h4 = frf_bode_mag(Dx_ff, freq_s, ha(1,1), 'Hz', '--m');
-    h5 = frf_bode_mag(Dy_ff, freq_s, ha(2,2), 'Hz', '--m');
-    ylabel(ha(2,2), '')
+%     ylabel(ha(2,2), '')
     
     
     fprintf('Bandwidth HH1: %f\n', bandwidth(HH1(1,1))/2/pi)
@@ -218,12 +218,10 @@ function F11 = bode_local(HH1, HH2, Gxyz_frd, Dx_ff, Dy_ff)
     h1(1,1).DisplayName = 'C.L w/o F.F';
     h2(1,1).DisplayName = 'C.L w/ F.F';
     h3(1,1).DisplayName = 'O.L. Plant';
-    try
-    h4.DisplayName = '$D_{x,ff}$';
-    catch
-        keyboard
-    end
-    h5.DisplayName = '$D_{y,ff}$';
+
+    h4.DisplayName = '$F_X$';
+
+    h5.DisplayName = '$F_Y$';
     
     leg = legend([h1(1,1), h2(1,1), h3(1,1), h4], 'FontSize', 10);
     legy = legend(h5, 'FontSize', 12);
