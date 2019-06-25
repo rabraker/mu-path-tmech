@@ -12,21 +12,21 @@ n = size(im_og, 1);
 [mask, pix_idx] = CsTools.mu_path_mask(mu_len, n, n, samp_frac);
 
 figbase = 1;
-t_recon_cs20ng = cp_bptv_bp(im_og, pix_idx, 'cs20ng', figbase)
+t_recon_cs20ng = cp_bptv_bp(im_og, pix_idx, 'cs20ng', figbase);
 
 U_fun = @(x) idct(x);
 Ut_fun = @(x) dct(x);
     
 E_fun = @(x) CsTools.E_fun1(x, pix_idx);
 Et_fun = @(x) CsTools.Et_fun1(x, pix_idx, n, n);
-%%        
-clc
-im_og = im_og / max(im_og(:));
-b = CsTools.pixmat2vec(im_og);
-b = b(pix_idx);
-alpv = .01;
-alph = .91;
-opts = NESTA_opts('U', U_fun, 'Ut', Ut_fun, 'verbose', 0, 'TolVar', 1e-5);
+%        
+% clc
+% im_og = im_og / max(im_og(:));
+% b = CsTools.pixmat2vec(im_og);
+% b = b(pix_idx);
+% alpv = .01;
+% alph = .91;
+% opts = NESTA_opts('U', U_fun, 'Ut', Ut_fun, 'verbose', 0, 'TolVar', 1e-5);
 
 % [ssm, X] = fun(im_og, b, E_fun, Et_fun, opts, alpv, alph);
 % alps_0 = [alpv; alph];
@@ -38,7 +38,7 @@ opts = NESTA_opts('U', U_fun, 'Ut', Ut_fun, 'verbose', 0, 'TolVar', 1e-5);
 % fmopts = optimoptions('fmincon', 'MaxIterations', 10, 'Disp', 'iter');
 % alps = fmincon(f, alps_0, [], [], [], [], [0;0], [], [], fmopts)
 
-%%
+%
 
 % ------------ Row 2, DNA -------------------------
 im_og = double(rgb2gray(imread('dnn_dna_gt.png')));
@@ -52,7 +52,7 @@ figbase = 100;
 
 [mask, pix_idx] = CsTools.mu_path_mask(mu_len, n, n, samp_frac, figbase);
 
-t_recon_dna = cp_bptv_bp(im_og, pix_idx, 'dna', figbase)
+t_recon_dna = cp_bptv_bp(im_og, pix_idx, 'dna', figbase);
 
 fprintf('CS20NG reconstruction time: %.2f\n', t_recon_cs20ng);
 fprintf('DNA reconstruction time: %.2f\n', t_recon_dna);
@@ -128,7 +128,8 @@ function t_recon = cp_bptv_bp(im_og, pix_idx, prefix, figbase)
     [Fig_dna_bptv, ax_bptv] = imshow_local(X_bptv, 3 + figbase);
     
     % bottom, left corner of box
-    x0 = 55;
+    
+    x0 = 58;
     y0 = 66;
     
     y1 = 24;
@@ -159,7 +160,7 @@ end
 function plot_box(ax, x0, y0, x1, y1)
     
    hold(ax, 'on')
-   lw = 1.2
+   lw = 1.2;
    %left edge
    plot(ax, [x0, x0], [y0, y1], 'r', 'LineWidth', lw);
    %top
