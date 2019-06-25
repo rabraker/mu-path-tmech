@@ -43,7 +43,7 @@ for k=1:length(raster_files)
 end
 fprintf('finished loading raster data\n')
 
-%%
+
 target_pix = 512;
 use_ze = false;
 % last image is 128 pixels
@@ -102,7 +102,7 @@ for k=1:length(rast_exps)
 end
 
 
-%%
+
 cs_exps = cell(length(cs_files), 1);
 for k=1:length(cs_files)
     [dat_root, dat_name, ext] = fileparts(cs_files{k});
@@ -185,9 +185,9 @@ for k=1:length(cs_exps)
 end    
 write_cs_meta_data(cs_exps, opts, 'latex/cs_data.txt');
 fprintf('Finished processing CS data\n');
-%%    
+% 
 for k=1:length(cs_exps)
-    cs_exps{k}.save()
+%     cs_exps{k}.save()
 end
 
 
@@ -391,9 +391,7 @@ for k=1:length(rast_exps)
 
     rate_k = rast_exps{k}.meta_in.raster_freq;
     
-    if abs(rate_k - 1.0)<0.1 && k~=1
-        continue
-    end
+
     
     ax_im = ax_im(fig_col);
     
@@ -404,8 +402,10 @@ for k=1:length(rast_exps)
     stit = sprintf('raster %d (%.1f Hz)', rast_exps{k}.npix_y_og, rate_k);
     title(ax_im, stit, 'FontSize', 7.5)
         
-        
-    if fig_row == 1
+
+
+
+    if fig_row == 1 && ~(abs(rate_k - 1.0)<0.1 && k~=1)
         hold(ha1(fig_row, fig_col), 'on')
         hold(ha_row(1), 'on')
         ha_row(1).ColorOrderIndex = fig_col;
@@ -464,7 +464,7 @@ for k=1:length(cs_exps)
     imk = cs_exps{k}.pix_mat_uz;
     imagesc(ha1(fig_row, fig_col), imk, clr_range);
     colormap(ha1(fig_row, fig_col), 'gray');
-    stit = sprintf('CS (%.1f \\%%, %.1f Hz)',...
+    stit = sprintf('CS (%.1f Hz, %.1f \\%%)',...
         cs_exps{k}.sub_sample_frac()*100, cs_exps{k}.equiv_raster_rate());
     title(ha1(fig_row, fig_col), stit, 'FontSize', 7.5);
     
@@ -737,9 +737,6 @@ save_fig(F_rdi, fullfile(PATHS.tmech_fig(), 'cs_rast_damage'), false)
 save_fig(F_ssm, fullfile(PATHS.tmech_fig(), 'cs_rast_time_vs_ssim'), false)
 save_fig(F_psn, fullfile(PATHS.tmech_fig(), 'cs_rast_time_vs_psnr'), false)
 %%
-
-
-
 
 F_trade = mkfig(10, 3.5, 3); clf
 ha_t = tight_subplot(1, 1, 0.01, [0.15, 0.15], [0.15, 0.02], false);
