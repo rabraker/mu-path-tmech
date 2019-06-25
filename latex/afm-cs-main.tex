@@ -563,24 +563,24 @@ retraction setpoint).
   down, but thinking of a knife pushed into a surface and then
   dragged...} 
   
-In order to minimize the scanning time, tip tip should be moved as fast as possible when trainsitioning between $\mu$-path locations (state (1)). Since such speeds can be beyond the bandwidth of the $z-$axis controller, it is important to reduce the tip-sample interaction force to prevent tip sear and sample damage. In our initial implementation, this was achieved by 
-%In our initial implementation
-\cite{braker_hardware_2018}, we insisted that the during
+In order to minimize the scanning time, tip tip should be moved as fast as possible when trainsitioning between $\mu$-path locations (state (1)). Since such speeds can be beyond the bandwidth of the $z-$axis controller, it is important to reduce the tip-sample interaction force to prevent tip wear and sample damage. In our initial implementation \cite{braker_hardware_2018}, 
+%we insisted that the during
+this was achieved by insisting that during the
 tip-retraction (state (5)), the cantilever tip should fully break
 contact with the surface. Here, we impose no such requirement. Rather,
 we change the $Z$-setpoint during tip-retraction to only pull away far
 enough that the deflection signal stays low (i.e., below the scanning
 setpoint), even while we run across the surface. We choose \rzup so
 that the interaction between the tip and sample becomes purely
-adhesive. In general, stable imaging is not possible at \rzup and
-complete dis-engagement occasionally occurs. This can be seen in bottom pane of
+adhesive. In general, stable imaging is not possible with the setpoint at \rzup and
+complete dis-engagement occasionally occurs. This can be seen in the bottom pane of
 Fig.~\ref{fig:cs_cycle} during the second $XY$-move (black portion) where the tip detaches partway through the move.
 %Fig.~\ref{fig:afm_bd_dinv} which selects either the scanning setpoint $r_{Z,s}$ or the retraction setpoint $r_{Z,\textrm{up}}$ based the current state.
 When dis-engagement does occur, the $Z$-axis control loop implements an anti-windup scheme to prevent the control from saturating.
 
 
 Only moving the tip into the adhesive region during the $XY$ move saves considerable time
-compared to completely detaching the tip between each $\mu$-path. By eliminating the normal force into the sample, we are able to take dozens of images with a single probe without a noticeable degradation in image quality. However, completely characterizing the damage done to the tip and sample with this scheme compared complete detachment (which can also damage the probe \cite{meyer_atomic_1992}), remains an outstanding goal.
+compared to completely detaching the tip between each $\mu$-path. By essentially eliminating the normal force into the sample, we are able to take dozens of images with a single probe without a noticeable degradation in image quality and is a key component to the new quality metric we introduce in Sec.~\ref{sec:rdi}. However, completely characterizing the damage done to the tip and sample with this scheme compared complete detachment (which can also damage the probe \cite{meyer_atomic_1992}), remains an outstanding goal.
 
 \begin{figure}[t!]
   \centering \includesvg[width=1\columnwidth]{figures/cs_cycle.svg}
@@ -601,7 +601,7 @@ After the tip-descent, we begin scanning in a ``pre-scan'' phase
 (state (3)), which is the turquoise ``tip settle'' portion of the trajectories in
 Fig.~\ref{fig:cs_cycle}. There are two reasons for this. First, we
 have observed that there is less noise in the deflection signal while
-the $XY$-stage is in motion compared to sitting still. More
+the $XY$-stage is in motion compared to sitting still. Second, and more
 importantly, it lets us bring the $X$-axis to its scanning velocity at
 the same time the transients from the $Z$-axis die out. Without this,
 we must extend the $\mu$-path by a distance equal to the steady-state
