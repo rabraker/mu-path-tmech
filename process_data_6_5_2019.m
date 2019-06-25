@@ -860,8 +860,8 @@ function S = state_times_table(cs_exps, hz_skip, frac_skip)
     for k=1:length(cs_exps)
         cst = cs_exps{k}.get_state_times();
         rate = cs_exps{k}.equiv_raster_rate();
-        frac = cs_exps{k}.meta_in.actual_sub_samble_perc;
-        
+%         frac = cs_exps{k}.meta_in.actual_sub_samble_perc;
+        frac = cs_exps{k}.sub_sample_frac()*100;
         if any(abs(frac_skip - frac) < 0.5)
             continue
         end
