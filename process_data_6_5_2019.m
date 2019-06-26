@@ -541,7 +541,7 @@ wo = 7;
 yo = 35;
 h = 3;
 fac = (xs(1) + wo)/xs(1);
-
+text_color = [0.97, 0.97, 0.97];
 for k=1:7
 % rate_k = rastm_512.rate(k);
 rate_k = color_ord_map(1, k);
@@ -550,7 +550,7 @@ clr = ha.ColorOrder;
 x1 = xs(k);
 
 x2 = x1*fac;
-w = (xs(k+1) - xs(k))*.9;
+w = (xs(k+1) - xs(k))*.92;
 
 X = [x1, x1+w, x1+w, x1];
 Y = [yo, yo, yo+h, yo+h];
@@ -558,8 +558,8 @@ C= clr(k,:);
 pt = patch(ha, X, Y, C);
 
 st = sprintf('%.1f Hz', rate_k);
-tx = text(ha, mean(X(1:2))-1, mean(Y([1,3])), st, 'VerticalAlignment', 'middle',...
-    'HorizontalAlignment', 'center');
+tx = text(ha, mean(X(1:2))-0.5*x1/wo, mean(Y([1,3])), st, 'VerticalAlignment', 'middle',...
+    'HorizontalAlignment', 'center', 'Color', text_color);
 
 end
 ylim(ha, [0, 38])
@@ -629,8 +629,8 @@ C= clr(k,:);
 pt = patch(ha_ssm, X, Y, C);
 
 st = sprintf('%.1f Hz', rate_k);
-tx = text(ha_ssm, mean(X(1:2)), mean(Y([1,3])), st,...
-    'VerticalAlignment', 'middle', 'HorizontalAlignment', 'center');
+tx = text(ha_ssm, mean(X(1:2))-0.25*x1/wo, mean(Y([1,3])), st,...
+    'VerticalAlignment', 'middle', 'HorizontalAlignment', 'center', 'Color', text_color);
 
 end
 xlim(ha_ssm, [6, 230])
@@ -692,7 +692,8 @@ C= clr(k,:);
 pt = patch(ha_psn, X, Y, C);
 
 st = sprintf('%.1f Hz', rate_k);
-tx = text(ha_psn, mean(X(1:2)), mean(Y([1,3])), st, 'VerticalAlignment', 'middle', 'HorizontalAlignment', 'center');
+tx = text(ha_psn, mean(X(1:2))-0.25*x1/wo, mean(Y([1,3])), st,...
+    'VerticalAlignment', 'middle', 'HorizontalAlignment', 'center', 'Color', text_color);
 
 end
 ylim(ha_psn, [18, 25])
