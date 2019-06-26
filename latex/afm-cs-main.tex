@@ -149,7 +149,7 @@ of small, fast cantilevers \cite{Viani:1999tp,
   braunsmann2010high,Adams:2016hg}, the development of faster
 actuators \cite{Maroufi:2015gt,Yong:2012kd,Kenton:2012cm}, and
 the application of advanced controllers
-\cite{Rana:2018es,Yong:2015gr,butterworth2010adaptive,salapaka2002high}.
+\cite{Rana:2018es,Yong:2015gr,butterworth_discrete_2012,salapaka2002high}.
 By combining different techniques, there are current generation,
 high-end instruments that can image at rates on the order of 1-10
 frames/sec \cite{Ando:2014ja}. However, the fastest rates are achieved
@@ -298,12 +298,15 @@ the columns of a matrix.
   \end{tabular}
   \caption{Reconstruction comparison between BPDN and BPVV. (first
     column) Original raster-scanned image. (second column) BPDN
-    reconstruction from random, \textcolor{red}{40 pixel long $\mu$-paths with 25\%
-    sampling}. (third column) BPVV reconstruction from the same
+    reconstruction from random, $\mu$-path sampling.
+    (third column) BPVV reconstruction from the same
     sub-sampled data. (remaining columns) Corresponding details from
-    the red boxes indicated in the raster image. The results show that
-    BPVV reduces the artifacts arising from the horizontal scans of
-    the $\mu$-path pattern that appear in BPDN reconstructions.}
+    the red boxes indicated in the raster image.
+    The top row uses 15\% sampling with 50 pixel $\mu$-paths and the
+    bottom row uses 25\% sampling with 25 pixel $\mu$-paths.
+    The results show that BPVV reduces the artifacts arising from the
+    horizontal scans of the $\mu$-path pattern that appear in BPDN
+    reconstructions.}
   \label{fig:BPTV_demonstration}
 \end{figure*}
 \endgroup
@@ -477,7 +480,7 @@ DNA acquired with an Agilent 5500 AFM. For the CS-20NG grating, we
 sampled 15\% of the pixels with 50 pixel $\mu$-paths and 25\%
 of the DNA image with 25 pixel long $\mu$-paths. The second columns
 shows the full frame reconstructions using BPDN and the third columns
-shows the result using BPVV (\textcolor{red}{with $\alpha = ??$ and $\beta = ??$}). The fourth column zooms in on the region
+shows the result using BPVV (with $\alpha = 0.75$ and $\beta = 0.1$). The fourth column zooms in on the region
 indicated by the red box in column one. Similarly, the fifth and six
 columns show the detail of the reconstructions. The reconstruction
 results show the artifacts apparent in the BPDN reconstruction are
