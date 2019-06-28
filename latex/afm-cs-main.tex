@@ -694,7 +694,7 @@ work \cite{braker_afmmpc_2019}.
 % adjusting the signals and control involved in the vertical loop.
 
 \subsection{Feedforward Control}\label{sec:ff_control}
-Unfortunately, as the bottom row of plots in
+As the bottom row of plots in
 Fig.~\ref{fig:mimo_frf_uxuy} makes clear, there is a strong
 cross-coupling from the horizontal plane to the $Z$ axis (the coupling
 from $u_Z$ to the $X$ and $Y$ axes is very weak, and so is not shown).
@@ -742,20 +742,21 @@ that the effective bandwidth of the $X$-axis controller is higher
 while raster scanning than while CS-scanning. On the other hand, it
 also implies that for faster scan rates, fewer Fourier
 coefficients are used, and so the approximation to a triangle wave is
-worse.
+worse, leading to scans which do not cover the entire intended range..
 
 \section{Metrics}\label{sec:rdi}
-In section~\ref{sec:results} we use three metrics to assess our
-results. The first two seek to quantify image quality between two images.
-Define a master image as $X$ and a reconstruction or corrupted version
+In this section we introduce the three metrics used to assess our
+results in Sec.~\ref{sec:results}. The first two seek to quantify image quality between two images.
+To that end, define a master image as $X$ and a reconstruction or corrupted version
 as $Y$, with each having $s\times h=m$ pixels. Let $x=\textrm{vec}(X)$
 and $y=\textrm{vec}(Y)$. Let $L$ be the dynamic range of the master
-image $x$. Then the peak signal to noise ratio (PSNR) is given by
+image $x$. The first metric is the peak signal to noise ratio (PSNR), given by
 \begin{equation*}
   \text{PSNR}(x,y) = 10\log_{10}\frac{L^2}
   {\sqrt{\frac{1}{m} \sum_{i=1}^{m}( x_{i} - y_{i})^2 }}.
 \end{equation*}
 
+The second metric is the Structured Similarity Index Metrix (SSIM).
 The goal of the SSIM is to compare two image's structure,
 luminescence, and contrast and is built up from the means ($\mu_x$ and
 $\mu_y$), standard deviations ($\sigma_x$ and $\sigma_y$), and
@@ -806,7 +807,7 @@ images and the PSNR increases to \baseline{one2twoAlgnPsnr} and
 \begin{figure}[t!]
   \centering
   % \includesvg[width=0.7\columnwidth]{figures/baseline_errors_aligned_1Hz.svg}
-  \includesvg[width=0.7\columnwidth]{figures/baseline_errors_1and6.svg}
+  \includesvg[width=0.9\columnwidth]{figures/baseline_errors_1and6.svg}
   \caption{Errors between the first and sixth raster scans in a
     sequence of six 1.0~Hz raster scans. (left) Errors without
     alignment (right) The same data but aligned via cross
@@ -818,30 +819,25 @@ images and the PSNR increases to \baseline{one2twoAlgnPsnr} and
 \subsection{A new metric}
 The PSNR and SSIM metrics only assess the similarity of two images.
 However, in AFM imaging, pure image quality is not the only concern,
-particularly for delicate samples. What is needed is a figure of merit
-for how much damage was done to a specimen during the imaging process.
-While damage to the specimen is not really a concern while imaging a
+particularly for delicate samples. While damage to the specimen is not really a concern while imaging a
 hard calibration grating, it plays a prominent role for biological
 samples~\cite{ando_highspeed_2008}, though damage to the probe itself
-is still a concern. In general, the faster the scan rate, the more
+is still a concern even with hard samples. In general, the faster the scan rate, the more
 difficulty the $Z$-axis control will have in following the sample
 surface, which results in a larger $Z_d$ over more time. The actual
 damage done by a given $Z_d$ will depend on the spring constant of the
-cantilever and the softness of the specimen. Nonetheless, we propose a
-metric, which we call the Relative Damage Index (RDI) which computes
-the power in the deflection signal for a given scan. That is,
+cantilever and the softness of the specimen. To capture these concerns, we propose a
+metric, which we call the Relative Damage Index (RDI) that computes
+the power in the deflection signal for a given scan. The RDI,given by
 
 \begin{align}
-  \text{RDI} &= \frac{1}{T_s}\sum_{k=1}^N \frac{1}{k} \left(Z_{d,k} - r_{Z,s}\right)^2 \label{eqn:RDI}
+  \text{RDI} &= \frac{1}{T_s}\sum_{k=1}^N \frac{1}{k} \left(Z_{d,k} - r_{Z,s}\right)^2, \label{eqn:RDI}
 \end{align}
-The idea behind the RDI is that increased scan rates lead to larger
-deflection signals (and thereby increased force into the specimen) at
-each surface feature, which the RDI accumulates.
+accumulates the deflection signal as a measure of the net force applied to the specimen  over time.
 
 \section{Experimental Results}\label{sec:results}
-We compared $\mu$-path scanning to two scenarios. First, we compare it
-to full resolution raster scans at several scan rates in
-Sec.~\ref{sec:cp_full}. Second, we compare to coarse raster scans in
+We compared $\mu$-path scanning to two scenarios: first to full resolution raster scans at several scan rates in
+Sec.~\ref{sec:cp_full}, and second, to coarse raster scans in
 Sec.~\ref{sec:cp_subline}.
 
 \subsection{Comparison to full raster}\label{sec:cp_full}
@@ -849,7 +845,7 @@ We took scans of a Ted Pella CS-20NG sample grating over an area with
 holes on a 500 nm pitch. The holes are 20 nm deep. We scanned 5 micron
 by 5 micron images using standard raster scans with 512 lines. For the
 raster scans, we took scans at 1.0~Hz, 2.5~Hz, 5.0~Hz, 8.0~Hz and
-10~Hz. We also took $\mu$-path scans with densities at 12.5\% and
+10~Hz. We also took $\mu$-path scans with densities at approximately 12.5\% and
 25\% and reconstructed 512 by 512 pixel images. The CS scans were
 taken with scan velocities equivalent to raster scan rates of 1.0~Hz,
 2.0~Hz, 4.0~Hz, 5.0~Hz and 8.0~Hz. For all CS scans, the $\mu$-paths are
