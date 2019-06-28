@@ -1006,7 +1006,7 @@ standard raster scan with fewer lines. This is the technique we
 consider in this subsection, by scanning images with 128 and 64 lines.
 For each of these scenarios, we first divide the data for each line
 into 512 bins. This gives an image that is 128 (resp., 64) pixels by
-512 pixels. We then linearly interpolate along each column to produce
+512 pixels, corresponding to 25\% (resp., 12.5\% sampling). We then linearly interpolate along each column to produce
 a 512 by 512 pixel image. Again, we take these coarser raster scans at
 1.0, 2.5, 5.0, 8.0 and 10.0 Hz. The resulting images are shown in
 Fig.~\ref{fig:results_subline_images}.
