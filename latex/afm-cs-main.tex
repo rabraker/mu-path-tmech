@@ -85,23 +85,25 @@ Through Sub-sampling and Reconstruction}
   paper, we describe one such hardware implementation and demonstration based on the use of collections of short scans
   known as $\mu$--paths. Using a commercial AFM, we acquire data on a
   grating sample. Reconstructions are made from these data using
-  % three approaches: (1) inpainting, an interpolation technique that
-  % diffuses information from sampled locations into unsampled
-  % regions, (2)
-  % basis-pursuit, a compressive sensing-based algorithm that seeks to
-  % minimize a
-  % measure of sparsity in the underlying image, and (3)
   a new variant of basis pursuit, Basis Pursuit with Vertical
   Variation, that is designed to reduce artifacts arising from
   the sampling pattern. The quality of the resulting images is
   compared to images from standard raster scans of the same regions at
   comparable imaging rates using both the peak signal-to-noise ratio
   and the structured similarity index metric and a new metric we call
-  the relative damage index. These images are compared both to standard raster scans as well as to simple subline sampling where only a subset of the rows of the image are acquired (followed by reconstruction). \textcolor{red}{These experiments demonstrate that at slow scan
-  rates, the $\mu-$path scheme produces similar image quality with
-  significantly less sampling (and thus less tip-sample interaction)
-  and that at high rates, the undersampling scheme produces higher
-  quality images than raster scanning.}
+  the relative damage index. These images are compared (across a range of scan speeds)
+  to both standard raster
+  scans as well as to simple subline sampling where only a subset of the
+  rows of the image are acquired (followed by reconstruction).
+  These experiments show that at low sampling densities and slow scan rates,
+  $\mu$-path scanning achieves better image quality than subline sampling.
+  Conversely, for faster scan rates, subline sampling achieves better image quality
+  in less time.
+  % These experiments demonstrate that at slow scan
+  % rates, the $\mu-$path scheme produces similar image quality with
+  % significantly less sampling (and thus less tip-sample interaction)
+  % and that at high rates, the undersampling scheme produces higher
+  % quality images than raster scanning.
 \end{abstract}
 
 \section{Introduction}\label{sec:introduction}
@@ -165,10 +167,14 @@ used in place of the standard raster pattern. While these trajectories are
 easier for the actuators to follow, allowing the tip to be moved more
 quickly and leading to faster image acquisition on an otherwise
 unmodified instrument
-\cite{Bazaei:2017dm,Wu:2015dt,Rana:2014bj,Tuma:2012hv,Yong:2010gm}, they are ultimately limited by the vertical bandwidth of
+\cite{Bazaei:2017dm,Wu:2015dt,Rana:2014bj,Tuma:2012hv,Yong:2010gm}, they
+are ultimately limited by the vertical bandwidth of
 the instrument for regulating the deflection signal \cite{Teo:2016ev}.
 
-A different use of non-raster scan patterns are those that seek to improve imaging rate by reducing sampling rather than increasing speed. This class includes local scanning methods that use the measurements in real-time to steer the tip to focus the scan on features of
+A different use of non-raster scan patterns are those that seek to improve
+imaging rate by reducing sampling rather than increasing speed. This class
+includes local scanning methods that use the measurements in real-time to
+steer the tip to focus the scan on features of
 interest \cite{Hartman:2018ja,Wen:2018fl,Zhang:2015cf,Huang:2014dw}.
 While these have been shown to yield an order of magnitude or better
 improvement in imaging rate, they are limited in the class of samples
@@ -220,6 +226,7 @@ demonstrates that the approach can achieve scanning time
 reduction while maintaining faithful image reconstruction
 \cite{maxwell2014compressed,Luo:2015tu, braker_hardware_2018}. 
 The main contributions of this paper relative to that past work are as follows.
+% \begin{enumerate}[wide, labelwidth=!, labelindent=0pt]
 \begin{itemize}
 \item We introduce a new reconstruction algorithm which is designed to
 minimize the artifacts arising from the structure of the $\mu$-path
@@ -229,6 +236,7 @@ reconstruction methods through simulations in Sec. \ref{sec:reconstructionMethod
 We show in Sec.~\ref{sec:ff_control} that one of the limitations of $\mu$-path scanning is the discontinuous $X$-axis reference (e.g., in moving between $\mu$-paths) which excites the cross-coupling modes between the $X$ and $Z$ axes, an effect which neither our prior experimental work nor simulation studies accounted for. We mitigate the cross coupling with a feed-forward design.
 \item We experimentally compare (Sec. \ref{sec:results}) $\mu$-path scanning to not only full density raster scans but also to coarse raster scans which are interpolated to a full image. This is in contrast to typical sub-line sampling which takes scan lines at random. The clear advantage to a coarse raster scan is that it requires no modification to the instrument, only to the post-processing.
 \item The bulk of this work is based on experiment, not simulation, in contrast to prior work by ourselves \cite{luo2015comparison,maxwell2014compressed} and others \cite{han_optimal_2018,jensen_reconstruction_2013,oxvig_structure_2017}. Our main focus here is on delineating the practical issues which must be addressed to effectively realize $\mu$-path scanning, which has only seen limited attention in the past.
+% \end{enumerate}
 \end{itemize}
 
 
@@ -916,25 +924,6 @@ Fig.~\ref{fig:pixel_rows}.
   \label{fig:resultsF1_images}
 \end{figure*}
 
-% \begin{figure*}
-%   % \centering
-%   \includesvg[scale=.98]{figures/cs_raster_images_6-5-2019.svg}
-%   \caption{Raster and compressed sensing images of a 5 micron by 5 micron 
-%     area of the CS-20NG grating. All images are 512$\times$512 pixels.
-%     The rows of pixels indicated by the red lines are
-%     shown in Fig.~\ref{fig:pixel_rows}.}
-%   \label{fig:resultsF1_images}
-% \end{figure*}
-
-% \begin{table}[t!]
-%   \centering
-%   \caption{Performance metrics for raster and CS scans.}
-%   \begin{tabular}{cccccc}
-%     \input{tables/cs_raster_table_6-5-2019_muInf_dct2.tex}
-%   \end{tabular}
-%   \label{tab:rast_vs_cs_v1}
-% \end{table}
-
 \begin{table}[t!]
   \centering
   \caption{Breakdown of state times for the CS scans shown in
@@ -955,11 +944,11 @@ Fig.~\ref{fig:pixel_rows}.
 For each raster scan and each CS scan, we computed the SSIM and PSNR
 using the 1~Hz raster scan as the master and also computed the RDI
 metric. These are plotted against total acquisition time in
-Fig.~\ref{fig:time_vs_metrics}. Unfortunately, the
-SSIM and PSNR metrics are not particularly illuminating. There are
-several inconsistencies. For example, it makes no sense that the 1~Hz CS
-scan at 25\% has a \emph{worse} PSNR and SSIM than the 5~Hz scan; nor
-does it make sense that the 8~Hz full raster scan has a worse SSIM and
+Fig.~\ref{fig:time_vs_metrics}. Roughly speaking, image quality improves as
+acquisition time increase. However, the metrics are quite noisy, leading to 
+several inconsistencies. For example, it makes no sense that the 1~Hz, 25\% CS
+scan has a \emph{worse} PSNR and SSIM than the 5~Hz, 25\% CS~scan;
+nor does it make sense that the 8~Hz full raster scan has a worse SSIM and
 PSNR than the 10~Hz full raster scan.
 
 \begin{figure*}[t!]
@@ -1054,48 +1043,52 @@ image quality.
 \begin{figure}
   \includesvg[width=1\columnwidth]{figures/improvements.svg}
   \caption{Fraction of improvement in total scan time over a scan with
-    512 lines vs scan rate for the three sets of CS scans (at 25\%,
-    15\%, and 12.5\%) and coarser raster scans at 128 and 64 lines.}
+    512 lines vs scan rate for the two sets of CS scans (at 25\%
+    and 12.5\%) and coarse raster scans at 128 and 64 lines.}
   \label{fig:improve_512}
 \end{figure}
 
 \section{Conclusions}\label{sec:conclusions}
-The main conclusion of this paper is that with CS, it seems that we
+In this paper, we introduced a new reconstruction method designed to reduce $\mu$-path
+sampling artifacts. We then addressed several practical implementation issues.
+Chief among these is the need to more aggressively mitigate coupling between the
+horizontal plane and the $Z$-axis than is required for raster scanning. Here, we applied
+a feedforward control scheme which attenuates the problematic modes by approximately 40 dB.
+
+We then experimentally demonstrated $\mu$-path sub-sampling
+and compared the resulting images to both full raster scans
+and course raster scans paired with reconstruction.
+The main conclusion of this comparison is that with $\mu$-paths, we
 can acquire images faster yet with less specimen damage than is
-possible while raster scanning a full image. On the other hand, it
-appears that reconstructing a coarse raster scan makes more sense for
-faster scan rates. This is notable, since a coarse raster scan only
-requires an additional step in post-processing. It remains to be seen
-if this conclusion holds for a wide range of instruments.
+possible while raster scanning a full image and that for slow scan rates,
+$\mu$-path scanning achieves better images in less time than subline sampling.
+On the other hand, for faster scan rates, reconstructing a coarse raster scan makes more sense.
+This is notable, since a coarse raster scan with reconstruction is considerably
+easier to implement, both on the hardware side as well as the post-processing side. 
+It remains to be seen if this conclusion holds for a wide range of instruments.
 
 %%%%%%%%% then the Bibliography, if any %%%%%%%%%
 % \bibliographystyle{plain} % or "siam", or "alpha", etc.
 \bibliographystyle{IEEEtran} % or "siam", or "alpha", etc.
 \bibliography{braker_bibs,Andersson_bibs,Yufans_bibs} % Bib database in "refs.bib"
-
+\vspace{-2em}
 \begin{IEEEbiography}
   [{\includegraphics[width=1 in,height=1.25in,clip,keepaspectratio]{figures/braker_headshot.jpg}}]
   {Roger A. Braker} earned the B.A. degree in physics from the University of Oklahoma in 2005 and the M.S. degree in electrical engineering from the University of Colorado in 2017.
   Since 2014, he has been a graduate student in the Electrical, Computer, and Energy Engineering
   Department at the University of Colorado Boulder.
-
 \end{IEEEbiography}
-
 \begin{IEEEbiography}
   [{\includegraphics[width=1 in,height=1.25in,clip,keepaspectratio]{figures/yufan.JPG}}]
   {Yufan Luo}
 received dual B.S. degrees in automation and in management science from Zhejiang University, Zhejiang, China, in 2011, an M.S. degree in industrial and operations engineering from the University of Michigan, Ann Arbor, MI, USA, in 2012, and a Ph.D. degree in systems engineering from Boston University in 2019. He is currently with Juniper Networks, Sunnyvale, CA.
-
 \end{IEEEbiography}
-
 \begin{IEEEbiography}
   [{\includegraphics[width=1 in,height=1.25in,clip,keepaspectratio]{figures/pao_headshot.jpg}}]
   {Lucy Y. Pao} 
   is the Palmer Endowed Chair Professor in the Electrical, Computer, and Energy Engineering Department at the University of Colorado Boulder. She earned B.S., M.S., and Ph.D. degrees in Electrical Engineering from Stanford University. Her research has primarily focused on engineering control systems, with applications ranging from atomic force microscopes to multi-megawatt wind energy systems. She is a Fellow of the IEEE and the International Federation of Automatic Control (IFAC). Selected recent awards include the 2012 IEEE Control Systems Magazine Outstanding Paper Award, the 2015 Society for Industrial and Applied Mathematics (SIAM) Journal on Control and Optimization Best Paper Prize, the 2017 Control Engineering Practice Award from the American Automatic Control Council, and the Scientific Award 2017 from the European Academy of Wind Energy. Selected recent and current professional society activities include being a Fellow of the Renewable and Sustainable Energy Institute (2009-present), 
   General Chair of the 2013 American Control Conference, member of the IEEE Control Systems Society (CSS) Board of Governors (2011-2013 and 2015), IEEE CSS Fellow Nominations Chair (2016-2018), and member of the IFAC Executive Board (2017-2020).    
-
 \end{IEEEbiography}
-
 \begin{IEEEbiography}
   [{\includegraphics[width=1 in,height=1.25in,clip,keepaspectratio]{figures/SeanAndersson_IEEE.jpg}}]
   {Sean B. Andersson}
