@@ -234,7 +234,8 @@ scanning pattern. This algorithm is described and compared to existing
 reconstruction methods through simulations in Sec. \ref{sec:reconstructionMethods}.
 \item In our prior experimental prototype \cite{braker_hardware_2018}, we used very basic integral controllers for all three axes for both raster and $\mu$-path scans. Here, we design compensators for each axis using standard loop-shaping techniques (Sec.~\ref{sec:control}), which result in a substantial increase in closed-loop bandwidth (e.g., 50 Hz to 450~Hz for the $Z$-axis).
 We show in Sec.~\ref{sec:ff_control} that one of the limitations of $\mu$-path scanning is the discontinuous $X$-axis reference (e.g., in moving between $\mu$-paths) which excites the cross-coupling modes between the $X$ and $Z$ axes, an effect which neither our prior experimental work nor simulation studies accounted for. We mitigate the cross coupling with a feed-forward design.
-\item We experimentally compare (Sec. \ref{sec:results}) $\mu$-path scanning to not only full density raster scans but also to coarse raster scans which are interpolated to a full image. This is in contrast to typical sub-line sampling which takes scan lines at random. The clear advantage to a coarse raster scan is that it requires no modification to the instrument, only to the post-processing.
+\item We experimentally compare (Sec. \ref{sec:results}) $\mu$-path scanning to not only full density raster scans but also to coarse raster scans which are interpolated to a full image. This is in contrast to typical sub-line sampling which takes scan lines at random. The clear advantage to a coarse raster scan is that its implementation only requires adjustments to the data collection and post-processing. 
+  % it requires no modification to the instrument, only to the post-processing.
 \item The bulk of this work is based on experiment, not simulation, in contrast to prior work by ourselves \cite{luo2015comparison,maxwell2014compressed} and others \cite{han_optimal_2018,jensen_reconstruction_2013,oxvig_structure_2017}. Our main focus here is on delineating the practical issues which must be addressed to effectively realize $\mu$-path scanning, which has only seen limited attention in the past.
 % \end{enumerate}
 \end{itemize}
@@ -495,7 +496,7 @@ results show the artifacts apparent in the BPDN reconstruction are
 largely mitigated using BPVV. Thus, in the remainder of the paper, we
 focus exclusively on BPVV. These reconstructions wth BPVV took about
 1.5 seconds for the DNA image and about 7 seconds for the
-CS-20NG (on a typical laptop computer).
+CS-20NG (on a typical desktop computer).
 	
 
 % =========================================================================
@@ -546,7 +547,7 @@ Transition between, and operation in, these different stages is
 implemented as a simple state machine, summarized in
 Table~\ref{tab:cs_tasks}. The main job of the state machine is to
 adjust the reference signals to accomplish each task. In the
-following, $r_X$ and $r_Y$, $r_Z$ refer to the references for the
+following, $r_X$, $r_Y$, and $r_Z$ refer to the references for the
 $X$, $Y$, and $Z$ axes, respectively. The $Z$-axis setpoint $r_Z$
 takes on values $r_{Z,s}$ (the scanning setpoint) and $\rzup$ (the
 retraction setpoint).
@@ -574,7 +575,7 @@ retraction setpoint).
   down, but thinking of a knife pushed into a surface and then
   dragged...} 
   
-In order to minimize the scanning time, tip tip should be moved as fast as possible when trainsitioning between $\mu$-path locations (state (1)). Since such speeds can be beyond the bandwidth of the $z-$axis controller, it is important to reduce the tip-sample interaction force to prevent tip wear and sample damage. In our initial implementation \cite{braker_hardware_2018}, 
+In order to minimize the scanning time, the tip should be moved as fast as possible when trainsitioning between $\mu$-path locations (state (1)). Since such speeds can be beyond the bandwidth of the $z-$axis controller, it is important to reduce the tip-sample interaction force to prevent tip wear and sample damage. In our initial implementation \cite{braker_hardware_2018}, 
 %we insisted that the during
 this was achieved by insisting that during the
 tip-retraction (state (5)), the cantilever tip should fully break
@@ -591,7 +592,7 @@ When dis-engagement does occur, the $Z$-axis control loop implements an anti-win
 
 
 Only moving the tip into the adhesive region during the $XY$ move saves considerable time
-compared to completely detaching the tip between each $\mu$-path. By essentially eliminating the normal force into the sample, we are able to take dozens of images with a single probe without a noticeable degradation in image quality and is a key component to the new quality metric we introduce in Sec.~\ref{sec:rdi}. However, completely characterizing the damage done to the tip and sample with this scheme compared complete detachment (which can also damage the probe \cite{meyer_atomic_1992}), remains an outstanding goal.
+compared to completely detaching the tip between each $\mu$-path. By essentially eliminating the normal force into the sample, we are able to take dozens of images with a single probe without a noticeable degradation in image quality and is a key component to the new quality metric we introduce in Sec.~\ref{sec:rdi}. However, completely characterizing the damage done to the tip and sample with this scheme compared to complete detachment (which can also damage the probe \cite{meyer_atomic_1992}), remains an outstanding goal.
 
 \begin{figure}[t!]
   \centering \includesvg[width=1\columnwidth]{figures/cs_cycle.svg}
@@ -788,7 +789,7 @@ open question how to best compare experimental AFM images. While we
 use the SSIM and PSNR in Sec.~\ref{sec:results}, we believe those
 numbers should be interpreted with some caution. In our experimental
 setup, actuation in the $XY$-plane happens via the nPoint piezo stage
-and the $XY$-direction of the original piezo scanner is uncontrolled.
+and the $XY$-direction of the original piezo tube scanner is uncontrolled.
 This leads to substantial drift between images. To illustrate this, we
 took a sequence of 6 raster scans of a sample grating, each at a 1~Hz
 scan rate over a 5 micron by 5 micron area. The left image of
@@ -832,16 +833,17 @@ hard calibration grating, it plays a prominent role for biological
 samples~\cite{ando_highspeed_2008}, though damage to the probe itself
 is still a concern even with hard samples. In general, the faster the scan rate, the more
 difficulty the $Z$-axis control will have in following the sample
-surface, which results in a larger $Z_d$ over more time. The actual
+surface, which results in a larger deflection signal $Z_d$ over more time. The actual
 damage done by a given $Z_d$ will depend on the spring constant of the
 cantilever and the softness of the specimen. To capture these concerns, we propose a
 metric, which we call the Relative Damage Index (RDI) that computes
-the power in the deflection signal for a given scan. The RDI,given by
+the power in the deflection signal for a given scan. The RDI, given by
 
 \begin{align}
-  \text{RDI} &= \frac{1}{T_s}\sum_{k=1}^N \frac{1}{k} \left(Z_{d,k} - r_{Z,s}\right)^2, \label{eqn:RDI}
+  \text{RDI} &= \frac{1}{T_s}\sum_{k\in I} \frac{1}{k} \left(Z_{d,k} - r_{Z,s}\right)^2, \label{eqn:RDI}\\
+  I & = \{k : r_{Z,k} = r_{z,s}\}
 \end{align}
-accumulates the deflection signal as a measure of the net force applied to the specimen  over time.
+accumulates the deflection signal while scanning as a measure of the net force applied to the specimen  over time.
 
 \section{Experimental Results}\label{sec:results}
 We compared $\mu$-path scanning to two scenarios: first to full resolution raster scans at several scan rates in
