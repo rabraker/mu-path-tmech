@@ -878,8 +878,8 @@ ${\alpha=\scanD{alph}}$ and ${\beta=\scanD{alpv}}$. For the
 raster scans, we discard data from the re-trace and divided the
 remaining data for each scan line into 512 bins based on the \xc
 sensor measurements. We then average the data in each bin to obtain
-the value of one pixel. To remove the affects of piezo creep and
-sample tilt, we then de-trend each individual line. De-trending each
+the value of one pixel. To remove the effects of piezo creep and
+sample tilt, we de-trend each individual line. De-trending each
 line causes the flat portion between the holes in the horizontal
 direction to appear at a different height than the flat portion
 between holes in the vertical direction. To remove this effect, we
@@ -947,11 +947,9 @@ For each raster scan and each CS scan, we computed the SSIM and PSNR
 using the 1~Hz raster scan as the master and also computed the RDI
 metric. These are plotted against total acquisition time in
 Fig.~\ref{fig:time_vs_metrics}. Roughly speaking, image quality improves as
-acquisition time increase. However, the metrics are quite noisy, leading to 
-several inconsistencies. For example, it makes no sense that the 1~Hz, 25\% CS
-scan has a \emph{worse} PSNR and SSIM than the 5~Hz, 25\% CS~scan;
-nor does it make sense that the 8~Hz full raster scan has a worse SSIM and
-PSNR than the 10~Hz full raster scan.
+acquisition time increase. However, the metrics are quite noisy and the results of the different methods are overlapping, making it difficult to extract a general result on the scanning approaches. 
+
+%leading to several inconsistencies. For example, it makes no sense that the 1~Hz, 25\% CS scan has a \emph{worse} PSNR and SSIM than the 5~Hz, 25\% CS~scan; nor does it make sense that the 8~Hz full raster scan has a worse SSIM and PSNR than the 10~Hz full raster scan.
 
 \begin{figure*}[t!]
   \centering
@@ -984,9 +982,10 @@ PSNR than the 10~Hz full raster scan.
 
 
 Things are clearer if we plot the RDI for each scan against total
-acquisition time, which is shown in Fig.~\ref{fig:time_damage}, and
-this is where CS seems to shine. As one would expect, as imaging time
-decreases, the RDI for each scan type increases. From
+acquisition time, shown in Fig.~\ref{fig:time_damage}.
+%, and this is where CS seems to shine. 
+As one would expect, as imaging time
+decreases, the RDI for each scan type increases. Note that the CS curves are always better than that of the full raster scan. From
 Fig.~\ref{fig:time_damage}, we see that for a fixed RDI, CS has a
 faster imaging acquisition rate. The amount of improvement is best if
 we need a very low RDI: for example, if we want to hold the RDI below~2, then we have to take the 1~Hz raster scan (512 seconds) while we
@@ -1002,7 +1001,7 @@ rates.
 \subsection{Comparison to Sub-line Sampling} \label{sec:cp_subline}
 Many sub-line sampling papers assume that the lines to sample are
 selected randomly \cite{han_optimal_2018, Luo_nano_2015}. An even
-simpler alternative to $\mu$-path sampling is to simply take a
+simpler alternative to $\mu$-path sampling is simply to take a
 standard raster scan with fewer lines. This is the technique we
 consider in this subsection, by scanning images with 128 and 64 lines.
 For each of these scenarios, we first divide the data for each line
@@ -1021,7 +1020,7 @@ appear to have as good or better image quality than either CS scans.
 Note the defect on the hole located in the second column, sixth row
 from the top (of the grating holes). The CS-scans do a poor job
 detecting this, while both coarse raster scans do so. However, the
-other artifacts in the 64 line scan obscure the defect.
+other artifacts in the 64 line scan obscure the defect. It is important to note, however, that the appearance (or lack thereof) of such small features in the image is in large part a random occurrence. In our scans, the line scanner happened to pass through this region and capture the appropriate data while the $\mu$-path pattern used did not. 
 
 Fig.~\ref{fig:improve_512} compares the amount of speed improvement of
 the different sub-sampling schemes over a full raster scan with 512
@@ -1032,7 +1031,7 @@ raster scan is close. At the same time, the image quality of the 1~Hz,
 However, this advantage quickly evaporates for faster scan rates.
 Indeed, for rates beyond about 5~Hz, the raster scan with 128 lines is
 not only faster than the 12.5\% CS scan, it also has (arguably) better
-image quality.
+image quality, at least on the sample used.
 
 \begin{figure*}
   \centering
