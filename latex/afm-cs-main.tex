@@ -586,13 +586,14 @@ setpoint), even while we run across the surface. We choose \rzup so
 that the interaction between the tip and sample becomes purely
 adhesive. In general, stable imaging is not possible with the setpoint at \rzup and
 complete dis-engagement occasionally occurs. This can be seen in the bottom pane of
-Fig.~\ref{fig:cs_cycle} during the second $XY$-move (black portion) where the tip detaches partway through the move.
-%Fig.~\ref{fig:afm_bd_dinv} which selects either the scanning setpoint $r_{Z,s}$ or the retraction setpoint $r_{Z,\textrm{up}}$ based the current state.
-When dis-engagement does occur, the $Z$-axis control loop implements an anti-windup scheme to prevent the control from saturating.
+Fig.~\ref{fig:cs_cycle} during the second $XY$-move (black portion) where the tip detaches partway through the move. When dis-engagement does occur, the $Z$-axis control loop implements an anti-windup scheme to prevent the control from saturating.
 
 
 Only moving the tip into the adhesive region during the $XY$ move saves considerable time
-compared to completely detaching the tip between each $\mu$-path. By essentially eliminating the normal force into the sample, we are able to take dozens of images with a single probe without a noticeable degradation in image quality and is a key component to the new quality metric we introduce in Sec.~\ref{sec:rdi}. However, completely characterizing the damage done to the tip and sample with this scheme compared to complete detachment (which can also damage the probe \cite{meyer_atomic_1992}), remains an outstanding goal.
+compared to completely detaching the tip between each $\mu$-path. By essentially eliminating the normal force into the sample, we are able to take dozens of images with a single probe without a noticeable degradation in image quality.
+% RAB: I don't see this. Whether we disengage completely or not, RDI should remain the same.
+% and is a key component to the new quality metric we introduce in Sec.~\ref{sec:rdi}.
+However, completely characterizing the damage done to the tip and sample with this scheme compared to complete detachment (which can also damage the probe \cite{meyer_atomic_1992}), remains an outstanding goal.
 
 \begin{figure}[t!]
   \centering \includesvg[width=1\columnwidth]{figures/cs_cycle.svg}
@@ -627,14 +628,6 @@ $X$-axis. For our system $N=111$. By initiating the scan while the
 $Z$-axis settles, we eliminate much of this overhead.
 
 \subsection{Control}\label{sec:control}
-% \begin{figure}
-%   \centering
-%   \includesvg[width=1\columnwidth]{figures/z_control_design.svg}
-%   \caption{FRFs of the $Z$-axis. The blue curve is the open loop
-%   response from $u_Z$ to deflection. By inverting the bending mode
-%   at 215~Hz, we achieve the black curve in closed-loop.}
-%   \label{fig:z_control}
-% \end{figure}
 The control structure for each axis, shown in the block diagram in
 Fig.~\ref{fig:afm_bd_dinv}, is similar and essentially consists of a
 set of filters in series with a PI controller. The open-loop frequency
@@ -695,12 +688,6 @@ work \cite{braker_afmmpc_2019}.
     feedforward compensation. (c) Frequency response of the $Z$-axis
     in open-loop (black) and closed-loop (red). }
 \end{figure*}
-
-
-% We note that the $z$-axis control described here operates the AFM in
-% constant force mode during imaging. It is straightforward to perform
-% scanning under different AFM modes, such as tapping mode, simply by
-% adjusting the signals and control involved in the vertical loop.
 
 \subsection{Feedforward Control}\label{sec:ff_control}
 As the bottom row of plots in
@@ -840,10 +827,9 @@ metric, which we call the Relative Damage Index (RDI) that computes
 the power in the deflection signal for a given scan. The RDI, given by
 
 \begin{align}
-  \text{RDI} &= \frac{1}{T_s}\sum_{k\in I} \frac{1}{k} \left(Z_{d,k} - r_{Z,s}\right)^2, \label{eqn:RDI}\\
-  I & = \{k : r_{Z,k} = r_{z,s}\} \nonumber
+  \text{RDI} &= \frac{1}{T_s}\sum_{k\in I} \frac{1}{k} \left(Z_{d,k} - r_{Z,s}\right)^2, \label{eqn:RDI}
 \end{align}
-accumulates the deflection signal while scanning as a measure of the net force applied to the specimen  over time.
+with ${I = \{k : r_{Z,k} = r_{z,s}\}}$, accumulates the deflection signal while scanning as a measure of the net force applied to the specimen  over time.
 
 \section{Experimental Results}\label{sec:results}
 We compared $\mu$-path scanning to two scenarios: first to full resolution raster scans at several scan rates in
@@ -855,7 +841,7 @@ We took scans of a Ted Pella CS-20NG sample grating over an area with
 holes on a 500 nm pitch. The holes are 20 nm deep. We scanned 5 micron
 by 5 micron images using standard raster scans with 512 lines. For the
 raster scans, we took scans at 1.0~Hz, 2.5~Hz, 5.0~Hz, 8.0~Hz and
-10~Hz. We also took $\mu$-path scans with densities at approximately 12.5\% and
+10~Hz. We also took $\mu$-path scans with nominal densities of 12.5\% and
 25\% and reconstructed 512 by 512 pixel images. The CS scans were
 taken with scan velocities equivalent to raster scan rates of 1.0~Hz,
 2.0~Hz, 4.0~Hz, 5.0~Hz and 8.0~Hz. For all CS scans, the $\mu$-paths are
@@ -873,7 +859,7 @@ cantilever was a Budget Sensors ContAI-G, with a nominal length of 450
 microns and spring constant of $0.2$~N/m.
 
 % \SSData{G2}$& $g_6 = \SSData{G6}
-The CS scans were reconstructed with BPVV. We set
+The CS scans were reconstructed with BPVV using
 ${\alpha=\scanD{alph}}$ and ${\beta=\scanD{alpv}}$. For the
 raster scans, we discard data from the re-trace and divided the
 remaining data for each scan line into 512 bins based on the \xc
@@ -888,25 +874,10 @@ that does not cross any holes (i.e., a vertical line through the flat
 area), and register each scan line to a common height along these columns.
 This step eases comparison with the CS scans and was inspired by a
 feature in the AFM image processing toolbox \texttt{SPIW} \cite{spiw}.
-The resulting images are shown in Fig.~\ref{fig:resultsF1_images}. The
-color maps represent a range of $\pm$20 nm. The rows of pixels
-indicated by the red lines are shown as cross sections in
-Fig.~\ref{fig:pixel_rows}.
+A subset of the resulting images are shown in Fig.~\ref{fig:resultsF1_images}. The
+rows of pixels indicated by the red lines are shown as cross sections in
+Fig.~\ref{fig:pixel_rows}. For the CS scans shown in Fig.~\ref{fig:resultsF1_images}, Table~\ref{tab:final_state_times} breaks down the amount of time spent on each task.
 
-% \begin{figure}
-%   \begin{subfigure}{.48\textwidth}
-%     \includesvg[width=1\textwidth]{figures/ }
-%     \caption{ }
-%     \label{fig: }
-%   \end{subfigure}
-%   \begin{subfigure}{.48\textwidth}
-%     \includegraphics[width=1\textwidth]{figures/ }
-%     \caption{ }
-%     \label{fig: }
-%   \end{subfigure}
-%   \caption{}
-%   \label{fig: }
-% \end{figure}
 \begin{figure*}
   % \begin{center}
   \parbox{.1\textwidth}{\phantom{p}}
@@ -980,7 +951,6 @@ acquisition time increase. However, the metrics are quite noisy and the results 
   \label{fig:time_vs_metrics}
 \end{figure*}
 
-
 Things are clearer if we plot the RDI for each scan against total
 acquisition time, shown in Fig.~\ref{fig:time_damage}.
 %, and this is where CS seems to shine. 
@@ -1008,7 +978,7 @@ For each of these scenarios, we first divide the data for each line
 into 512 bins. This gives an image that is 128 (resp., 64) pixels by
 512 pixels, corresponding to 25\% (resp., 12.5\% sampling). We then linearly interpolate along each column to produce
 a 512 by 512 pixel image. Again, we take these coarser raster scans at
-1.0, 2.5, 5.0, 8.0 and 10.0 Hz. The resulting images are shown in
+1.0, 2.5, 5.0, 8.0 and 10.0 Hz. A subset of the resulting images are shown in
 Fig.~\ref{fig:results_subline_images}.
 
 Both visually from Fig.~\ref{fig:results_subline_images} and from the SSIM and PSNR metrics shown in 
@@ -1017,10 +987,11 @@ scan performs the worst of the all the sub-sampling methods and is
 slower than 12.5\% CS for slow scan rates. However, the 128 line scans
 appear to have as good or better image quality than either CS scans.
 
-Note the defect on the hole located in the second column, sixth row
-from the top (of the grating holes). The CS-scans do a poor job
-detecting this, while both coarse raster scans do so. However, the
-other artifacts in the 64 line scan obscure the defect. It is important to note, however, that the appearance (or lack thereof) of such small features in the image is in large part a random occurrence. In our scans, the line scanner happened to pass through this region and capture the appropriate data while the $\mu$-path pattern used did not. 
+% Note the defect on the hole located in the second column, sixth row
+% from the top (of the grating holes). The CS-scans do a poor job
+% detecting this, while both coarse raster scans do so. However, the
+% other artifacts in the 64 line scan obscure the defect. It is important to note, however, that the appearance (or lack thereof) of such small features in the image is in large part a random occurrence. In our scans, the line scanner happened to pass through this region and capture the appropriate data while the $\mu$-path pattern used did not. 
+% Except that it passed through this region for all of the sub-line scans, which did not scan exactly the same area...
 
 Fig.~\ref{fig:improve_512} compares the amount of speed improvement of
 the different sub-sampling schemes over a full raster scan with 512
@@ -1028,21 +999,23 @@ lines as a function of scan rate. As far as pure speed goes, the CS
 scan at 12.5\% is the fastest for a rate of 1~Hz, though the 64 line
 raster scan is close. At the same time, the image quality of the 1~Hz,
 12.5\% CS scan is better than the the 1~Hz 64 line raster scan.
-However, this advantage quickly evaporates for faster scan rates.
-Indeed, for rates beyond about 5~Hz, the raster scan with 128 lines is
-not only faster than the 12.5\% CS scan, it also has (arguably) better
-image quality, at least on the sample used. However, as seen in Fig.~\ref{fig:time_damage}, the 12.5\% CS scan has better RDI performance that the 128 line scan.
+This speed advantage quickly evaporates for faster scan rates.
+Indeed, for rates beyond about 3~Hz, the 64 line scan is faster than the 12.5\% CS scan and
+the 128 line scan is faster than the 25\% CS scan. 
+In general, the artifacts of the CS reconstructions are different than the interpolated raster scans.
+CS appears to preserve the edges of the holes better than sub-line sampling while sub-line sampling has less noise in the flat areas of the specimen. 
 
 \begin{figure*}
   \centering
-  \includesvg[scale=.98]{figures/cs_raster_images_subl_6-5-2019.svg}
+  \includesvg[scale=.95]{figures/cs_raster_images_subl_6-5-2019.svg}
   \caption{Raster scans at 128 (top) and 64 (bottom) which have been
     interpolated along each column to 512 lines.}
   \label{fig:results_subline_images}
 \end{figure*}
 
 \begin{figure}
-  \includesvg[width=1\columnwidth]{figures/improvements.svg}
+  \centering
+  \includesvg[width=0.85\columnwidth]{figures/improvements.svg}
   \caption{Fraction of improvement in total scan time over a scan with
     512 lines vs scan rate for the two sets of CS scans (at 25\%
     and 12.5\%) and coarse raster scans at 128 and 64 lines.}
@@ -1073,29 +1046,31 @@ It remains to be seen if this conclusion holds for a wide range of instruments.
 \bibliographystyle{IEEEtran} % or "siam", or "alpha", etc.
 \bibliography{braker_bibs,Andersson_bibs,Yufans_bibs} % Bib database in "refs.bib"
 \vspace{-2em}
+\parbox[][][t]{1\columnwidth}{
 \begin{IEEEbiography}
   [{\includegraphics[width=1 in,height=1.25in,clip,keepaspectratio]{figures/braker_headshot.jpg}}]
   {Roger A. Braker} earned the B.A. degree in physics from the University of Oklahoma in 2005 and the M.S. degree in electrical engineering from the University of Colorado in 2017.
   Since 2014, he has been a graduate student in the Electrical, Computer, and Energy Engineering
   Department at the University of Colorado Boulder.
-\end{IEEEbiography}
+\end{IEEEbiography}\vspace{-2em}
+\baselineskip=1pt
 \begin{IEEEbiography}
   [{\includegraphics[width=1 in,height=1.25in,clip,keepaspectratio]{figures/yufan.JPG}}]
   {Yufan Luo}
 received dual B.S. degrees in automation and in management science from Zhejiang University, Zhejiang, China, in 2011, an M.S. degree in industrial and operations engineering from the University of Michigan, Ann Arbor, MI, USA, in 2012, and a Ph.D. degree in systems engineering from Boston University in 2019. He is currently with Juniper Networks, Sunnyvale, CA.
-\end{IEEEbiography}
+\end{IEEEbiography}\vspace{-2em}
 \begin{IEEEbiography}
   [{\includegraphics[width=1 in,height=1.25in,clip,keepaspectratio]{figures/pao_headshot.jpg}}]
   {Lucy Y. Pao} 
   is the Palmer Endowed Chair Professor in the Electrical, Computer, and Energy Engineering Department at the University of Colorado Boulder. She earned B.S., M.S., and Ph.D. degrees in Electrical Engineering from Stanford University. Her research has primarily focused on engineering control systems, with applications ranging from atomic force microscopes to multi-megawatt wind energy systems. She is a Fellow of the IEEE and the International Federation of Automatic Control (IFAC). Selected recent awards include the 2012 IEEE Control Systems Magazine Outstanding Paper Award, the 2015 Society for Industrial and Applied Mathematics (SIAM) Journal on Control and Optimization Best Paper Prize, the 2017 Control Engineering Practice Award from the American Automatic Control Council, and the Scientific Award 2017 from the European Academy of Wind Energy. Selected recent and current professional society activities include being a Fellow of the Renewable and Sustainable Energy Institute (2009-present), 
   General Chair of the 2013 American Control Conference, member of the IEEE Control Systems Society (CSS) Board of Governors (2011-2013 and 2015), IEEE CSS Fellow Nominations Chair (2016-2018), and member of the IFAC Executive Board (2017-2020).    
-\end{IEEEbiography}
+\end{IEEEbiography}\vspace{-2em}
 \begin{IEEEbiography}
   [{\includegraphics[width=1 in,height=1.25in,clip,keepaspectratio]{figures/SeanAndersson_IEEE.jpg}}]
   {Sean B. Andersson}
 received the B.S. degree in engineering and applied physics from Cornell University, Ithaca, NY, USA, in 1994, the M.S. degree in mechanical engineering from Stanford University, Stanford, CA, USA, in 1995, and the Ph.D. degree in electrical and computer engineering from the University of Maryland, College Park, MD, USA, in 2003. He has worked at AlliedSignal Aerospace and Aerovironment, Inc. and is currently an Associate Professor of mechanical engineering and of systems engineering with Boston University, Boston, MA, USA. His research interests include systems and control theory with applications in scanning probe microscopy, dynamics in molecular systems, and robotics. He received an NSF CAREER award in 2009, is a senior member of the IEEE, and was an associate editor for the IEEE Transactions on Automatic Control (2014-2018) and for the SIAM Journal on Control and Optimization (2013-2018).
-\end{IEEEbiography} 
-
+\end{IEEEbiography}
+}
 
 
 %%%%%%%%% then the Appendices, if any %%%%%%%%%

@@ -50,7 +50,7 @@ use_ze = false;
 x1s = [36,   27,  27,  27,  27, 27, 6*4];
 x2s = [493, 493, 493, 495, 494, 494, 122*4];
 figbase = 10;
-for k=1:length(rast_exps)
+for k=1:1 %length(rast_exps)
     rast_exps{k}.uz = log_creep_detrend(rast_exps{k}.uz, []);
     
     if rast_exps{k}.npix_y_og ~= target_pix
@@ -85,6 +85,7 @@ for k=1:length(rast_exps)
         plot(ax1, [idx_right, idx_right], [1, 512], 'r')
     end
 end
+
 fprintf('Finished processing raster data\n');
 if false
     save the first image so we can simulate reconstruction in plot_bptv_vs_bp.m
@@ -405,16 +406,18 @@ for k=1:length(rast_exps)
 
 
 
-    if fig_row == 1 && ~(abs(rate_k - 1.0)<0.1 && k~=1)
+    if fig_row == 1
         hold(ha1(fig_row, fig_col), 'on')
         hold(ha_row(1), 'on')
         ha_row(1).ColorOrderIndex = fig_col;
         plot(ha1(fig_row, fig_col), [1, 512], [row_idx, row_idx], 'r');
-        
+        if abs(rate_k - 1.0)<0.1 && k~=1
+            continue
+        end
         row_hands(fig_col) = plot(ha_row(1), imk(row_idx, :)*AFM.volts2nm_z());
         row_hands(fig_col).DisplayName = sprintf('%.1f Hz', rate_k);
         hold(ha_row(1), 'on')
-        
+        %keyboard
     end
 %     pause
 
@@ -464,7 +467,7 @@ for k=1:length(cs_exps)
     imk = cs_exps{k}.pix_mat_uz;
     imagesc(ha1(fig_row, fig_col), imk, clr_range);
     colormap(ha1(fig_row, fig_col), 'gray');
-    stit = sprintf('CS (%.1f Hz, %.1f \\%%)',...
+    stit = sprintf('CS (%.1f \\%%, %.1f Hz)',...
         cs_exps{k}.sub_sample_frac()*100, cs_exps{k}.equiv_raster_rate());
     title(ha1(fig_row, fig_col), stit, 'FontSize', 7.5);
     
@@ -712,21 +715,25 @@ save_fig(F_ssm, fullfile(PATHS.tmech_fig(), 'cs_rast_time_vs_ssim'), false)
 save_fig(F_psn, fullfile(PATHS.tmech_fig(), 'cs_rast_time_vs_psnr'), false)
 %%
 
-F_trade = mkfig(10, 3.5, 2.75); clf
-ha_t = tight_subplot(1, 1, 0.01, [0.15, 0.12], [0.15, 0.02], false);
+F_trade = mkfig(10, 3.5, 2.25); clf
+ha_t = tight_subplot(1, 1, 0.01, [0.15, 0.05], [0.15, 0.02], false);
 % plot(rastm_512.rate, rastm_512.time)
 hold on
 
 nrm_s = rastm_512.time;
 h1 = plot(rastm_64.rate, rastm_64.time./nrm_s, '-o');
 hold on
-h2 = plot(csm_12.rate, csm_12.time./nrm_s, '--o');
+nrm_s_cs12 = 512./csm_12.rate;
+h2 = plot(csm_12.rate, csm_12.time./nrm_s_cs12, '--o');
 
 
 h3 = plot(rastm_128.rate, rastm_128.time./nrm_s, '-o');
 
 % h4a = plot(csm_15.rate, csm_15.time./nrm_s, '--o');
-h4 = plot(csm_25.rate, csm_25.time./nrm_s, '--o');
+nrm_s_cs25 = 512./csm_25.rate;
+h4 = plot(csm_25.rate, csm_25.time./nrm_s_cs25, '--o');
+
+
 % title('25~\% sampling')
 % plot(csm_15.rate, csm_15.time)
 h1.DisplayName = 'raster 64 lines';
@@ -735,13 +742,13 @@ h2.DisplayName = 'CS 12.5 \%';
 h3.DisplayName = 'raster 128 lines';
 % h4a.DisplayName = 'CS 15 \%';
 h4.DisplayName = 'CS 25 \%';
-leg_t = legend([h1, h3, h2, h4], 'Position', [0.2304 0.8754 0.6830 0.1207],...
-    'NumColumns', 2, 'Box', 'off');
+leg_t = legend([h1, h3, h2, h4], 'Position', [0.1706 0.6866 0.3648 0.2655],...
+    'NumColumns', 1, 'Box', 'off');
 
 xlabel('rate [Hz]')
 ylabel('fraction of 512 line scan time')
 grid on
-
+%%
 save_fig(F_trade, 'latex/figures/improvements', false)
 %%
 clc
