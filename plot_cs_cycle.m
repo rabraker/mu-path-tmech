@@ -39,7 +39,7 @@ end
 
 % taken from cycle 3, where tip detaches.
 cs_exp1 = cs_exps{1};
-zdfl_free = -0.637;
+zdfl_free = -0.637-.05;
 cs_exp1.ze = cs_exp1.ze - zdfl_free;
 
 
@@ -104,7 +104,7 @@ end
 
 ylim(ha(2), [0, 5]);
 ylim(ha(3), [-20, 90])
-
+ylim(ha(4), [-0.15, 0.45])
 hands(3).DisplayName = 'tip settle/pre-scan';
 
 leg = legend(hands, 'NumColumns', 1, 'Position', [0.6064 0.6017 0.3808 0.1656]);
