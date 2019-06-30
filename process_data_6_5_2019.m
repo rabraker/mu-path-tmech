@@ -103,7 +103,7 @@ for k=1:length(rast_exps)
 end
 
 
-
+%%
 cs_exps = cell(length(cs_files), 1);
 for k=1:length(cs_files)
     [dat_root, dat_name, ext] = fileparts(cs_files{k});
@@ -380,7 +380,7 @@ for k=1:length(rast_exps)
             fig_col = 1;
         case 5.0 
             fig_col = 2;
-        case 10
+        case 8
             fig_col = 3;
         case 15 
             fig_col = 4;
