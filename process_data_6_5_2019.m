@@ -467,8 +467,8 @@ for k=1:length(cs_exps)
     imk = cs_exps{k}.pix_mat_uz;
     imagesc(ha1(fig_row, fig_col), imk, clr_range);
     colormap(ha1(fig_row, fig_col), 'gray');
-    stit = sprintf('CS (%.1f \\%%, %.1f Hz)',...
-        cs_exps{k}.sub_sample_frac()*100, cs_exps{k}.equiv_raster_rate());
+    stit = sprintf('CS (%.1f Hz, %.1f \\%%)',...
+        cs_exps{k}.equiv_raster_rate(), cs_exps{k}.sub_sample_frac()*100);
     title(ha1(fig_row, fig_col), stit, 'FontSize', 7.5);
     
     if abs(cs_exps{k}.equiv_raster_rate()-2)< .1 ||...
@@ -705,6 +705,7 @@ xlim(ha_psn, [6, 230])
 % set(ha1(end), 'Visible', 'off')
 % set(ha_err(end), 'Visible', 'off')
 save_fig(Fig1, fullfile(PATHS.tmech_fig(), 'cs_raster_images_6-5-2019'), false)
+%%
 save_fig(Fig_subl, fullfile(PATHS.tmech_fig(), 'cs_raster_images_subl_6-5-2019'),false)
 save_fig(Fig_rows, fullfile(PATHS.tmech_fig(), 'cs_raster_pixel_rows_6-5-2019'), false)
 
