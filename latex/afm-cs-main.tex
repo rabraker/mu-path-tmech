@@ -33,8 +33,8 @@
 \newcommand{\yc}{\ensuremath{Y}\xspace}
 \newcommand{\zc}{\ensuremath{Z}\xspace}
 
-\newcommand{\rzup}{\ensuremath{r_{z,\textrm{up}}}\xspace}
-\newcommand{\rzs}{\ensuremath{r_{z,\textrm{s}}}\xspace}
+\newcommand{\rzup}{\ensuremath{r_{Z,\textrm{up}}}\xspace}
+\newcommand{\rzs}{\ensuremath{r_{Z,\textrm{s}}}\xspace}
 
 \usepackage{catchfilebetweentags} % for data input
 \newcommand{\scanD}[1]{\ExecuteMetaData[cs_data.txt]{#1}}
@@ -65,7 +65,7 @@
 \title{Improving the Image Acquisition Rate \\ of an Atomic Force Microscope \\
 Through Sub-sampling and Reconstruction}
 
-\author{Roger A. Braker, \textit{Student Member, IEEE}, Yufan Luo, \textit{Student Member, IEEE} , Lucy Y. Pao, \textit{Fellow, IEEE} and Sean B. Andersson, \textit{Senior Member, IEEE, and Member, ASME}
+\author{Roger A. Braker, Yufan Luo, \textit{Student Member, IEEE}, Lucy Y. Pao, \textit{Fellow, IEEE}\\ and Sean B. Andersson, \textit{Senior Member, IEEE, and Member, ASME}
   \thanks{Braker and Pao are with the Dept. of Electrical, Computer, and
     Energy Engineering at the University of Colorado, 425 UCB,
     Boulder, CO 80309 USA. %Phone: 
@@ -309,7 +309,7 @@ the columns of a matrix.
   \end{tabular}
   \caption{Reconstruction comparison between BPDN and BPVV. (first
     column) Original raster-scanned image. (second column) BPDN
-    reconstruction from random, $\mu$-path sampling.
+    reconstruction from random $\mu$-path sampling.
     (third column) BPVV reconstruction from the same
     sub-sampled data. (remaining columns) Corresponding details from
     the red boxes indicated in the raster image.
@@ -496,7 +496,7 @@ indicated by the red box in column one. Similarly, the fifth and six
 columns show the detail of the reconstructions. The reconstruction
 results show the artifacts apparent in the BPDN reconstruction are
 largely mitigated using BPVV. Thus, in the remainder of the paper, we
-focus exclusively on BPVV. These reconstructions wth BPVV took about
+focus exclusively on BPVV. These reconstructions with BPVV took about
 1.5 seconds for the DNA image and about 7 seconds for the
 CS-20NG (on a typical desktop computer).
 	
@@ -577,7 +577,7 @@ retraction setpoint).
   down, but thinking of a knife pushed into a surface and then
   dragged...} 
   
-In order to minimize the scanning time, the tip should be moved as fast as possible when trainsitioning between $\mu$-path locations (state (1)). Since such speeds can be beyond the bandwidth of the $z-$axis controller, it is important to reduce the tip-sample interaction force to prevent tip wear and sample damage. In our initial implementation \cite{braker_hardware_2018}, 
+In order to minimize the scanning time, the tip should be moved as fast as possible when trainsitioning between $\mu$-path locations (state (1)). Since such speeds can be beyond the bandwidth of the $Z-$axis controller, it is important to reduce the tip-sample interaction force to prevent tip wear and sample damage. In our initial implementation \cite{braker_hardware_2018}, 
 %we insisted that the during
 this was achieved by insisting that during the
 tip-retraction (state (5)), the cantilever tip should fully break
@@ -660,8 +660,9 @@ compensator also includes an inverse creep and hysteresis model. The
 hysteresis model is a modified Prandtl-Ishlinskii type model and is
 based on the work of \cite{kuhnen_modeling_2003}, while the drift
 compensation models the piezo creep as a simple second-order transfer
-function with real poles and zeros. In Fig.~\ref{fig:afm_bd_dinv}, the
-hysteresis inversion is indicated by $\mathcal{H}_X^{-1}[\cdot]$. We
+function with real poles and zeros whose inverse is part of $D_X$.
+In Fig.~\ref{fig:afm_bd_dinv}, the hysteresis inversion is indicated
+by $\mathcal{H}_X^{-1}[\cdot]$. We
 have found that the inclusion of these extra compensators limits the
 overshoot of the $X$-axis during larger moves between different
 $\mu$-paths (e.g., without them, the $X$-axis trajectory in
@@ -740,7 +741,7 @@ that the effective bandwidth of the $X$-axis controller is higher
 while raster scanning than while CS-scanning. On the other hand, it
 also implies that for faster scan rates, fewer Fourier
 coefficients are used, and so the approximation to a triangle wave is
-worse, leading to scans which do not cover the entire intended range.
+worse, leading to scans which cover slightly less than the intended range.
 
 \section{Metrics}\label{sec:rdi}
 In this section we introduce the three metrics used to assess our
@@ -957,11 +958,17 @@ Things are clearer if we plot the RDI for each scan against total
 acquisition time, shown in Fig.~\ref{fig:time_damage}.
 %, and this is where CS seems to shine. 
 As one would expect, as imaging time
-decreases, the RDI for each scan type increases. Note that the CS curves are always better than that of the full raster scan. From
-Fig.~\ref{fig:time_damage}, we see that for a fixed RDI, CS has a
-faster imaging acquisition rate. The amount of improvement is best if
-we need a very low RDI: for example, if we want to hold the RDI below~2, then we have to take the 1~Hz raster scan (512 seconds) while we
-can achieve the same RDI via CS in about 42 seconds with the 12.5\%
+decreases, the RDI for each scan type increases.
+From Fig.~\ref{fig:time_damage}, we see that for a fixed RDI, CS has a
+faster imaging acquisition rate. Conversely, for an acquisition time below
+a given threshold, CS offers a smaller RDI than a full raster scan.
+% This is not the case: e.g., compare 8Hz cs and 1 hz raster.
+% Note that the CS curves are always better than that of the full raster scan.
+% From Fig.~\ref{fig:time_damage}, we see that for a fixed RDI, CS has a
+% faster imaging acquisition rate.
+The amount of improvement is best if we need a very low RDI: for example,
+if we want to hold the RDI below~2, then we have to take the 1~Hz raster scan
+(512 seconds) while we can achieve the same RDI via CS in about 42 seconds with the 12.5\%
 sampling, which is a speed improvement of over a factor of 10. The higher of an
 RDI we are willing to tolerate, the advantage of CS over raster
 narrows. For example, the 8~Hz raster scan and 8~Hz, 12.5\% CS scan
@@ -1000,12 +1007,13 @@ the different sub-sampling schemes over a full raster scan with 512
 lines as a function of scan rate. As far as pure speed goes, the CS
 scan at 12.5\% is the fastest for a rate of 1~Hz, though the 64 line
 raster scan is close. At the same time, the image quality of the 1~Hz,
-12.5\% CS scan is better than the 1~Hz 64 line raster scan.
+12.5\% CS scan is better than the 1~Hz, 64 line raster scan.
 This speed advantage quickly evaporates for faster scan rates.
 Indeed, for rates beyond about 3~Hz, the 64 line scan is faster than the 12.5\% CS scan and
 the 128 line scan is faster than the 25\% CS scan. 
 In general, the artifacts of the CS reconstructions are different than the interpolated raster scans.
-CS appears to preserve the edges of the holes better than sub-line sampling while sub-line sampling has less noise in the flat areas of the specimen. 
+CS appears to preserve the edges of the holes better than sub-line sampling,
+while sub-line sampling has less noise in the flat areas of the specimen. 
 
 \begin{figure*}
   \centering
