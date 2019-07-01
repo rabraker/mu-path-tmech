@@ -236,7 +236,7 @@ scanning pattern. This algorithm is described and compared to existing
 reconstruction methods through simulations in Sec. \ref{sec:reconstructionMethods}.
 \item In our prior experimental prototype \cite{braker_hardware_2018}, we used very basic integral controllers for all three axes for both raster and $\mu$-path scans. Here, we design compensators for each axis using standard loop-shaping techniques (Sec.~\ref{sec:control}), which result in a substantial increase in closed-loop bandwidth (e.g., 50 Hz to 450~Hz for the $Z$-axis).
 We show in Sec.~\ref{sec:ff_control} that one of the limitations of $\mu$-path scanning is the discontinuous $X$-axis reference (e.g., in moving between $\mu$-paths) which excites the cross-coupling modes between the $X$ and $Z$ axes, an effect which neither our prior experimental work nor simulation studies accounted for. We mitigate the cross coupling with a feed-forward design.
-\item We experimentally compare (Sec. \ref{sec:results}) $\mu$-path scanning to not only full density raster scans but also to coarse raster scans which are interpolated to a full image. This is in contrast to typical sub-line sampling which takes scan lines at random. The clear advantage to a coarse raster scan is that its implementation only requires adjustments to the data collection and post-processing. 
+\item We experimentally compare (Sec. \ref{sec:results}) $\mu$-path scanning to not only full density raster scans but also to coarse raster scans which are interpolated to a full image. This is in contrast to typical subline sampling which takes scan lines at random. The clear advantage to a coarse raster scan is that its implementation only requires adjustments to the data collection and post-processing. 
   % it requires no modification to the instrument, only to the post-processing.
 \item The bulk of this work is based on experiment, not simulation, in contrast to prior work by ourselves \cite{luo2015comparison,maxwell2014compressed} and others \cite{han_optimal_2018,jensen_reconstruction_2013,oxvig_structure_2017}. Our main focus here is on delineating the practical issues which must be addressed to effectively realize $\mu$-path scanning, which has only seen limited attention in the past.
 % \end{enumerate}
@@ -599,7 +599,7 @@ However, completely characterizing the damage done to the tip and sample with th
 
 \begin{figure}[t!]
   \centering \includesvg[width=1\columnwidth]{figures/cs_cycle.svg}
-  \caption{Several CS cycles. Each state is indicated by color.}
+  \caption{Several CS cycles. Each state is indicated by color. The deflection is shifted so its free value is zero.}
   \label{fig:cs_cycle}
 \end{figure}
 
@@ -658,7 +658,7 @@ must track, we have found that compensating hysteresis and creep to be
 particular helpful during $\mu$-path scanning. Thus, the $X$-axis
 compensator also includes an inverse creep and hysteresis model. The
 hysteresis model is a modified Prandtl-Ishlinskii type model and is
-based on the work of \cite{kuhnen_modeling_2003}, while the drift
+based on the work of \cite{kuhnen_modeling_2003}. The drift
 compensation models the piezo creep as a simple second-order transfer
 function with real poles and zeros whose inverse is part of $D_X$.
 In Fig.~\ref{fig:afm_bd_dinv}, the hysteresis inversion is indicated
@@ -977,8 +977,8 @@ a result of the constant overhead imposed by the engage/disengage and
 $XY$-move states in CS which remains constant for different scan
 rates.
 
-\subsection{Comparison to Sub-line Sampling} \label{sec:cp_subline}
-Many sub-line sampling papers assume that the lines to sample are
+\subsection{Comparison to subline Sampling} \label{sec:cp_subline}
+Many subline sampling papers assume that the lines to sample are
 selected randomly \cite{han_optimal_2018, Luo_nano_2015}. An even
 simpler alternative to $\mu$-path sampling is simply to take a
 standard raster scan with fewer lines. This is the technique we
@@ -1000,7 +1000,7 @@ appear to have as good or better image quality than either CS scans.
 % from the top (of the grating holes). The CS-scans do a poor job
 % detecting this, while both coarse raster scans do so. However, the
 % other artifacts in the 64 line scan obscure the defect. It is important to note, however, that the appearance (or lack thereof) of such small features in the image is in large part a random occurrence. In our scans, the line scanner happened to pass through this region and capture the appropriate data while the $\mu$-path pattern used did not. 
-% Except that it passed through this region for all of the sub-line scans, which did not scan exactly the same area...
+% Except that it passed through this region for all of the subline scans, which did not scan exactly the same area...
 
 Fig.~\ref{fig:improve_512} compares the amount of speed improvement of
 the different sub-sampling schemes over a full raster scan with 512
@@ -1012,8 +1012,8 @@ This speed advantage quickly evaporates for faster scan rates.
 Indeed, for rates beyond about 3~Hz, the 64 line scan is faster than the 12.5\% CS scan and
 the 128 line scan is faster than the 25\% CS scan. 
 In general, the artifacts of the CS reconstructions are different than the interpolated raster scans.
-CS appears to preserve the edges of the holes better than sub-line sampling,
-while sub-line sampling has less noise in the flat areas of the specimen. 
+CS appears to preserve the edges of the holes better than subline sampling,
+while subline sampling has less noise in the flat areas of the specimen. 
 
 \begin{figure*}
   \centering
