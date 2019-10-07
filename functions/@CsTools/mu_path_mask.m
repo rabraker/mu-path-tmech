@@ -16,14 +16,14 @@
 %                  mu-path areas, and zeros elsewhere.
 
 
-function [pix_mask, pix_idx] = mu_path_mask(mupath_len, n, m, samplingRatio, repeat_sampling)
+function [pix_mask, pix_idx, npaths] = mu_path_mask(mupath_len, n, m, samplingRatio, repeat_sampling)
    
     if nargin < 5
         repeat_sampling = false;
     end
 
     pix_mask = zeros(n,m);
-
+    npaths = 0;
     while (sum(sum(pix_mask))<samplingRatio*n*m)
         
         if repeat_sampling
@@ -37,6 +37,7 @@ function [pix_mask, pix_idx] = mu_path_mask(mupath_len, n, m, samplingRatio, rep
             rand_j = randi(m-mupath_len+1);
             if sum(pix_mask(rand_i,rand_j:rand_j+mupath_len-1)) < 0.5
                 pix_mask(rand_i,rand_j:rand_j+mupath_len-1) = 1;
+                npaths = npaths + 1;
             end            
         end
     end

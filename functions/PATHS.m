@@ -15,10 +15,10 @@ classdef PATHS
       end
     end
     function path = tmech_fig()
-       path = '/home/arnold/gradschool/publications/afm-cs-tmech/latex/figures/'; 
+       path = '/home/arnold/gradschool/publications/tmech-afm-cs/latex/figures/'; 
     end
     function path = tmech_table()
-      path = '/home/arnold/gradschool/publications/afm-cs-tmech/latex/tables';
+      path = '/home/arnold/gradschool/publications/tmech-afm-cs/latex/tables';
     end
     
     function path = cs_final_fig()

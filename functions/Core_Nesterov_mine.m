@@ -70,7 +70,7 @@ function [xk,niter] = Core_Nesterov_mine(...
     
     if opts.alpha_v > 0
         alp_v = opts.alpha_v;
-        Lmu = Lmu + alp_v^2 * 4;
+        Lmu = Lmu + (alp_v^2 * 4)/mu;
 
         Dv = alp_v*spdiags([reshape([-ones(n-1,n); zeros(1,n)],N,1) ...
             reshape([zeros(1,n); ones(n-1,n)],N,1)], [0 1], N, N);
@@ -80,7 +80,7 @@ function [xk,niter] = Core_Nesterov_mine(...
     
     if opts.alpha_h > 0
         alp_h = opts.alpha_h;%.125;
-        Lmu = Lmu + alp_h^2 * 4;
+        Lmu = Lmu + (alp_h^2 * 4)/mu;
         Dh = alp_h*spdiags([reshape([-ones(n,n-1) zeros(n,1)],N,1) ...
             reshape([zeros(n,1) ones(n,n-1)],N,1)], [0 n], N, N);
     else
@@ -88,9 +88,10 @@ function [xk,niter] = Core_Nesterov_mine(...
     end
     
     residuals = zeros(maxiter, 2);
-    st = sprintf('Iter |     fmu     |  Rel. Vartn fmu |  Residual  |');
-    fprintf('%s\n%s\n', st, repmat('-', 1, length(st)));
-
+    if opts.Verbose > 0
+        st = sprintf('Iter |     fmu     |  Rel. Vartn fmu |  Residual  |');
+        fprintf('%s\n%s\n', st, repmat('-', 1, length(st)));
+    end
     % ---------------------------- MAIN ITERATION -------------------------- %
     max_means = 10;
     fmu_s = zeros(max_means+1, 1);

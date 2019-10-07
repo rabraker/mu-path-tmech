@@ -1,0 +1,158 @@
+\documentclass[11pt]{article} % use larger type; default would be 10pt
+\usepackage{xr} % allow crossref to root.tex of all references
+\externaldocument{jpaper}
+\usepackage{xcite} % allow crossref to root.tex to all citations therein.
+\externalcitedocument[A-]{jpaper}
+%%% PACKAGES
+
+% \usepackage[resetlabels,labeled]{multibib}
+% \newcites{A}{review_response}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{bbold}
+\usepackage{mathtools}	
+\usepackage{epstopdf}
+\usepackage{color}
+\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage{url}
+\usepackage[margin=1in]{geometry}		%%DSZ: changed the margins 
+\usepackage{appendix}
+\usepackage{calc}
+\usepackage{xspace}
+
+\newcommand{\pic}[2]{\includegraphics[width={#2}]{#1}}
+%% Try this out
+
+\usepackage{enumitem}
+
+\usepackage[normalem]{ulem}
+\usepackage{soul}
+\usepackage{framed}
+\usepackage{environ}
+\usepackage{xcolor}
+
+\newcommand{\sgn}{\ensuremath{\text{sgn}}\xspace}
+\newcommand{\sat}{\ensuremath{\text{sat}}\xspace}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% The following two macros allow us to use citations in this document which are
+% not in the primary manuscript and add a prepended letter ('R' in this case)
+% to disambugate from the citations refered to by xcite from the main manuscript.
+% In order to use this must include a bibliography and style file at the end. 
+\makeatletter
+\renewcommand\@biblabel[1]{[R#1]}
+\makeatother
+
+\setlist{  
+  listparindent=\parindent,
+  parsep=0pt,
+}
+% \let\svbibcite\bibcite
+% \def\bibcite#1#2{\svbibcite{#1}{#2}}
+% \makeatletter
+% \let\svbiblabel\@biblabel
+% \def\@biblabel#1{\svbiblabel{R#1}}
+% \makeatother
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newtheorem{prlm}{Problem}
+
+\renewenvironment{leftbar}[1]
+{%\begin{leftbar}%
+    \def\FrameCommand
+    {%
+        {\color{#1}\vrule width 3pt}%
+        \hspace{0pt}%must no space.
+        \fboxsep=\FrameSep\colorbox{lightgray}%
+    }%
+    \MakeFramed{\hsize \hsize\advance\hsize-\width\FrameRestore}%
+}
+{\endMakeFramed}
+
+% ---------------------------------------------------------------- %
+% use this command as \listintertext{text here} to insert a rebuttal text
+% between list items.
+\makeatletter
+\newcommand{\listintertext}{\@ifstar\listintertext@\listintertext@}
+
+\newcommand{\listintertext@}[1]{% \listintertext*{#1}
+  \hspace*{-\@totalleftmargin}
+  % \begin{minipage}{\textwidth}
+  \parbox{\textwidth}{
+    \setlength{\parindent}{24pt}
+    #1
+    }}
+  % \end{minipage}}
+
+
+% \newcommand{\listintertext}{\@ifstar\listintertext@\listintertext@@}
+
+% \newcommand{\listintertext@}[1]{% \listintertext*{#1}
+%   \hspace*{-\@totalleftmargin}\parbox{\textwidth}{#1}}
+
+% \newcommand{\listintertext@@}[1]{% \listintertext{#1}
+%   \hspace{-\leftmargin}\mbox{#1}}
+\makeatother
+
+\newcommand{\inttext}[1]{\end{enumerate} #1\begin{enumerate}[resume]}
+\newcommand{\itemaddr}[2]{\begin{leftbar}{#1} \item{#2}\end{leftbar}}
+  
+\title{Response to Reviews}
+\author{Roger A. Braker and Lucy Y. Pao}
+
+\date{\parbox{\linewidth}{\centering%
+  %\today
+\endgraf\bigskip
+  }}
+
+%\date{} % Activate to display a given date or no date (if empty),
+         % otherwise the current date is prined 
+
+\begin{document}
+\maketitle
+\noindent
+Dear Reviewers and Prof. Editors,
+
+We thank the reviewers for their helpful comments. 
+We have revised the paper based on these suggestions, with full details described below. The original review comments appear with a vertical bar on the left. References to equations use the numbers as they appear in the revised manuscript. 
+%Citations specifically used in this rebuttal document are pre-pended with the letter 'R', e.g., [R1].
+
+
+\section{Review 1}
+\begin{leftbar}{black}
+  A Comparison of 
+\end{leftbar}
+
+ 
+\begin{enumerate}
+
+    \itemaddr{black}{Objection}
+
+    \inttext{Response}
+  \end{enumerate}
+  While interesting, this paper assumes full state feedback.
+  That is not a realistic assumption for many systems,
+  including the one under consideration here.
+ 
+
+\section{Review 2}
+
+
+  \listintertext{Response. }
+
+
+% \bibliographystyle{IEEEtran}
+% \bibliography{review_response, prefixnumbers=A}
+
+\bibliographystyle{IEEEtran}
+% \bibliography{/home/arnold/bib_pdf/main_bibliography,review_response}
+%\bibliography{afm_mpc_tcst.bib,review_response}
+
+\end{document}
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

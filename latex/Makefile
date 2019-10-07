@@ -8,11 +8,16 @@
 fig_dir=figures
 
 out = $(fig_dir)/exp_setup.pdf \
-	$(fig_dir)/AFM_loop_z.pdf
+	$(fig_dir)/AFM_loop_z.pdf \
+	$(fig_dir)/AFM_loop_xyz.pdf \
+	Andersson_bibs.bib\
+	braker_bibs.bib\
+	Yufans_bibs.bib
 
 
 
-all: $(out)
+all: afm-cs-main.pdf
+
 
 
 $(fig_dir)/exp_setup.pdf: $(fig_dir)/exp_setup.odp
@@ -27,3 +32,15 @@ $(fig_dir)/AFM_loop_z.pdf: $(fig_dir)/AFM_loop_z.odp
 	epstopdf tmp.eps $@
 	pdfcrop $@ $@
 	rm tmp.eps
+
+$(fig_dir)/AFM_loop_xyz.pdf: $(fig_dir)/AFM_loop_xyz.odp
+	unoconv --output=tmp.eps -f eps $^
+	epstopdf tmp.eps $@
+	pdfcrop $@ $@
+	rm tmp.eps
+
+afm-cs-main.pdf:afm-cs-main.tex $(out)
+	latexmk -pdf -pdflatex="pdflatex -interaction=nonstopmode" -use-make $<
+
+clean:
+	latexmk -CA
