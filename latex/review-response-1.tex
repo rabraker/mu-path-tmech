@@ -124,22 +124,121 @@ We have revised the paper based on these suggestions, with full details describe
   A Comparison of 
 \end{leftbar}
 
- 
+\textbf{WHAT ARE THE CONTRIBUTIONS OF THIS PAPER:} Please see the section "Comments to the Author".
+
+\textbf{WHAT ARE SOME WAYS IN WHICH THE PAPER COULD BE IMPROVED:} Please see the section "Comments to the Author".
+
+
+Comments to the Author
+
+Authors extended their own previous work related to $\mu$-path pattern for AFM imaging. Bulk of this work is to experimentally demonstrate potential advantages of $\mu$-path pattern namely: (a) reduction in scanning time, and (b) sampling artifacts. 
+
 \begin{enumerate}
+\itemaddr{red}{Writing could be improved. Certain sentences are too long and may benefit by decomposing into two sentences.}
 
-    \itemaddr{black}{Objection}
+\itemaddr{red}{For BPVV technique, what can be the minimum value of $\beta$ instead of zero? The value of $\beta$ was chosen to be 0.1. Does the reconstruction improve by having $\beta$ to be 0.05, 0.01, 0.001 or less?}
 
-    \inttext{Response}
-  \end{enumerate}
-  While interesting, this paper assumes full state feedback.
-  That is not a realistic assumption for many systems,
-  including the one under consideration here.
- 
+\itemaddr{red}{In section IV A, authors have mentioned that the cantilever does not need to fully disengage. This may be lead to damage of delicate biological samples. Hence, is this approach viable for biological samples?}
 
+\itemaddr{red}{Why was PID controller not chosen over PI controller (section IV C)? Please explain in detail.}
+
+\itemaddr{red}{Instead of using SSIM and PSNR to compare two images, did authors work on quantifying the error by overlapping/comparing the obtained images with master image? Please explain. Further, does $\mu$-path provide high accuracy when compared to other techniques e.g. raster scan?}
+
+\itemaddr{red}{Did authors experimentally evaluate the tip as well as sample damage and correlate that to the RDI number? Please explain in detail.}
+
+\itemaddr{red}{CS or $\mu$-method is dependent on frequency e.g. at 8 Hz (Fig 11), raster 128 images look comparable or may be better than CS (12.7\% and 24.8\%). In addition, the time taken by raster 128 is approximately half of CS 25\% and close to CS 12.5\%. Hence, the method mentioned in this paper may not be applied to all frequencies. Please comment.}
+
+\itemaddr{red}{In Fig 12, what is the significance or value of showing 10 Hz data only for raster scans (128 and 64 lines)? Suggestion is to add 10 Hz data also for CS 12.5\% and CS 25\%. Alternatively, 10 Hz data for raster scans can be removed.}
+
+\end{enumerate}
 \section{Review 2}
+\textbf{WHAT ARE THE CONTRIBUTIONS OF THIS PAPER:} This paper, building on substantial prior work of the authors [31,33,35-37], demonstrates AFM imaging based on sub-sampling and reconstruction. The paper summarizes compressive sensing approaches, the experimental implementation of the method, image quality metrics and presents experimental results. The main contributions are a new reconstruction algorithm (BPVV) and experimental comparison of AFM images using standard raster scanning and the proposed method.
+
+\textbf{WHAT ARE SOME WAYS IN WHICH THE PAPER COULD BE IMPROVED:} The paper is well written and easy to follow. The presentation of the results in general is good. However, a lot of content is based on prior work by the authors [31,33,35-37] and therefore is only revisited. Given that the paper is already on the long side and the limited novel content, the authors could consider to focus on the main contribution. The authors mention the control scheme as a new contribution however the use of notches and pre-filters is a standard approach in such tracking control applications. 
+
+Some section headings should be revisited, e.g. better headings found for IV A), V B). Particularly, the experimental results sections A) and B) are quite wordy and it would benefit the readability to focus on concise statements and summarized results. Maybe, the results on subline sampling can be included in the overall comparison (Fig. 10) for conciseness. 
+
+Further Comments:
+\begin{itemize}
+\itemaddr{red}{No clear trend can be seen in Fig. 10 a) and b) compared to c). Can the authors comment on the origin of this observation and how it relates to the definition of the metrics used? }
+
+\itemaddr{black}{The deflection signal should be stated in real-word units instead of volts. In contact mode AFM, the setpoint is a contact force and not a voltage.}
+
+\listintertext{This is not true. In PicoView, the setpoint is either a voltage or a unitless number.}
+
+\itemaddr{red}{The authors mention difficulties with leveling the images. Could facet leveling be used instead however this will depend on the z-noise level?}
+
+\listintertext{What is facet leveling?}
+\end{itemize}
+
+Comments to the Author
+please see above
+
+\section{Review 3}
+
+WHAT ARE THE CONTRIBUTIONS OF THIS PAPER: Please see comments to the author.
+
+WHAT ARE SOME WAYS IN WHICH THE PAPER COULD BE IMPROVED: Please see comments to the author.
+
+Comments to the Author
+The article presents an undersampling-based approach ($\mu$-path) for reducing the imaging time in atomic force microscopy, with the aim of retaining the imaging quality of a slower raster scan. The approach is based on sampling random lines and reconstructing the image from the gathered data. The experimental results are convincing, indicating that the approach taken can substantially increase the imaging speed under certain conditions. The article is well written and easy to follow.
+
+The introduction provides a well-founded motivation for the work, and gives a comprehensive overview of related research. The authors combine their previous preliminary work on the topic into a more comprehensive work. Together with the new contributions, this work is suitable for publication.
+
+Please consider some additional comments in the following.
 
 
-  \listintertext{Response. }
+The meaning of undersampling in this case could be made more clear at an earlier point, as it may be confused with the term used in signal processing, that is, signal sampling rate below the Nyquist limit. "Reducing sampling" is ambiguous in this sense.
+
+For the reconstruction method, do the values of alpha and beta need to be tuned for different samples, or do the values used in the article apply generally?
+
+The implementation details are generally well described. However, some description of the mechanical setup of the AFM would help interpret the results, ie. later in the article it is clarified that it is based on a piezo tube scanner. This explains some of the coupling between the xy-axes and the z-axis. Furthermore, this leads to the question of whether or not the results are independent of the mechanical setup, that is, would the results be comparable on a scanner with more independent axes?
+
+It would be interesting to see a plot of the triangle-like wave of the raster scanning reference trajectory, and possibly compared to a trajectory generated by the CS approach.
+
+The experimental results: How is 'nominal density' defined?
+
+Figure 8 and 11 should have the total imaging time indicated. In general, comparison in terms of imaging time is the more interesting result in this reviewers opinon, rather than the scanning frequency.
+
+Figure 10 is not easy to read. Perhaps it would be easier if the scan types (ie. raster 512, CS 25%, …) are colored, and solid lines used to connect the scans. Furthermore, perhaps numbers [Hz] to indicate scanning speed.
+
+The images produced by the CS approach seems to be quite blurry near the edges. Is there an explanation for this observation?
+
+In general, while this approach provides good contrast and quality for some scanning speeds, it seems that it could potentially miss smaller details in the sample entirely, due the random sampling. Is it possible to say something about what kind of samples would be more suitable for the approach in this regard?
+
+\section{Review 4}
+\textbf{WHAT ARE SOME WAYS IN WHICH THE PAPER COULD BE IMPROVED:} The paper can be improved in the following aspects:
+1) The title and the abstract need to be changed to make the paper clearly distinct from the authors' previous work.
+2) A few technical questions are required to be answered.
+
+\textbf{WHAT ARE THE CONTRIBUTIONS OF THIS PAPER:} The paper presents the implementation of a data acquisition approach, which drives AFM to scan over a $\mu$ path. It also suggests a data reconstruction method Basis Pursuit Vertical Variation (BPVV) Compressive Sensing (CS) method. As a result, the AFM scanning time is faster than typical raster scans. The damage to the tip and delicate specimens is reduced. The work is of high quality and very valuable for the research area. The paper is recommended for publishing after a few further clarifications are added.
+
+Comments to the Author
+
+To authors,
+
+The paper presents a data acquisition approach based on $\mu$ scanning path. The measured data is suggested to be reconstructed via a Basis Pursuit Vertical Variation (BPVV) Compressive Sensing (CS) method. Practical control method has been designed and implemented for the $\mu$ path scans. Experimental results have shown the advantages of the proposed data acquisition method. The paper is in high quality and is important.
+
+The paper can be improved as follows, for higher quality.
+\begin{enumerate}[label=\alph*]
+\itemaddr{red}{It would be better to change the tile to make it easy to differentiate the paper from the authors’ previous work.  Please rephrase the abstract also to make it more concise.}
+
+\itemaddr{red}{I assume the AFM works in contact mode based on the article itself. Please make it clearer.}
+
+\itemaddr{red}{Do we have a constant $\mu$ path for each scanning configurations in terms of size, resolution and speed? }
+
+\itemaddr{red}{The signal $x$ needs to satisfy sparsity, in order to satisfy Equation (1). In AFM, can we make sure that the sparsity-property is true? Please clarify assumptions, if signal $x$ in Equation (1) and the following requires sparsity.}
+
+\itemaddr{red}{The scanning path is designed as parts of raster patterns. Do the transitions between scanning patterns follow any order?}
+
+\itemaddr{red}{What is the used anti-windup design? Is it only a saturation of sensing signals as mentioned in the caption of Fig 5?}
+
+\itemaddr{red}{The error between the first and sixth raster scans in Fig 7 seems to be a result of drifting. Is it possible to correct the signals by measuring the drift instead of the used computational method? When the specimen is alive, the proposed computational method may ignore the moving of the specimen.}
+
+\itemaddr{red}{There is no unit in Table II.}
+\end{enumerate}
+
+
 
 
 % \bibliographystyle{IEEEtran}
