@@ -13,7 +13,7 @@ classdef CsTools
     
     Mpix = pixvec2mat(vpix, nrows, ncol);
     
-    [pix_mask, pix_idx] = mu_path_mask(mupath_len, n, m, samplingRatio, repeat_sampling);
+    [pix_mask, pix_idx, npaths] = mu_path_mask(mupath_len, n, m, samplingRatio, repeat_sampling);
     
     [Ir] = bregman_split_delxy(I,E,epsy, epsx, mu, lam,gam,maxiter,tol)
     
@@ -90,7 +90,18 @@ classdef CsTools
       b = b(pix_idx);
 
     end
+    function [ x ] = Utfun_dct2(z, N)
+      Z_mat = CsTools.pixvec2mat(z, N);
+      X_mat = dct2(Z_mat);
+      x = CsTools.pixmat2vec(X_mat);
+    end
+    
+    function [z] = Ufun_dct2(x, N)
+      X_mat = CsTools.pixvec2mat(x, N);
+      Z_mat = idct2(X_mat);
+      z = CsTools.pixmat2vec(Z_mat);
 
+    end
   end
   
 end

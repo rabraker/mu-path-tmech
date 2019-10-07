@@ -1,0 +1,10 @@
+{
+    "_schemaVersion": "1.0.0",
+    "bin_raster_really_slow":
+    {
+        "inputs":
+        [
+            {"name":"line_detrender", "kind":"optional", "type":["function"], "purpose":"Detrend a row"},
+        ]
+    }
+}
